@@ -22,7 +22,6 @@ import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.flags.StateFlag;
 
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.craft.Craft;
@@ -92,7 +91,7 @@ public class DetectionTask extends AsyncTask {
 	}
 
 	@Override
-	public void excecute() {
+	public void execute() {
 
 		HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks = ( HashMap<ArrayList<Integer>, ArrayList<Double>> ) getCraft().getType().getFlyBlocks().clone();
 		dFlyBlocks=flyBlocks;

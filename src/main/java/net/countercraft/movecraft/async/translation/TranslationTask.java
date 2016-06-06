@@ -18,9 +18,7 @@
 package net.countercraft.movecraft.async.translation;
 
 import com.palmergames.bukkit.towny.object.Town;
-import com.sk89q.worldguard.protection.flags.StateFlag;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.async.AsyncManager;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -33,21 +31,15 @@ import net.countercraft.movecraft.utils.MathUtils;
 import net.countercraft.movecraft.utils.MovecraftLocation;
 
 import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.bukkit.Chunk;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,7 +47,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
+
 import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.TownyUtils;
 import com.palmergames.bukkit.towny.object.TownBlock;
@@ -77,7 +69,7 @@ public class TranslationTask extends AsyncTask {
 	}
 
 	@Override
-	public void excecute() {
+	public void execute() {
             MovecraftLocation[] blocksList = data.getBlockList();
 
             final int[] fallThroughBlocks = new int[]{ 0, 8, 9, 10, 11, 31, 37, 38, 39, 40, 50, 51, 55, 59, 63, 65, 68, 69, 70, 72, 75, 76, 77, 78, 83, 85, 93, 94, 111, 141, 142, 143, 171};
@@ -878,7 +870,7 @@ public class TranslationTask extends AsyncTask {
 //                        *   so I replaced Lists with Sets
 //                        * 
 //                        *   Caused by: java.lang.NoClassDefFoundError: org/apache/commons/collections/ListUtils
-//                        *   at net.countercraft.movecraft.async.translation.TranslationTask.excecute(TranslationTask.java:716)
+//                        *   at net.countercraft.movecraft.async.translation.TranslationTask.execute(TranslationTask.java:716)
 //                        *                                                                                       mwkaicz 24-02-2015
 //                        ***********************************************************************************************************/
 //                        Set<MovecraftLocation> setA = new HashSet(Arrays.asList(blocksList));
