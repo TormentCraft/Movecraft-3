@@ -56,8 +56,8 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class InteractListener implements Listener {
-	private static final Map<Player, Long> timeMap = new HashMap<Player, Long>();
-	private static final Map<Player, Long> repairRightClickTimeMap = new HashMap<Player, Long>();
+	private static final Map<Player, Long> timeMap = new HashMap<>();
+	private static final Map<Player, Long> repairRightClickTimeMap = new HashMap<>();
 
 	@EventHandler
 	public void onPlayerInteract( PlayerInteractEvent event ) {
@@ -85,12 +85,12 @@ public class InteractListener implements Listener {
 						}
 					
 					if(foundCraft==null) {
-						event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "ERROR: Remote Sign must be a part of a piloted craft!" ) ) );
+						event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "ERROR: Remote Sign must be a part of a piloted craft!" ));
 						return;
 					}
 					
-					if(foundCraft.getType().allowRemoteSign()==false) {
-						event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "ERROR: Remote Signs not allowed on this craft!" ) ) );
+					if(!foundCraft.getType().allowRemoteSign()) {
+						event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "ERROR: Remote Signs not allowed on this craft!" ));
 						return;						
 					}
 
@@ -122,7 +122,7 @@ public class InteractListener implements Listener {
 						}
 					}
 					if(foundLoc==null) {
-						event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "ERROR: Could not find target sign!" ) ) );
+						event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "ERROR: Could not find target sign!" ));
 						return;						
 					}
 
@@ -173,7 +173,7 @@ public class InteractListener implements Listener {
 							}
 
 							if ( MathUtils.playerIsWithinBoundingPolygon( craft.getHitBox(), craft.getMinX(), craft.getMinZ(), MathUtils.bukkit2MovecraftLoc( event.getPlayer().getLocation() ) ) ) {
-								if(craft.getType().rotateAtMidpoint()==true) {
+								if(craft.getType().rotateAtMidpoint()) {
 									MovecraftLocation midpoint=new MovecraftLocation((craft.getMaxX()+craft.getMinX())/2,(craft.getMaxY()+craft.getMinY())/2,(craft.getMaxZ()+craft.getMinZ())/2);
 									CraftManager.getInstance().getCraftByPlayer( event.getPlayer() ).rotate( Rotation.ANTICLOCKWISE, midpoint );									
 								} else {
@@ -186,7 +186,7 @@ public class InteractListener implements Listener {
 							}
 
 						} else {
-							event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+							event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 						}
 					}
 				}
@@ -233,7 +233,7 @@ public class InteractListener implements Listener {
 							timeMap.put( event.getPlayer(), System.currentTimeMillis() );
 							event.setCancelled( true );
 						} else {
-							event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );							
+							event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 						}
 					}
 				}
@@ -265,7 +265,7 @@ public class InteractListener implements Listener {
 				MovecraftLocation startPoint = new MovecraftLocation( loc.getBlockX(), loc.getBlockY(), loc.getBlockZ() );
 				final Craft c = new Craft( getCraftTypeFromString( org.bukkit.ChatColor.stripColor(sign.getLine( 0 )) ), loc.getWorld() );
 				
-				if(c.getType().getCruiseOnPilot()==true) {
+				if(c.getType().getCruiseOnPilot()) {
 					c.detect( null, event.getPlayer(), startPoint );
 					c.setCruiseDirection(sign.getRawData());
 					c.setLastCruisUpdate(System.currentTimeMillis());
@@ -293,7 +293,7 @@ public class InteractListener implements Listener {
 				
 				event.setCancelled( true );
 			} else {
-			event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+			event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 
 			}
 
@@ -322,7 +322,7 @@ public class InteractListener implements Listener {
 					}
 
 					if ( MathUtils.playerIsWithinBoundingPolygon( craft.getHitBox(), craft.getMinX(), craft.getMinZ(), MathUtils.bukkit2MovecraftLoc( event.getPlayer().getLocation() ) ) ) {
-						if(craft.getType().rotateAtMidpoint()==true) {
+						if(craft.getType().rotateAtMidpoint()) {
 							MovecraftLocation midpoint=new MovecraftLocation((craft.getMaxX()+craft.getMinX())/2,(craft.getMaxY()+craft.getMinY())/2,(craft.getMaxZ()+craft.getMinZ())/2);
 							CraftManager.getInstance().getCraftByPlayer( event.getPlayer() ).rotate( Rotation.CLOCKWISE, midpoint );									
 						} else {
@@ -335,7 +335,7 @@ public class InteractListener implements Listener {
 					}
 
 				} else {
-					event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+					event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 				}
 			}
 		} else if ( org.bukkit.ChatColor.stripColor(sign.getLine( 0 )).equalsIgnoreCase( "Subcraft Rotate")) {
@@ -381,7 +381,7 @@ public class InteractListener implements Listener {
 					timeMap.put( event.getPlayer(), System.currentTimeMillis() );
 					event.setCancelled( true );
 				} else {
-					event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );							
+					event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 				}
 			}		
 		} else if ( org.bukkit.ChatColor.stripColor(sign.getLine( 0 )).equalsIgnoreCase( "Cruise: OFF")) {
@@ -471,7 +471,7 @@ public class InteractListener implements Listener {
 						CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).translate(dx, dy, dz);;
 					}
 				} else {
-					event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+					event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 				}
 			}
 		} else if ( org.bukkit.ChatColor.stripColor(sign.getLine( 0 )).equalsIgnoreCase( "Release")) {
@@ -523,7 +523,7 @@ public class InteractListener implements Listener {
 
 					}
 				} else {
-					event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+					event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 				}
 			}
 		} else  if ( org.bukkit.ChatColor.stripColor(sign.getLine( 0 )).equalsIgnoreCase("RMove:")) {
@@ -594,7 +594,7 @@ public class InteractListener implements Listener {
 						
 					}
 				} else {
-					event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+					event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 				}
 			}
 		}
@@ -640,7 +640,7 @@ public class InteractListener implements Listener {
 					if ( MathUtils.playerIsWithinBoundingPolygon( craft.getHitBox(), craft.getMinX(), craft.getMinZ(), MathUtils.bukkit2MovecraftLoc( event.getPlayer().getLocation() ) ) ) {
 
 						if ( event.getPlayer().hasPermission( "movecraft." + craft.getType().getCraftName() + ".move" ) ) {
-							if( craft.getPilotLocked()==true ) {
+							if(craft.getPilotLocked()) {
 								// right click moves up or down if using direct control
 								int DY=1;
 								if(event.getPlayer().isSneaking()) 
@@ -703,7 +703,7 @@ public class InteractListener implements Listener {
 								craft.setLastCruisUpdate(System.currentTimeMillis());
 							}
 						} else { 
-							event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+							event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 						}
 					}
 				}
@@ -713,23 +713,21 @@ public class InteractListener implements Listener {
 			if ( event.getItem() != null && event.getItem().getTypeId()==Settings.PilotTool ) {
 				Craft craft = CraftManager.getInstance().getCraftByPlayer( event.getPlayer() );
 				if( craft!=null ) {
-					if ( craft.getPilotLocked()==false) {
+					if (!craft.getPilotLocked()) {
 						if ( event.getPlayer().hasPermission( "movecraft." + craft.getType().getCraftName() + ".move" ) && craft.getType().getCanDirectControl() ) {
 							craft.setPilotLocked(true);
 							craft.setPilotLockedX(event.getPlayer().getLocation().getBlockX()+0.5);
 							craft.setPilotLockedY(event.getPlayer().getLocation().getY());
 							craft.setPilotLockedZ(event.getPlayer().getLocation().getBlockZ()+0.5);
-							event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Entering Direct Control Mode" ) ) );
+							event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Entering Direct Control Mode" ));
 							event.setCancelled(true);
-							return;
 						} else {
-							event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );						
+							event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 						}
 					} else {
 						craft.setPilotLocked(false);
-						event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Leaving Direct Control Mode" ) ) );
+						event.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "Leaving Direct Control Mode" ));
 						event.setCancelled(true);
-						return;
 					}
 				}
 			}

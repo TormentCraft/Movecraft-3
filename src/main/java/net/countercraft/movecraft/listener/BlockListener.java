@@ -17,11 +17,8 @@
 
 package net.countercraft.movecraft.listener;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Random;
-
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -29,51 +26,39 @@ import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.items.StorageChestItem;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.utils.MapUpdateManager;
 import net.countercraft.movecraft.utils.MathUtils;
 import net.countercraft.movecraft.utils.MovecraftLocation;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.BlockRedstoneEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Attachable;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import java.util.Arrays;
+import java.util.Iterator;
 
 public class BlockListener implements Listener {
 
 	@EventHandler
 	public void onBlockPlace( final BlockPlaceEvent e ) {
-		if ( Settings.DisableCrates==true )
+		if (Settings.DisableCrates)
 			return;
 		if ( e.getBlockAgainst().getTypeId() == 33 && e.getBlockAgainst().getData() == ( ( byte ) 6 ) ) {
 			e.setCancelled( true );
-		} else if ( e.getItemInHand().getItemMeta() != null && e.getItemInHand().getItemMeta().getDisplayName() != null && e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase( String.format( I18nSupport.getInternationalisedString( "Item - Storage Crate name" ) ) ) ) {
+		} else if ( e.getItemInHand().getItemMeta() != null && e.getItemInHand().getItemMeta().getDisplayName() != null && e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(I18nSupport.getInternationalisedString( "Item - Storage Crate name" )) ) {
 			e.getBlockPlaced().setTypeId( 33 );
 			Location l = e.getBlockPlaced().getLocation();
 			MovecraftLocation l1 = new MovecraftLocation( l.getBlockX(), l.getBlockY(), l.getBlockZ() );
@@ -94,7 +79,7 @@ public class BlockListener implements Listener {
 
 		if ( event.getAction() == Action.RIGHT_CLICK_BLOCK ) {
 			if ( event.getClickedBlock().getTypeId() == 33 && event.getClickedBlock().getData() == ( ( byte ) 6 ) ) {
-				if(Settings.DisableCrates==true)
+				if(Settings.DisableCrates)
 					return;
 				Location l = event.getClickedBlock().getLocation();
 				MovecraftLocation l1 = new MovecraftLocation( l.getBlockX(), l.getBlockY(), l.getBlockZ() );
@@ -126,12 +111,12 @@ public class BlockListener implements Listener {
 					}				
 				}
 			if(blockInCraft) {
-				e.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "BLOCK IS PART OF A PILOTED CRAFT" ) ) );
+				e.getPlayer().sendMessage(I18nSupport.getInternationalisedString( "BLOCK IS PART OF A PILOTED CRAFT" ));
 				e.setCancelled(true);
 			}
 		}
 		if ( e.getBlock().getTypeId() == 33 && e.getBlock().getData() == ( ( byte ) 6 ) ) {
-			if(Settings.DisableCrates==true)
+			if(Settings.DisableCrates)
 				return;
 			Location l = e.getBlock().getLocation();
 			MovecraftLocation l1 = new MovecraftLocation( l.getBlockX(), l.getBlockY(), l.getBlockZ() );
@@ -224,24 +209,24 @@ public class BlockListener implements Listener {
         String signText=org.bukkit.ChatColor.stripColor(event.getLine(0));
         // did the player try to create a craft command sign?
         if(getCraftTypeFromString( signText ) != null) {
-        	if(Settings.RequireCreatePerm==false) {
+        	if(!Settings.RequireCreatePerm) {
         		return;
         	}
-			if(p.hasPermission( "movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create")==false) {
-				p.sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+			if(!p.hasPermission("movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create")) {
+				p.sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 				event.setCancelled(true);
 			}
         }
         if(signText.equalsIgnoreCase( "Cruise: OFF") || signText.equalsIgnoreCase( "Cruise: ON")) {
-        	if(p.hasPermission( "movecraft.cruisesign")==false && Settings.RequireCreatePerm) {
-				p.sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+        	if(!p.hasPermission("movecraft.cruisesign") && Settings.RequireCreatePerm) {
+				p.sendMessage(I18nSupport.getInternationalisedString( "Insufficient Permissions" ));
 				event.setCancelled(true);
 			}
         }
         if(signText.equalsIgnoreCase( "Crew:")) {
             String crewName=org.bukkit.ChatColor.stripColor(event.getLine(1));
         	if(!p.getName().equalsIgnoreCase(crewName)) {
-				p.sendMessage( String.format( I18nSupport.getInternationalisedString( "You can only create a Crew: sign for yourself" ) ) );
+				p.sendMessage(I18nSupport.getInternationalisedString( "You can only create a Crew: sign for yourself" ));
 				event.setLine(1, p.getName());
 //				event.setCancelled(true);
 			}
@@ -269,7 +254,7 @@ public class BlockListener implements Listener {
 				// check to see if fire spread is allowed, don't check if worldguard integration is not enabled
 				if(Movecraft.getInstance().getWorldGuardPlugin()!=null && (Settings.WorldGuardBlockMoveOnBuildPerm || Settings.WorldGuardBlockSinkOnPVPPerm)) {
 					ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(testBlock.getWorld()).getApplicableRegions(testBlock.getLocation());
-					if(set.allows(DefaultFlag.FIRE_SPREAD)==false) {
+					if(!set.allows(DefaultFlag.FIRE_SPREAD)) {
 						isBurnAllowed=false;
 					}
 				}
@@ -297,7 +282,7 @@ public class BlockListener implements Listener {
     public void explodeEvent(EntityExplodeEvent e) {
 		// Remove any blocks from the list that were adjacent to water, to prevent spillage
 		Iterator<Block> i=e.blockList().iterator();
-		if(Settings.DisableSpillProtection==false)
+		if(!Settings.DisableSpillProtection)
 			while(i.hasNext()) {
 				Block b=i.next();
 				boolean isNearWater=false;

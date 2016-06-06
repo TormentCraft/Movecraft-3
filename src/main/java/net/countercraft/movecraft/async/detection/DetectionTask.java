@@ -57,17 +57,17 @@ public class DetectionTask extends AsyncTask {
 	private Integer maxY;
 	private Integer maxZ;
 	private Integer minY;
-	private final Stack<MovecraftLocation> blockStack = new Stack<MovecraftLocation>();
-	private final HashSet<MovecraftLocation> blockList = new HashSet<MovecraftLocation>();
-	private final HashSet<MovecraftLocation> visited = new HashSet<MovecraftLocation>();
-	private final HashMap<ArrayList<Integer>, Integer> blockTypeCount = new HashMap<ArrayList<Integer>, Integer>();
+	private final Stack<MovecraftLocation> blockStack = new Stack<>();
+	private final HashSet<MovecraftLocation> blockList = new HashSet<>();
+	private final HashSet<MovecraftLocation> visited = new HashSet<>();
+	private final HashMap<ArrayList<Integer>, Integer> blockTypeCount = new HashMap<>();
 	private HashMap<ArrayList<Integer>, ArrayList<Double>> dFlyBlocks;
 	private final DetectionTaskData data;
         
         private int craftMinY = 0;
         private int craftMaxY = 0;
         private boolean townyEnabled = false;
-        Set<TownBlock> townBlockSet = new HashSet<TownBlock>();
+        Set<TownBlock> townBlockSet = new HashSet<>();
         TownyWorld townyWorld = null;
         TownyWorldHeightLimits townyWorldHeightLimits = null;
         
@@ -149,7 +149,7 @@ public class DetectionTask extends AsyncTask {
 							foundPilot=true;
 						}
 						if(!foundPilot && (!data.getPlayer().hasPermission("movecraft.bypasslock"))) {
-							fail( String.format( I18nSupport.getInternationalisedString( "Not one of the registered pilots on this craft" )));							
+							fail(I18nSupport.getInternationalisedString( "Not one of the registered pilots on this craft" ));
 						}
 					}
 				}
@@ -157,7 +157,7 @@ public class DetectionTask extends AsyncTask {
 			
 			if ( isForbiddenBlock( testID,testData ) ) {
 
-				fail( String.format( I18nSupport.getInternationalisedString( "Detection - Forbidden block found" ) ) );
+				fail(I18nSupport.getInternationalisedString( "Detection - Forbidden block found" ));
 
 			} else if ( isAllowedBlock( testID,testData ) ) {
 				//check for double chests
@@ -176,7 +176,7 @@ public class DetectionTask extends AsyncTask {
 						foundDoubleChest=true;
 					}
                     if(foundDoubleChest) {
-						fail( String.format( I18nSupport.getInternationalisedString( "Detection - ERROR: Double chest found" ) ) );						
+						fail(I18nSupport.getInternationalisedString( "Detection - ERROR: Double chest found" ));
 					}
 				}
                 //check for double trapped chests
@@ -195,7 +195,7 @@ public class DetectionTask extends AsyncTask {
 						foundDoubleChest=true;
 					}
                     if(foundDoubleChest) {
-						fail( String.format( I18nSupport.getInternationalisedString( "Detection - ERROR: Double chest found" ) ) );						
+						fail(I18nSupport.getInternationalisedString( "Detection - ERROR: Double chest found" ));
 					}
 				}
                                 
@@ -239,7 +239,7 @@ public class DetectionTask extends AsyncTask {
                                                         }
                                                         if (failed){
                                                             if(Movecraft.getInstance().getWorldGuardPlugin()!=null && Movecraft.getInstance().getWGCustomFlagsPlugin()!= null && Settings.WGCustomFlagsUsePilotFlag){
-                                                                LocalPlayer lp = (LocalPlayer) Movecraft.getInstance().getWorldGuardPlugin().wrapPlayer(p);
+                                                                LocalPlayer lp = Movecraft.getInstance().getWorldGuardPlugin().wrapPlayer(p);
                                                                 ApplicableRegionSet regions = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(loc.getWorld()).getApplicableRegions(loc);
                                                                 if (regions.size() != 0){
                                                                     WGCustomFlagsUtils WGCFU = new WGCustomFlagsUtils();
@@ -407,7 +407,7 @@ public class DetectionTask extends AsyncTask {
 
 	private MovecraftLocation[] finaliseBlockList( HashSet<MovecraftLocation> blockSet ) {
 		//MovecraftLocation[] finalList=blockSet.toArray( new MovecraftLocation[1] );
-		ArrayList <MovecraftLocation> finalList=new ArrayList <MovecraftLocation>();
+		ArrayList <MovecraftLocation> finalList= new ArrayList<>();
 		
 		// Sort the blocks from the bottom up to minimize lower altitude block updates
 		for(int posx=data.getMinX();posx<=this.maxX;posx++) {
@@ -423,9 +423,9 @@ public class DetectionTask extends AsyncTask {
 	}
 
 	private boolean confirmStructureRequirements( HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks, HashMap<ArrayList<Integer>, Integer> countData ) {
-		if ( getCraft().getType().getRequireWaterContact()==true ) {
-			if(data.getWaterContact()==false) {
-				fail( String.format( I18nSupport.getInternationalisedString( "Detection - Failed - Water contact required but not found" )));
+		if (getCraft().getType().getRequireWaterContact()) {
+			if(!data.getWaterContact()) {
+				fail(I18nSupport.getInternationalisedString( "Detection - Failed - Water contact required but not found" ));
 				return false;
 			}
 		}

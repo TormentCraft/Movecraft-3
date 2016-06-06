@@ -27,7 +27,7 @@ public class InventoryTransferHolder extends TransferData {
 		this.invetory = invetory;
 	}
 
-	public ItemStack[] getInvetory() {
+	public ItemStack[] getInventory() {
 		return invetory;
 	}
 }

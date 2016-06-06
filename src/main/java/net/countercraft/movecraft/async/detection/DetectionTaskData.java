@@ -43,9 +43,6 @@ public class DetectionTaskData {
 		this.waterContact = false;
 	}
 
-	public DetectionTaskData() {
-	}
-
 	public Integer[] getAllowedBlocks() {
 		return allowedBlocks;
 	}

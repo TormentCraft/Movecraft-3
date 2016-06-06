@@ -61,7 +61,7 @@ public class CraftType {
 	private float explodeOnCrash;
 	private float collisionExplosion;
 	private int tickCooldown;
-	private HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks = new HashMap<ArrayList<Integer>, ArrayList<Double>>();
+	private HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks = new HashMap<>();
 	private int hoverLimit;
 	private List<Material> harvestBlocks;
         private List<Material> harvesterBladeBlocks;
@@ -90,7 +90,7 @@ public class CraftType {
 	}
 
 	private Integer[] blockIDListFromObject(Object obj) {
-		ArrayList<Integer> returnList=new ArrayList<Integer>();
+		ArrayList<Integer> returnList= new ArrayList<>();
 		ArrayList objList=(ArrayList) obj;
 		for(Object i : objList) {
 			if(i instanceof String) {
@@ -115,10 +115,10 @@ public class CraftType {
 	private HashMap<ArrayList<Integer>, ArrayList<Double>> blockIDMapListFromObject(Object obj) {
 		//flyBlocks = ( HashMap<Integer, ArrayList<Double>> ) data.get( "flyblocks" );
 		
-		HashMap<ArrayList<Integer>, ArrayList<Double>> returnMap=new HashMap<ArrayList<Integer>, ArrayList<Double>>();
+		HashMap<ArrayList<Integer>, ArrayList<Double>> returnMap= new HashMap<>();
 		HashMap<Object, Object> objMap=(HashMap<Object, Object>) obj;
 		for(Object i : objMap.keySet()) {
-			ArrayList<Integer> rowList=new ArrayList<Integer>();
+			ArrayList<Integer> rowList= new ArrayList<>();
 
 			// first read in the list of the blocks that type of flyblock. It could be a single string (with or without a ":") or integer, or it could be multiple of them
 			if(i instanceof ArrayList<?>) {
@@ -158,7 +158,7 @@ public class CraftType {
 			
 			// then read in the limitation values, low and high
 			ArrayList<Object> objList=(ArrayList<Object>)objMap.get(i);
-			ArrayList<Double> limitList=new ArrayList<Double>();
+			ArrayList<Double> limitList= new ArrayList<>();
 			for(Object limitObj : objList) {
 				if(limitObj instanceof String) {
 					String str=(String)limitObj;
@@ -392,8 +392,8 @@ public class CraftType {
     	}else{
         	hoverLimit=0;
      	}
-            harvestBlocks = new ArrayList<Material>(); 
-            harvesterBladeBlocks = new ArrayList<Material>();
+            harvestBlocks = new ArrayList<>();
+            harvesterBladeBlocks = new ArrayList<>();
             if (data.containsKey("harvestBlocks")){
     /*        	String[] temp = ((ArrayList<String> ) data.get( "harvestBlocks" )).toArray( new String[1] );
                     for (int i = 0; i < temp.length; i++){

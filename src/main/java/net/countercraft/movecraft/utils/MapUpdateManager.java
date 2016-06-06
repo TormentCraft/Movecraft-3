@@ -31,9 +31,6 @@ import net.countercraft.movecraft.utils.datastructures.CommandBlockTransferHolde
 import net.countercraft.movecraft.utils.datastructures.StorageCrateTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.TransferData;
 import net.minecraft.server.v1_9_R1.BlockPosition;
-import net.minecraft.server.v1_9_R1.ChunkCoordIntPair;
-import net.minecraft.server.v1_9_R1.EnumSkyBlock;
-import net.minecraft.server.v1_9_R1.IBlockData;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -41,24 +38,18 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.craftbukkit.v1_9_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_9_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
 
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.SignBlock;
@@ -70,14 +61,10 @@ import java.io.StringWriter;
 import java.util.*;
 import java.util.logging.Level;
 
-import net.minecraft.server.v1_9_R1.EntityTNTPrimed;
-
-import org.bukkit.event.entity.ExplosionPrimeEvent;
-
 public class MapUpdateManager extends BukkitRunnable {
-	private final HashMap<World, ArrayList<MapUpdateCommand>> updates = new HashMap<World, ArrayList<MapUpdateCommand>>();
-	private final HashMap<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<World, ArrayList<EntityUpdateCommand>>();
-    private final HashMap<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<World, ArrayList<ItemDropUpdateCommand>>();
+	private final HashMap<World, ArrayList<MapUpdateCommand>> updates = new HashMap<>();
+	private final HashMap<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<>();
+    private final HashMap<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<>();
 		
 	private MapUpdateManager() {
 	}
@@ -285,7 +272,7 @@ public class MapUpdateManager extends BukkitRunnable {
 								loc=loc.subtract(0, 1, 0);
 								if(w.getBlockAt(loc).getType().equals(Material.BED_BLOCK)) {
 									crewPlayer.setBedSpawnLocation(loc);
-									if(Settings.SetHomeToCrewSign==true)
+									if(Settings.SetHomeToCrewSign)
 
 										if (Movecraft.getInstance().getEssentialsPlugin() != null){
                                             User u = Movecraft.getInstance().getEssentialsPlugin().getUser(crewPlayer);
@@ -308,14 +295,14 @@ public class MapUpdateManager extends BukkitRunnable {
 						sign.update( true, false );
 					}
 				} else if ( transferData instanceof StorageCrateTransferHolder ) {
-					Inventory inventory = Bukkit.createInventory( null, 27, String.format( I18nSupport.getInternationalisedString( "Item - Storage Crate name" ) ) );
-					inventory.setContents( ( ( StorageCrateTransferHolder ) transferData ).getInvetory() );
+					Inventory inventory = Bukkit.createInventory( null, 27, I18nSupport.getInternationalisedString( "Item - Storage Crate name" ));
+					inventory.setContents( ( ( StorageCrateTransferHolder ) transferData ).getInventory() );
 					StorageChestItem.setInventoryOfCrateAtLocation( inventory, l, w );
 	
 				} else if ( transferData instanceof InventoryTransferHolder ) {
 					InventoryTransferHolder invData = ( InventoryTransferHolder ) transferData;
 					InventoryHolder inventoryHolder = ( InventoryHolder ) w.getBlockAt( l.getX(), l.getY(), l.getZ() ).getState();
-					inventoryHolder.getInventory().setContents( invData.getInvetory() );
+					inventoryHolder.getInventory().setContents( invData.getInventory() );
 				} else if ( transferData instanceof CommandBlockTransferHolder) {
 					CommandBlockTransferHolder cbData=(CommandBlockTransferHolder) transferData;
 					CommandBlock cblock=(CommandBlock) w.getBlockAt( l.getX(), l.getY(), l.getZ() ).getState();
@@ -324,10 +311,8 @@ public class MapUpdateManager extends BukkitRunnable {
 					cblock.update();
 				}
 				w.getBlockAt( l.getX(), l.getY(), l.getZ() ).setData( transferData.getData() );
-			} catch ( IndexOutOfBoundsException e ) {
+			} catch ( IndexOutOfBoundsException | IllegalArgumentException e ) {
 				Movecraft.getInstance().getLogger().log( Level.SEVERE, "Severe error in map updater" );
-			} catch (IllegalArgumentException e) {
-	                                Movecraft.getInstance().getLogger().log( Level.SEVERE, "Severe error in map updater" );
 			}
 		}
 	}
@@ -383,7 +368,7 @@ public class MapUpdateManager extends BukkitRunnable {
 					}						
 				}
 			}
-			if(Settings.CompatibilityMode==false) {
+			if(!Settings.CompatibilityMode) {
 				// send updates to client
 				for ( MapUpdateCommand c : updatesInWorld ) {
 					Location loc=new Location(w,c.getNewBlockLocation().getX(),c.getNewBlockLocation().getY(),c.getNewBlockLocation().getZ());
@@ -432,19 +417,19 @@ public class MapUpdateManager extends BukkitRunnable {
 				List<MapUpdateCommand> updatesInWorld = updates.get( w );
 				List<EntityUpdateCommand> entityUpdatesInWorld = entityUpdates.get( w );
                                 List<ItemDropUpdateCommand> itemDropUpdatesInWorld = itemDropUpdates.get( w );
-				Map<MovecraftLocation, List<EntityUpdateCommand>> entityMap = new HashMap<MovecraftLocation, List<EntityUpdateCommand>>();
-                                Map<MovecraftLocation, List<ItemDropUpdateCommand>> itemMap = new HashMap<MovecraftLocation, List<ItemDropUpdateCommand>>();
-				Map<MovecraftLocation, TransferData> dataMap = new HashMap<MovecraftLocation, TransferData>();
-				HashMap<MovecraftLocation, Byte> origLightMap = new HashMap<MovecraftLocation, Byte>();
+				Map<MovecraftLocation, List<EntityUpdateCommand>> entityMap = new HashMap<>();
+                                Map<MovecraftLocation, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
+				Map<MovecraftLocation, TransferData> dataMap = new HashMap<>();
+				HashMap<MovecraftLocation, Byte> origLightMap = new HashMap<>();
 				Set<net.minecraft.server.v1_9_R1.Chunk> chunks = null; 
 				Set<Chunk> cmChunks = null;
-				ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<MapUpdateCommand>();
-				ArrayList<Boolean> queuedPlaceDispensers = new ArrayList<Boolean>();
+				ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<>();
+				ArrayList<Boolean> queuedPlaceDispensers = new ArrayList<>();
 
 				if(Settings.CompatibilityMode) {
-					cmChunks = new HashSet<Chunk>();					
+					cmChunks = new HashSet<>();
 				} else {
-					chunks = new HashSet<net.minecraft.server.v1_9_R1.Chunk>();
+					chunks = new HashSet<>();
 				}
                                 
 				// Preprocessing
@@ -497,7 +482,7 @@ public class MapUpdateManager extends BukkitRunnable {
 						if(i!=null) {
 							MovecraftLocation entityLoc=new MovecraftLocation(i.getNewLocation().getBlockX(), i.getNewLocation().getBlockY()-1, i.getNewLocation().getBlockZ());
 							if(!entityMap.containsKey(entityLoc)) {
-								List<EntityUpdateCommand> entUpdateList=new ArrayList<EntityUpdateCommand>();
+								List<EntityUpdateCommand> entUpdateList= new ArrayList<>();
 								entUpdateList.add(i);
 								entityMap.put(entityLoc, entUpdateList);
 							} else {
@@ -744,7 +729,7 @@ public class MapUpdateManager extends BukkitRunnable {
                                                         final World world = w;
                                                         final Location loc = i.getLocation();
                                                         final ItemStack stack = i.getItemStack();
-							if(i.getItemStack() instanceof ItemStack) {
+							if(i.getItemStack() != null) {
 								// drop Item
 								BukkitTask dropTask = new BukkitRunnable() {
 									@Override
@@ -769,12 +754,12 @@ public class MapUpdateManager extends BukkitRunnable {
 		if ( get != null ) {
 			updates.remove( w );
 		} else {
-			get = new ArrayList<MapUpdateCommand>();
+			get = new ArrayList<>();
 		}
 
 		Integer minx=Integer.MAX_VALUE,miny=Integer.MAX_VALUE,minz=Integer.MAX_VALUE;
 		Integer maxx=Integer.MIN_VALUE,maxy=Integer.MIN_VALUE,maxz=Integer.MIN_VALUE;
-		HashMap<MovecraftLocation,MapUpdateCommand> sortRef = new HashMap<MovecraftLocation,MapUpdateCommand>();
+		HashMap<MovecraftLocation,MapUpdateCommand> sortRef = new HashMap<>();
 		if(mapUpdates!=null) {
 			for ( MapUpdateCommand m : mapUpdates ) {
 				if ( setContainsConflict( get, m ) ) {
@@ -800,7 +785,7 @@ public class MapUpdateManager extends BukkitRunnable {
 
 		ArrayList<MapUpdateCommand> tempSet=null;
 		if(mapUpdates!=null) {
-			tempSet = new ArrayList<MapUpdateCommand>();//(Arrays.asList(mapUpdates));
+			tempSet = new ArrayList<>();//(Arrays.asList(mapUpdates));
 			// Sort the blocks from the bottom up to minimize lower altitude block updates
 			for(int posy=maxy;posy>=miny;posy--) {
 				for(MapUpdateCommand test : mapUpdates) {
@@ -810,7 +795,7 @@ public class MapUpdateManager extends BukkitRunnable {
 				}
 			}
 		} else {
-			tempSet = new ArrayList<MapUpdateCommand>();
+			tempSet = new ArrayList<>();
 		}
 		
 		get.addAll( tempSet );
@@ -822,10 +807,10 @@ public class MapUpdateManager extends BukkitRunnable {
 			if ( eGet != null ) {
 				entityUpdates.remove( w ); 
 			} else {
-				eGet = new ArrayList<EntityUpdateCommand>();
+				eGet = new ArrayList<>();
 			}
 			
-			ArrayList<EntityUpdateCommand> tempEUpdates = new ArrayList<EntityUpdateCommand>();
+			ArrayList<EntityUpdateCommand> tempEUpdates = new ArrayList<>();
                         tempEUpdates.addAll(Arrays.asList(eUpdates));
 			eGet.addAll( tempEUpdates );
 			entityUpdates.put(w, eGet);
@@ -837,10 +822,10 @@ public class MapUpdateManager extends BukkitRunnable {
 			if ( iGet != null ) {
 				entityUpdates.remove( w ); 
 			} else {
-				iGet = new ArrayList<ItemDropUpdateCommand>();
+				iGet = new ArrayList<>();
 			}
 			
-			ArrayList<ItemDropUpdateCommand> tempIDUpdates = new ArrayList<ItemDropUpdateCommand>();
+			ArrayList<ItemDropUpdateCommand> tempIDUpdates = new ArrayList<>();
                         tempIDUpdates.addAll(Arrays.asList(iUpdates));
 			iGet.addAll( tempIDUpdates );
 			itemDropUpdates.put(w, iGet);
@@ -932,7 +917,7 @@ public class MapUpdateManager extends BukkitRunnable {
         	boolean explosionblocked=false;
     		if(Movecraft.getInstance().getWorldGuardPlugin()!=null) {
     			ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(loc.getWorld()).getApplicableRegions(loc);
-    			if(set.allows(DefaultFlag.OTHER_EXPLOSION)==false) {
+    			if(!set.allows(DefaultFlag.OTHER_EXPLOSION)) {
     				explosionblocked=true;
     			}
     		}

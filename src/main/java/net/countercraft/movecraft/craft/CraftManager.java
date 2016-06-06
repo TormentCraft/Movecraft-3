@@ -35,9 +35,9 @@ import org.bukkit.scheduler.BukkitTask;
 public class CraftManager {
 	private static final CraftManager ourInstance = new CraftManager();
 	private CraftType[] craftTypes;
-	private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<World, Set<Craft>>();
-	private final HashMap<Player, Craft> craftPlayerIndex = new HashMap<Player, Craft>();
-	private final HashMap<Player, BukkitTask> releaseEvents = new HashMap<Player, BukkitTask>();
+	private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<>();
+	private final HashMap<Player, Craft> craftPlayerIndex = new HashMap<>();
+	private final HashMap<Player, BukkitTask> releaseEvents = new HashMap<>();
 
 	public static CraftManager getInstance() {
 		return ourInstance;
@@ -68,13 +68,13 @@ public class CraftManager {
 			Movecraft.getInstance().saveResource("types/Turret.craft", false);
 		}
 
-		HashSet<CraftType> craftTypesSet = new HashSet<CraftType>();
+		HashSet<CraftType> craftTypesSet = new HashSet<>();
 
 		boolean foundCraft=false;
 		for ( File file : craftsFile.listFiles() ) {
 			if ( file.isFile() ) {
 
-				if ( file.getName().contains( ".craft" ) ) {
+				if ( file.getName().contains(".craft") ) {
 					CraftType type = new CraftType( file );
 					craftTypesSet.add( type );
 					foundCraft=true;
@@ -100,12 +100,12 @@ public class CraftManager {
 	public void removeCraft( Craft c ) {
 		removeReleaseTask(c);
 		// if its sinking, just remove the craft without notifying or checking
-		if(c.getSinking()==true) {
+		if(c.getSinking()) {
 			craftList.get( c.getW() ).remove( c );
 			craftPlayerIndex.remove( getPlayerFromCraft( c ) );			
 		}
 		// don't just release torpedoes, make them sink so they don't clutter up the place
-		if(c.getType().getCruiseOnPilot()==true) {
+		if(c.getType().getCruiseOnPilot()) {
 			c.setCruising(false);
 			c.setSinking(true);
 			c.setNotificationPlayer(null);
@@ -113,7 +113,7 @@ public class CraftManager {
 		}
 		craftList.get( c.getW() ).remove( c );
 		if ( getPlayerFromCraft( c ) != null ) {
-			getPlayerFromCraft( c ).sendMessage( String.format( I18nSupport.getInternationalisedString( "Release - Craft has been released message" ) ) );
+			getPlayerFromCraft( c ).sendMessage(I18nSupport.getInternationalisedString( "Release - Craft has been released message" ));
 			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString( "Release - Player has released a craft console" ), c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length, c.getMinX(), c.getMinZ() ) );
 		} else {
 			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString( "NULL Player has released a craft of type %s with size %d at coordinates : %d x , %d z" ),  c.getType().getCraftName(), c.getBlockList().length, c.getMinX(), c.getMinZ() ) );
@@ -162,7 +162,7 @@ public class CraftManager {
 	public void removePlayerFromCraft( Craft c ) {
 		if ( getPlayerFromCraft( c ) != null ) {
 			removeReleaseTask(c);
-			getPlayerFromCraft( c ).sendMessage( String.format( I18nSupport.getInternationalisedString( "Release - Craft has been released message" ) ) );
+			getPlayerFromCraft( c ).sendMessage(I18nSupport.getInternationalisedString( "Release - Craft has been released message" ));
 			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString( "Release - Player has released a craft console" ), c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length, c.getMinX(), c.getMinZ() ) );
 			Player p=getPlayerFromCraft( c );
 			craftPlayerIndex.put(null, c);
@@ -178,7 +178,7 @@ public class CraftManager {
 	public final void addReleaseTask(final Craft c){
 		Player p = getPlayerFromCraft( c );
 		if ( !getReleaseEvents().containsKey( p ) ) {
-			p.sendMessage( String.format( I18nSupport.getInternationalisedString( "Release - Player has left craft" ) ) );
+			p.sendMessage(I18nSupport.getInternationalisedString( "Release - Player has left craft" ));
 			BukkitTask releaseTask = new BukkitRunnable() {
 				@Override
 				public void run() {

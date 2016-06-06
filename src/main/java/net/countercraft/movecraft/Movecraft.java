@@ -94,7 +94,7 @@ public class Movecraft extends JavaPlugin {
         @Override
 	public void onDisable() {
 		// Process the storage crates to disk
-		if(Settings.DisableCrates==false)
+		if(!Settings.DisableCrates)
 			StorageChestItem.saveToDisk();
 		shuttingDown = true;
 	}
@@ -118,7 +118,7 @@ public class Movecraft extends JavaPlugin {
 		// if the CompatibilityMode is specified in the config.yml file, use it.
 		// Otherwise set to false.
 		Settings.CompatibilityMode = getConfig().getBoolean("CompatibilityMode", false);
-		if(Settings.CompatibilityMode==false) {
+		if(!Settings.CompatibilityMode) {
 			try {
 				 	Class.forName( "net.minecraft.server.v1_9_R1.Chunk" );
 				} catch( ClassNotFoundException e ) {
@@ -295,12 +295,12 @@ public class Movecraft extends JavaPlugin {
                 if (shuttingDown && Settings.IGNORE_RESET) {
 			logger.log(
 					Level.SEVERE,
-					String.format(I18nSupport
-							.getInternationalisedString("Startup - Error - Reload error")));
+					I18nSupport
+							.getInternationalisedString("Startup - Error - Reload error"));
 			logger.log(
 					Level.INFO,
-					String.format(I18nSupport
-							.getInternationalisedString("Startup - Error - Disable warning for reload")));
+					I18nSupport
+							.getInternationalisedString("Startup - Error - Disable warning for reload"));
 			getPluginLoader().disablePlugin(this);
 		} else {
 
@@ -334,7 +334,7 @@ public class Movecraft extends JavaPlugin {
 			getServer().getPluginManager().registerEvents(new PlayerListener(),
 					this);
 			
-			if(Settings.DisableCrates==false) {
+			if(!Settings.DisableCrates) {
 				StorageChestItem.readFromDisk();
 				StorageChestItem.addRecipie();
 			}

@@ -41,6 +41,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -157,7 +158,7 @@ public class RotationTask extends AsyncTask {
 			}
 			
 			// now add all the air blocks found within the crafts borders below the waterline to the craft blocks so they will be rotated
-			HashSet<MovecraftLocation> newHSBlockList=new HashSet<MovecraftLocation>(Arrays.asList(blockList));
+			HashSet<MovecraftLocation> newHSBlockList= new HashSet<>(Arrays.asList(blockList));
 			for(int posY=waterLine; posY>=minY; posY--) {
 				for(int posX=getCraft().getMinX(); posX<=maxX; posX++) {
 					for(int posZ=getCraft().getMinZ(); posZ<=maxZ; posZ++) {
@@ -173,7 +174,7 @@ public class RotationTask extends AsyncTask {
 		
         // check for fuel, burn some from a furnace if needed. Blocks of coal are supported, in addition to coal and charcoal
         double fuelBurnRate=getCraft().getType().getFuelBurnRate();
-        if(fuelBurnRate!=0.0 && getCraft().getSinking()==false) {
+        if(fuelBurnRate!=0.0 && !getCraft().getSinking()) {
             if(getCraft().getBurningFuel()<fuelBurnRate) {
                 Block fuelHolder=null;
                 for (MovecraftLocation bTest : blockList) {
@@ -187,7 +188,7 @@ public class RotationTask extends AsyncTask {
                 }
                 if(fuelHolder==null) {
                     failed = true;
-					failMessage = String.format( I18nSupport.getInternationalisedString( "Translation - Failed Craft out of fuel" ) );
+					failMessage = I18nSupport.getInternationalisedString( "Translation - Failed Craft out of fuel" );
                 } else {
                     InventoryHolder inventoryHolder = ( InventoryHolder ) fuelHolder.getState();
                     if(inventoryHolder.getInventory().contains(263)) {
@@ -220,12 +221,12 @@ public class RotationTask extends AsyncTask {
 		// Rotate the block set
 		MovecraftLocation[] centeredBlockList = new MovecraftLocation[blockList.length];
 		MovecraftLocation[] originalBlockList = blockList.clone();
-		HashSet<MovecraftLocation> existingBlockSet = new HashSet<MovecraftLocation>( Arrays.asList( originalBlockList ) );
-		Set<MapUpdateCommand> mapUpdates = new HashSet<MapUpdateCommand>();
-		HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<EntityUpdateCommand>();
+		HashSet<MovecraftLocation> existingBlockSet = new HashSet<>(Arrays.asList(originalBlockList));
+		Set<MapUpdateCommand> mapUpdates = new HashSet<>();
+		HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<>();
                 
                 boolean townyEnabled = Movecraft.getInstance().getTownyPlugin() != null;
-                Set<TownBlock> townBlockSet = new HashSet<TownBlock>();
+                Set<TownBlock> townBlockSet = new HashSet<>();
                 TownyWorld townyWorld = null;
                 TownyWorldHeightLimits townyWorldHeightLimits = null;
                 
@@ -269,7 +270,7 @@ public class RotationTask extends AsyncTask {
             if(craftPilot!=null) {
                 // See if they are permitted to build in the area, if WorldGuard integration is turned on
                 if(Movecraft.getInstance().getWorldGuardPlugin()!=null && Settings.WorldGuardBlockMoveOnBuildPerm){
-                    if(Movecraft.getInstance().getWorldGuardPlugin().canBuild(craftPilot, plugLoc)==false) {
+                    if(!Movecraft.getInstance().getWorldGuardPlugin().canBuild(craftPilot, plugLoc)) {
                             failed = true;
                             failMessage = String.format( I18nSupport.getInternationalisedString( "Rotation - Player is not permitted to build in this WorldGuard region" )+" @ %d,%d,%d", blockList[i].getX(), blockList[i].getY(), blockList[i].getZ() );
                             break;
@@ -385,56 +386,54 @@ public class RotationTask extends AsyncTask {
 					numTries++;
 				}
 			}
-			Iterator<Entity> i=getCraft().getW().getEntities().iterator();
-			while (i.hasNext()) {
-				Entity pTest=i.next();
-				if ( MathUtils.playerIsWithinBoundingPolygon( getCraft().getHitBox(), getCraft().getMinX(), getCraft().getMinZ(), MathUtils.bukkit2MovecraftLoc( pTest.getLocation() ) ) ) {
-					if(pTest.getType()!=org.bukkit.entity.EntityType.DROPPED_ITEM ) {
+			for (Entity pTest : getCraft().getW().getEntities()) {
+				if (MathUtils.playerIsWithinBoundingPolygon(getCraft().getHitBox(), getCraft().getMinX(), getCraft().getMinZ(), MathUtils.bukkit2MovecraftLoc(pTest.getLocation()))) {
+					if (pTest.getType() != EntityType.DROPPED_ITEM) {
 						// Player is onboard this craft
-						tOP.setX(tOP.getBlockX()+0.5);
-						tOP.setZ(tOP.getBlockZ()+0.5);
+						tOP.setX(tOP.getBlockX() + 0.5);
+						tOP.setZ(tOP.getBlockZ() + 0.5);
 						Location playerLoc = pTest.getLocation();
-						if(getCraft().getPilotLocked()==true && pTest==CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
+						if (getCraft().getPilotLocked() && pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
 							playerLoc.setX(getCraft().getPilotLockedX());
 							playerLoc.setY(getCraft().getPilotLockedY());
 							playerLoc.setZ(getCraft().getPilotLockedZ());
-							}
-						Location adjustedPLoc = playerLoc.subtract( tOP ); 
+						}
+						Location adjustedPLoc = playerLoc.subtract(tOP);
 
-						double[] rotatedCoords = MathUtils.rotateVecNoRound( rotation, adjustedPLoc.getX(), adjustedPLoc.getZ() );
-						Location rotatedPloc = new Location( getCraft().getW(), rotatedCoords[0], playerLoc.getY(), rotatedCoords[1] );
-						Location newPLoc = rotatedPloc.add( tOP );
+						double[] rotatedCoords = MathUtils.rotateVecNoRound(rotation, adjustedPLoc.getX(), adjustedPLoc.getZ());
+						Location rotatedPloc = new Location(getCraft().getW(), rotatedCoords[0], playerLoc.getY(), rotatedCoords[1]);
+						Location newPLoc = rotatedPloc.add(tOP);
 
 						newPLoc.setPitch(playerLoc.getPitch());
-						float newYaw=playerLoc.getYaw();
-						if(rotation==Rotation.CLOCKWISE) {
-							newYaw=newYaw+90.0F;
-							if(newYaw>=360.0F) {
-								newYaw=newYaw-360.0F;
+						float newYaw = playerLoc.getYaw();
+						if (rotation == Rotation.CLOCKWISE) {
+							newYaw = newYaw + 90.0F;
+							if (newYaw >= 360.0F) {
+								newYaw = newYaw - 360.0F;
 							}
 						}
-						if(rotation==Rotation.ANTICLOCKWISE) {
-							newYaw=newYaw-90;
-							if(newYaw<0.0F) {
-								newYaw=newYaw+360.0F;
+						if (rotation == Rotation.ANTICLOCKWISE) {
+							newYaw = newYaw - 90;
+							if (newYaw < 0.0F) {
+								newYaw = newYaw + 360.0F;
 							}
 						}
 						newPLoc.setYaw(newYaw);
 
-						if(getCraft().getPilotLocked()==true && pTest==CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
+						if (getCraft().getPilotLocked() && pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
 							getCraft().setPilotLockedX(newPLoc.getX());
 							getCraft().setPilotLockedY(newPLoc.getY());
 							getCraft().setPilotLockedZ(newPLoc.getZ());
-							}
-						EntityUpdateCommand eUp=new EntityUpdateCommand(pTest.getLocation().clone(),newPLoc,pTest);
+						}
+						EntityUpdateCommand eUp = new EntityUpdateCommand(pTest.getLocation().clone(), newPLoc, pTest);
 						entityUpdateSet.add(eUp);
-						if(getCraft().getPilotLocked()==true && pTest==CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
+						if (getCraft().getPilotLocked() && pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
 							getCraft().setPilotLockedX(newPLoc.getX());
 							getCraft().setPilotLockedY(newPLoc.getY());
 							getCraft().setPilotLockedZ(newPLoc.getZ());
 						}
 					} else {
-					//	pTest.remove();   removed to test cleaner fragile item removal
+						//	pTest.remove();   removed to test cleaner fragile item removal
 					}
 				}
 
@@ -569,9 +568,9 @@ public class RotationTask extends AsyncTask {
 				for ( Craft craft : craftsInWorld ) {
 					if ( BlockUtils.arrayContainsOverlap( craft.getBlockList(), originalBlockList ) && craft!=getCraft() ) {
 						// found a parent craft
-						if(craft.isNotProcessing()==false) {
+						if(!craft.isNotProcessing()) {
 							failed=true;
-							failMessage = String.format( I18nSupport.getInternationalisedString( "Parent Craft is busy" ));
+							failMessage = I18nSupport.getInternationalisedString( "Parent Craft is busy" );
 							return;
 						}
 						
