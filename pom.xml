@@ -131,7 +131,7 @@
             <artifactId>worldguard</artifactId>
             <version>LATEST</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/worldguard.jar</systemPath>
+            <systemPath>/opt/msm/plugins/worldguard-bukkit/worldguard-bukkit.jar</systemPath>
         </dependency>
 
         <dependency>
