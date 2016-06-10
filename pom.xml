@@ -31,11 +31,6 @@
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
-    <ciManagement>
-        <system>jenkins</system>
-        <url>https://ajcstriker.ci.cloudbees.com/</url>
-    </ciManagement>
-
     <build>
         <plugins>
             <plugin>
@@ -161,12 +156,6 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/WGCustomFlags.jar</systemPath>
         </dependency>
-        <!-- http://mvnrepository.com/artifact/rhino/js -->
-        <dependency>
-            <groupId>rhino</groupId>
-            <artifactId>js</artifactId>
-            <version>1.7R1</version>
-        </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -175,12 +164,5 @@
         </dependency>
 
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>rhino.js</id>
-            <url>http://mvnrepository.com/artifact/rhino/js</url>
-        </repository>
-    </repositories>
 
 </project>
