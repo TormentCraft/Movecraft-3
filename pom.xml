@@ -89,7 +89,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.9.2-R0.1-SNAPSHOT</version>
+            <version>LATEST</version>
             <scope>system</scope>
             <systemPath>/opt/msm/src/spigot/craftbukkit.jar</systemPath>
         </dependency>
@@ -99,13 +99,6 @@
             <version>14.6</version>
             <scope>system</scope>
             <systemPath>/opt/msm/plugins/worldedit-bukkit/worldedit-bukkit.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>net.ess3</groupId>
-            <artifactId>EssentialsX</artifactId>
-            <version>2.13.1</version>
-            <scope>system</scope>
-            <systemPath>/opt/msm/plugins/EssentialsX/EssentialsX.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>net.milkbowl.vault</groupId>

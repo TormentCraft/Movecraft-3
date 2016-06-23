@@ -25,7 +25,6 @@ import at.pavlov.cannons.Cannons;
 
 
 
-import com.earth2me.essentials.Essentials;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
@@ -75,7 +74,6 @@ public class Movecraft extends JavaPlugin {
         private static Economy economy;
 	private static Cannons cannonsPlugin=null;
         private static Towny townyPlugin = null;
-	private static Essentials essentialsPlugin = null; 
         public static StateFlag FLAG_PILOT = null; //new StateFlag("movecraft-pilot", true);
         public static StateFlag FLAG_MOVE = null; //new StateFlag("movecraft-move", true);
         public static StateFlag FLAG_ROTATE = null; //new StateFlag("movecraft-rotate", true);
@@ -120,7 +118,7 @@ public class Movecraft extends JavaPlugin {
 		Settings.CompatibilityMode = getConfig().getBoolean("CompatibilityMode", false);
 		if(Settings.CompatibilityMode==false) {
 			try {
-				 	Class.forName( "net.minecraft.server.v1_9_R2.Chunk" );
+				 	Class.forName( "net.minecraft.server.v1_10_R1.Chunk" );
 				} catch( ClassNotFoundException e ) {
 					Settings.CompatibilityMode=true;
 					logger.log(Level.INFO, "WARNING: CompatibilityMode was set to false, but required build-specific classes were not found. FORCING COMPATIBILITY MODE");
@@ -251,21 +249,6 @@ public class Movecraft extends JavaPlugin {
                     logger.log(Level.INFO, "Movecraft did not find a compatible version of Towny. Disabling Towny integration.");
                 }
 
-                Plugin tempEssentialsPlugin = getServer().getPluginManager().getPlugin("Essentials");
-                if (tempEssentialsPlugin  != null){
-                    if (tempEssentialsPlugin.getDescription().getName().equalsIgnoreCase("essentials")){
-                        if (tempEssentialsPlugin.getClass().getName().equals((String)"com.earth2me.essentials.Essentials")){
-                            if (tempEssentialsPlugin instanceof Essentials){
-                                essentialsPlugin = (Essentials)tempEssentialsPlugin;
-                                logger.log(Level.INFO, "Found a compatible version of Essentials. Enabling Essentials integration.");
-                            }
-                        }    
-                    }
-                }
-                if (essentialsPlugin == null){
-                    logger.log(Level.INFO, "Movecraft did not find a compatible version of Essentials. Disabling Essentials integration.");
-                }
-        
         // and now Vault
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
             RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
@@ -381,10 +364,6 @@ public class Movecraft extends JavaPlugin {
         
         public Towny getTownyPlugin(){
             return townyPlugin;
-        }
-    
-        public Essentials getEssentialsPlugin(){
-            return essentialsPlugin;
         }
         
 }

@@ -17,8 +17,6 @@
 
 package net.countercraft.movecraft.utils;
 
-import com.earth2me.essentials.User;
-
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -30,7 +28,7 @@ import net.countercraft.movecraft.utils.datastructures.SignTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.CommandBlockTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.StorageCrateTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.TransferData;
-import net.minecraft.server.v1_9_R2.BlockPosition;
+import net.minecraft.server.v1_10_R1.BlockPosition;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -41,8 +39,8 @@ import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.block.CommandBlock;
-import org.bukkit.craftbukkit.v1_9_R2.CraftChunk;
-import org.bukkit.craftbukkit.v1_9_R2.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_10_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -76,8 +74,8 @@ public class MapUpdateManager extends BukkitRunnable {
 	private static class MapUpdateManagerHolder {
 		private static final MapUpdateManager INSTANCE = new MapUpdateManager();
 	}
-	
-	private void updateBlock(MapUpdateCommand m, World w, Map<MovecraftLocation, TransferData> dataMap, Set<net.minecraft.server.v1_9_R2.Chunk> chunks, Set<Chunk> cmChunks, HashMap<MovecraftLocation, Byte> origLightMap, boolean placeDispensers) {
+
+	private void updateBlock(MapUpdateCommand m, World w, Map<MovecraftLocation, TransferData> dataMap, Set<net.minecraft.server.v1_10_R1.Chunk> chunks, Set<Chunk> cmChunks, HashMap<MovecraftLocation, Byte> origLightMap, boolean placeDispensers) {
 		MovecraftLocation workingL = m.getNewBlockLocation();
 		final int[] blocksToBlankOut = new int[]{ 54, 61, 62, 63, 68, 116, 117, 146, 149, 150, 154, 158, 145 };
 
@@ -95,7 +93,7 @@ public class MapUpdateManager extends BukkitRunnable {
 		
 		chunk = w.getBlockAt( x, y, z ).getChunk();
 
-		net.minecraft.server.v1_9_R2.Chunk c = null;
+		net.minecraft.server.v1_10_R1.Chunk c = null;
 		Chunk cmC = null;
 		if(Settings.CompatibilityMode) {
 			cmC = chunk;
@@ -272,13 +270,6 @@ public class MapUpdateManager extends BukkitRunnable {
 								loc=loc.subtract(0, 1, 0);
 								if(w.getBlockAt(loc).getType().equals(Material.BED_BLOCK)) {
 									crewPlayer.setBedSpawnLocation(loc);
-									if(Settings.SetHomeToCrewSign==true)
-
-										if (Movecraft.getInstance().getEssentialsPlugin() != null){
-                                            User u = Movecraft.getInstance().getEssentialsPlugin().getUser(crewPlayer);
-                                            u.setHome("home", loc);
-                                        }
-                                        
 								}
 							}
 						}
@@ -318,8 +309,8 @@ public class MapUpdateManager extends BukkitRunnable {
 			}
 		}
 	}
-	
-	private void runQueue(final ArrayList<MapUpdateCommand> queuedMapUpdateCommands, final ArrayList<Boolean> queuedPlaceDispensers, final World w, final Set<net.minecraft.server.v1_9_R2.Chunk> chunks, final Set<Chunk> cmChunks,
+
+	private void runQueue(final ArrayList<MapUpdateCommand> queuedMapUpdateCommands, final ArrayList<Boolean> queuedPlaceDispensers, final World w, final Set<net.minecraft.server.v1_10_R1.Chunk> chunks, final Set<Chunk> cmChunks,
 			  			  final HashMap<MovecraftLocation, Byte> origLightMap, final Map<MovecraftLocation, TransferData> dataMap, final List<MapUpdateCommand> updatesInWorld, final Map<MovecraftLocation, List<EntityUpdateCommand>> entityMap) {
 		int numToRun=queuedMapUpdateCommands.size();
 		if(numToRun>Settings.BlockQueueChunkSize)
@@ -423,7 +414,7 @@ public class MapUpdateManager extends BukkitRunnable {
                                 Map<MovecraftLocation, List<ItemDropUpdateCommand>> itemMap = new HashMap<MovecraftLocation, List<ItemDropUpdateCommand>>();
 				Map<MovecraftLocation, TransferData> dataMap = new HashMap<MovecraftLocation, TransferData>();
 				HashMap<MovecraftLocation, Byte> origLightMap = new HashMap<MovecraftLocation, Byte>();
-				Set<net.minecraft.server.v1_9_R2.Chunk> chunks = null;
+				Set<net.minecraft.server.v1_10_R1.Chunk> chunks = null;
 				Set<Chunk> cmChunks = null;
 				ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<MapUpdateCommand>();
 				ArrayList<Boolean> queuedPlaceDispensers = new ArrayList<Boolean>();
@@ -431,7 +422,7 @@ public class MapUpdateManager extends BukkitRunnable {
 				if(Settings.CompatibilityMode) {
 					cmChunks = new HashSet<Chunk>();					
 				} else {
-					chunks = new HashSet<net.minecraft.server.v1_9_R2.Chunk>();
+					chunks = new HashSet<net.minecraft.server.v1_10_R1.Chunk>();
 				}
                                 
 				// Preprocessing
