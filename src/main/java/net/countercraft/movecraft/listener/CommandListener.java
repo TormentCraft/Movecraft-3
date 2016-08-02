@@ -272,6 +272,17 @@ public class CommandListener implements CommandExecutor {
 						craft.setCruiseDirection((byte)0x5);
 						craft.setCruising(true);
 					}
+					if(args[0].equalsIgnoreCase("up")) {
+						craft.setCruiseDirection((byte)0x42);
+						craft.setCruising(true);
+					}
+					if(args[0].equalsIgnoreCase("down")) {
+						craft.setCruiseDirection((byte)0x43);
+						craft.setCruising(true);
+					}
+					if(args[0].equalsIgnoreCase("off")) {
+						craft.setCruising(false);
+					}
 				}
 			} else {
 				player.sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );				
