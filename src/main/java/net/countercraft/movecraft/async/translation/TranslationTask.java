@@ -557,6 +557,7 @@ public class TranslationTask extends AsyncTask {
                                     fail( String.format( I18nSupport.getInternationalisedString( "Towny - Translation Failed") + " %s @ %d,%d,%d", townName, oldLoc.x, oldLoc.y, oldLoc.z));
                                 }else{
                                     fail( String.format( I18nSupport.getInternationalisedString( "Translation - Failed Craft is obstructed" )+" @ %d,%d,%d,%s", oldLoc.x, oldLoc.y, oldLoc.z, getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType().toString()) );
+                                    getCraft().setCruising(false);
                                 }
                                 break;
                             }else if(explosionBlockedByTowny){
