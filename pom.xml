@@ -91,35 +91,35 @@
             <artifactId>craftbukkit</artifactId>
             <version>LATEST</version>
             <scope>system</scope>
-            <systemPath>/opt/msm/src/spigot/craftbukkit.jar</systemPath>
+            <systemPath>${basedir}/../spigot/craftbukkit.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit-bukkit</artifactId>
             <version>14.6</version>
             <scope>system</scope>
-            <systemPath>/opt/msm/plugins/worldedit-bukkit/worldedit-bukkit.jar</systemPath>
+            <systemPath>${basedir}/../../plugins/worldedit-bukkit/worldedit-bukkit.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>net.milkbowl.vault</groupId>
             <artifactId>Vault</artifactId>
             <version>1.2.32</version>
             <scope>system</scope>
-            <systemPath>/opt/msm/plugins/Vault/Vault.jar</systemPath>
+            <systemPath>${basedir}/../../plugins/Vault/Vault.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>at.pavlov.Cannons</groupId>
             <artifactId>Cannons</artifactId>
             <version>2.4.3</version>
             <scope>system</scope>
-            <systemPath>/opt/msm/plugins/Cannons/Cannons.jar</systemPath>
+            <systemPath>${basedir}/../../plugins/Cannons/Cannons.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldguard</artifactId>
             <version>LATEST</version>
             <scope>system</scope>
-            <systemPath>/opt/msm/plugins/worldguard-bukkit/worldguard-bukkit.jar</systemPath>
+            <systemPath>${basedir}/../../plugins/worldguard-bukkit/worldguard-bukkit.jar</systemPath>
         </dependency>
 
         <dependency>
