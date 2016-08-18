@@ -179,7 +179,13 @@ public class Movecraft extends JavaPlugin {
 			logger.log(Level.INFO, "Siege configuration loaded.");
 		}
 		//load up WorldGuard if it's present
-		Plugin wGPlugin=getServer().getPluginManager().getPlugin("WorldGuard");
+
+		//ROK - disable completely since we can't control it.
+		Plugin wGPlugin = null;
+		if (getConfig().getBoolean("WGIntegationEnabled", false)) {
+			getServer().getPluginManager().getPlugin("WorldGuard");
+		}
+		
 		if (wGPlugin == null || !(wGPlugin instanceof WorldGuardPlugin)) {
 			logger.log(Level.INFO, "Movecraft did not find a compatible version of WorldGuard. Disabling WorldGuard integration");
 			Settings.SiegeName=null;
