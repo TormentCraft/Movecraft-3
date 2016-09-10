@@ -240,51 +240,86 @@ public class CommandListener implements CommandExecutor {
 				if(craft.getType().getCanCruise()) {
 					if(args.length == 0) {
 						float yaw = player.getLocation().getYaw();
+						while (yaw <= -180) yaw += 360;
+						while (yaw > 180) yaw -= 360;
+						
+						
 						if(yaw >= 135 || yaw < -135) {
 							// north
-							craft.setCruiseDirection((byte)0x3);
+							craft.setCruiseDirection((byte)0x0);
 							craft.setCruising(true);
 						} else if(yaw >= 45) {
 							// west
-							craft.setCruiseDirection((byte)0x5);
+							craft.setCruiseDirection((byte)0x0);
 							craft.setCruising(true);
 						} else if(yaw < -45) {
 							// south
-							craft.setCruiseDirection((byte)0x2);
+							craft.setCruiseDirection((byte)0x0);
 							craft.setCruising(true);
 						} else {
 							// east
-							craft.setCruiseDirection((byte)0x4);
+							craft.setCruiseDirection((byte)0x0);
 							craft.setCruising(true);
 						}
 						return true;
 					}
-					if(args[0].equalsIgnoreCase("north")) {
-						craft.setCruiseDirection((byte)0x3);
-						craft.setCruising(true);
-					}
-					if(args[0].equalsIgnoreCase("south")) {
-						craft.setCruiseDirection((byte)0x2);
-						craft.setCruising(true);
-					}
-					if(args[0].equalsIgnoreCase("east")) {
-						craft.setCruiseDirection((byte)0x4);
-						craft.setCruising(true);
-					}
-					if(args[0].equalsIgnoreCase("west")) {
-						craft.setCruiseDirection((byte)0x5);
-						craft.setCruising(true);
-					}
-					if(args[0].equalsIgnoreCase("up")) {
-						craft.setCruiseDirection((byte)0x42);
-						craft.setCruising(true);
-					}
-					if(args[0].equalsIgnoreCase("down")) {
-						craft.setCruiseDirection((byte)0x43);
-						craft.setCruising(true);
-					}
-					if(args[0].equalsIgnoreCase("off")) {
-						craft.setCruising(false);
+					else {
+						int dir = 0;
+						for (String a : args) {
+							if (a.length() == 0) {
+								continue;
+							}
+							switch(a.toLowerCase()) {
+							case "nw":
+							case "northwest":
+								dir |= ((byte)0x09);
+								break;
+							case "n":
+							case "north":
+								dir |= ((byte)0x01);
+								break;
+							case "ne":
+							case "northeast":
+								dir |= ((byte)0x03);
+								break;
+							case "e":
+							case "east":
+								dir |= ((byte)0x02);
+								break;
+							case "se":
+							case "southeast":
+								dir |= ((byte)0x06);
+								break;
+							case "s":
+							case "south":
+								dir |= ((byte)0x04);
+								break;
+							case "sw":
+							case "southwest":
+								dir |= ((byte)0x0C);
+								break;
+							case "w":
+							case "west":
+								dir |= ((byte)0x08);
+								break;
+							case "u":
+							case "up":
+								dir |= ((byte)0x10);
+								break;
+							case "d":
+							case "down":
+								dir |= ((byte)0x20);
+								break;
+							case "off":
+								dir = 0;
+								break;
+							}
+
+							if (dir == 0) break;
+						}
+						
+						craft.setCruiseDirection((byte)dir);
+						craft.setCruising(dir != 0);
 					}
 				}
 			} else {
