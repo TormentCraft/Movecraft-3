@@ -188,7 +188,28 @@ public class CommandListener implements CommandExecutor {
 				return true;
 			}
 		}
-		
+
+		if( cmd.getName().equalsIgnoreCase("rotate")) {
+			if ( !player.hasPermission( "movecraft.commands" ) && !player.hasPermission( "movecraft.commands.rotate" ) ) {
+				player.sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
+				return true;
+			}
+			
+			final Craft craft = CraftManager.getInstance().getCraftByPlayerName( player.getName() );
+			if (craft == null) {
+			} else
+			if ( player.hasPermission( "movecraft." + craft.getType().getCraftName() + ".rotate" ) ) {
+				MovecraftLocation midPoint = getCraftMidPoint(craft);
+				Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left")) 
+						? Rotation.ANTICLOCKWISE : Rotation.CLOCKWISE;
+				CraftManager.getInstance().getCraftByPlayerName( player.getName() ).rotate( rotation, midPoint );
+			} else {
+				player.sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );				
+			}
+			
+			return true;
+		}
+
 		if( cmd.getName().equalsIgnoreCase("rotateleft")) {
 			if ( !player.hasPermission( "movecraft.commands" ) && !player.hasPermission( "movecraft.commands.rotateleft" ) ) {
 				player.sendMessage( String.format( I18nSupport.getInternationalisedString( "Insufficient Permissions" ) ) );
@@ -239,28 +260,36 @@ public class CommandListener implements CommandExecutor {
 			if ( player.hasPermission( "movecraft." + craft.getType().getCraftName() + ".move" ) ) {
 				if(craft.getType().getCanCruise()) {
 					if(args.length == 0) {
-						float yaw = player.getLocation().getYaw();
+						Location loc = player.getLocation();
+						float yaw = loc.getYaw();
+						float pitch = loc.getPitch();
 						while (yaw <= -180) yaw += 360;
 						while (yaw > 180) yaw -= 360;
-						
-						
-						if(yaw >= 135 || yaw < -135) {
-							// north
-							craft.setCruiseDirection((byte)0x0);
-							craft.setCruising(true);
-						} else if(yaw >= 45) {
-							// west
-							craft.setCruiseDirection((byte)0x0);
-							craft.setCruising(true);
-						} else if(yaw < -45) {
-							// south
-							craft.setCruiseDirection((byte)0x0);
-							craft.setCruising(true);
-						} else {
-							// east
-							craft.setCruiseDirection((byte)0x0);
-							craft.setCruising(true);
+
+						int dir = 0;
+						if (pitch > -80 && pitch < 80) {
+							if (yaw >= -60.0 && yaw <= 60.0) {
+								dir |= 0x04;
+							}
+							if (yaw >= 30.0 && yaw <= 150.0) {
+								dir |= 0x08;
+							}
+							if (yaw >= -150.0 && yaw <= -30.0) {
+								dir |= 0x02;
+							}
+							if (yaw <= -120.0 || yaw >= 120.0) {
+								dir |= 0x01;
+							}
 						}
+						if (pitch <= -30) {
+							dir |= 0x10;
+						}
+						else if (pitch >= 30) {
+							dir |= 0x20;			
+						}
+
+						craft.setCruiseDirection((byte)dir);
+						craft.setCruising(dir != 0);
 						return true;
 					}
 					else {

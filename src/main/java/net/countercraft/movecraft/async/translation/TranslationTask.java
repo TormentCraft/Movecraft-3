@@ -35,6 +35,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -789,8 +790,9 @@ public class TranslationTask extends AsyncTask {
                                         Player player=(Player)pTest;
                                         getCraft().getMovedPlayers().put(player, System.currentTimeMillis());
                                     } // only move players for now, reduce monsters on airships
-                                   if(pTest.getType()!=org.bukkit.entity.EntityType.DROPPED_ITEM ) {
-                                        Location tempLoc = pTest.getLocation();
+                                   //if(pTest.getType()!=org.bukkit.entity.EntityType.DROPPED_ITEM ) {
+                            	   if(pTest instanceof LivingEntity) {
+                                            Location tempLoc = pTest.getLocation();
                                         if(getCraft().getPilotLocked()==true && pTest==CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
                                             tempLoc.setX(getCraft().getPilotLockedX());
                                             tempLoc.setY(getCraft().getPilotLockedY());
