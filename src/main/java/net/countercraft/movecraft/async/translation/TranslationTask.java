@@ -788,8 +788,8 @@ public class TranslationTask extends AsyncTask {
                                     if(pTest.getType()==org.bukkit.entity.EntityType.PLAYER) {
                                         Player player=(Player)pTest;
                                         getCraft().getMovedPlayers().put(player, System.currentTimeMillis());
-//                                    } only move players for now, reduce monsters on airships
-//                                   if(pTest.getType()!=org.bukkit.entity.EntityType.DROPPED_ITEM ) {
+                                    } // only move players for now, reduce monsters on airships
+                                   if(pTest.getType()!=org.bukkit.entity.EntityType.DROPPED_ITEM ) {
                                         Location tempLoc = pTest.getLocation();
                                         if(getCraft().getPilotLocked()==true && pTest==CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
                                             tempLoc.setX(getCraft().getPilotLockedX());

@@ -173,7 +173,7 @@ public class CommandListener implements CommandExecutor {
 				if ( player.hasPermission( "movecraft." + args[0] + ".pilot" ) ) {				
 					MovecraftLocation startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
 					Craft c = new Craft( getCraftTypeFromString( args[0] ), player.getWorld() );
-		
+
 					if ( CraftManager.getInstance().getCraftByPlayerName( player.getName() ) == null ) {
 						c.detect( player, player, startPoint );
 					} else {
@@ -196,7 +196,8 @@ public class CommandListener implements CommandExecutor {
 			}
 			
 			final Craft craft = CraftManager.getInstance().getCraftByPlayerName( player.getName() );
-
+			if (craft == null) {
+			} else
 			if ( player.hasPermission( "movecraft." + craft.getType().getCraftName() + ".rotate" ) ) {
 				MovecraftLocation midPoint = getCraftMidPoint(craft);
 				CraftManager.getInstance().getCraftByPlayerName( player.getName() ).rotate( Rotation.ANTICLOCKWISE, midPoint );
@@ -214,7 +215,8 @@ public class CommandListener implements CommandExecutor {
 			}
 			
 			final Craft craft = CraftManager.getInstance().getCraftByPlayerName( player.getName() );
-
+			if (craft == null) {
+			} else
 			if ( player.hasPermission( "movecraft." + craft.getType().getCraftName() + ".rotate" ) ) {
 				MovecraftLocation midPoint = getCraftMidPoint(craft);
 				CraftManager.getInstance().getCraftByPlayerName( player.getName() ).rotate( Rotation.CLOCKWISE, midPoint );
@@ -232,7 +234,8 @@ public class CommandListener implements CommandExecutor {
 			}
 			
 			final Craft craft = CraftManager.getInstance().getCraftByPlayerName( player.getName() );
-
+			if (craft == null) {
+			} else
 			if ( player.hasPermission( "movecraft." + craft.getType().getCraftName() + ".move" ) ) {
 				if(craft.getType().getCanCruise()) {
 					if(args.length == 0) {

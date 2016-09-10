@@ -1090,7 +1090,7 @@ public class AsyncManager extends BukkitRunnable {
 		processTNTContactExplosives();
 		processFadingBlocks();
 		processDetection();
-		processSiege();
+		//processSiege();
 		processAlgorithmQueue();
 	}
 
