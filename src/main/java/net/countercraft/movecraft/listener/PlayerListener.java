@@ -25,9 +25,12 @@ import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.MathUtils;
 import net.countercraft.movecraft.utils.MovecraftLocation;
 
+import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -41,123 +44,30 @@ public class PlayerListener implements Listener {
 	
 	private String checkCraftBorders(Craft craft) {
 		HashSet<MovecraftLocation> craftBlocks=new HashSet<MovecraftLocation>(Arrays.asList(craft.getBlockList()));
-		String ret=null;
 		for(MovecraftLocation block : craftBlocks) {
-			int x,y,z;
-			x= block.x +1;
-			y= block.y +0;
-			z= block.z +0;
-			MovecraftLocation test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
+			for (int x = -1; x <= 1; x++) {
+				for (int y = -1; y <= 1; y++) {
+					for (int z = -1; z <= 1; z++) {
+						//No diagonals
+						if ((z != 0 && x != 0) || (x == 0 && y == 0 && z == 0))
+							continue;
+						
+						MovecraftLocation test=new MovecraftLocation(block.x + x, block.y + y, block.z + z);
+						if(!craftBlocks.contains(test)) {
+							Block testBlock = craft.getW().getBlockAt(block.x + x, block.y + y, block.z + z);
+							if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) 
+									|| craft.getType().isForbiddenBlock(testBlock.getTypeId(), testBlock.getData())) {
+							
+								return String.format("%s at (%d,%d,%d)", 
+										BlockNames.itemName(testBlock.getTypeId(), testBlock.getData(), true), 
+										test.x, test.y, test.z);
+							}
+						}
+					}
 				}
-			x= block.x -1;
-			y= block.y +0;
-			z= block.z +0;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +0;
-			y= block.y +1;
-			z= block.z +0;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +0;
-			y= block.y -1;
-			z= block.z +0;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +0;
-			y= block.y +0;
-			z= block.z +1;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +0;
-			y= block.y +0;
-			z= block.z +1;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +1;
-			y= block.y +1;
-			z= block.z +0;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +1;
-			y= block.y -1;
-			z= block.z +0;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x -1;
-			y= block.y +1;
-			z= block.z +0;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x -1;
-			y= block.y -1;
-			z= block.z +0;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +0;
-			y= block.y +1;
-			z= block.z +1;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +0;
-			y= block.y -1;
-			z= block.z +1;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +0;
-			y= block.y +1;
-			z= block.z -1;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
-			x= block.x +0;
-			y= block.y -1;
-			z= block.z -1;
-			test=new MovecraftLocation(x,y,z);
-			if(!craftBlocks.contains(test))
-				if((Arrays.binarySearch(craft.getType().getAllowedBlocks(), craft.getW().getBlockTypeIdAt(x, y, z))>=0)||(Arrays.binarySearch(craft.getType().getAllowedBlocks(), (craft.getW().getBlockTypeIdAt(x, y, z)<<4)+craft.getW().getBlockAt(x, y, z).getData()+10000)>=0)) {
-					ret="@ "+x+","+y+","+z;
-				}
+			}
 		}
-		return ret;
+		return null;
 	}
 
 	@EventHandler
@@ -200,7 +110,9 @@ public class PlayerListener implements Listener {
 					} else {
 						String ret=checkCraftBorders(c);
 						if(ret!=null) {
-							event.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "WARNING! There are blocks near your craft that may merge with the craft "+ret)));						
+							event.getPlayer().sendMessage( ChatColor.RED + 
+									I18nSupport.getInternationalisedString( "WARNING! There are blocks near your craft, part of your craft may be damaged!")
+									+ ChatColor.RESET + "\n" + ret );
 						}
 					}
 					

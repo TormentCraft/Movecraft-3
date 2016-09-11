@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.CraftType;
+import net.countercraft.movecraft.utils.BlockNames;
 import net.minecraft.server.v1_10_R1.Item;
 import net.minecraft.server.v1_10_R1.ItemStack;
 
@@ -42,6 +43,12 @@ public class CraftHelpListener implements CommandExecutor {
 			args = new String[] { "list" };
 		}
 
+		if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("movecraftadmin.reload")) {
+			CraftManager.getInstance().initCraftTypes();
+			sender.sendMessage(ChatColor.GOLD + "Craft configuration reloaded.");
+			return true;
+		}
+
 		boolean doList = args[0].equalsIgnoreCase("list");
 		CraftType c = null;
 		if (!doList) {
@@ -52,11 +59,6 @@ public class CraftHelpListener implements CommandExecutor {
 		}
 		if (doList || c == null) {
 			doCraftList(sender);
-			return true;
-		}
-		if (args[0].equalsIgnoreCase("reload")) {
-			CraftManager.getInstance().initCraftTypes();
-			sender.sendMessage(ChatColor.GOLD + "Craft configuration reloaded.");
 			return true;
 		}
 
@@ -84,7 +86,7 @@ public class CraftHelpListener implements CommandExecutor {
 		Integer[] blockIds = c.getAllowedBlocks();
 		Set<String> blockList = new HashSet<String>();
 		for (int ix = 0; ix < blockIds.length; ix++) {
-			itemNames(blockIds[ix], blockList);
+			BlockNames.itemNames(blockIds[ix], blockList);
 		}
 		String[] names = blockList.toArray(new String[blockList.size()]);
 		Arrays.sort(names);
@@ -94,64 +96,10 @@ public class CraftHelpListener implements CommandExecutor {
 		return true;
 	}
 
-	private String properCase(String text) {
-		char[] chars = text.toCharArray();
-		boolean makeUpper = true;
-		for (int ix = 0; ix < chars.length; ix++) {
-			char ch = makeUpper ? Character.toUpperCase(chars[ix]) : Character.toLowerCase(chars[ix]);
-			makeUpper = !Character.isLetter(ch);
-			chars[ix] = makeUpper ? ' ' : ch;
-		}
-
-		return new String(chars).replaceAll("\\s\\s+", " ").trim();
-	}
-
-	private String itemName(int mvcftId) {
-		int blockData = 0, blockId = mvcftId;
-		boolean hasData = false;
-		if (blockId > 10000) {
-			blockId -= 10000;
-			blockData = blockId & 0x0F;
-			blockId = blockId >> 4;
-			hasData = true;
-		}
-		String tmp = null;
-		try {
-			ItemStack stck = new ItemStack(Item.getById(blockId), 0, blockData);
-			tmp = stck == null ? null : stck.getName();
-		}
-		catch (Exception e) {}
-		if (tmp == null || tmp.length() == 0) {
-			tmp = Material.getMaterial(blockId).name();
-		}
-		tmp = properCase(tmp);
-		tmp = tmp.replaceAll("\\s(On|Off)$", "");
-		if (!hasData && tmp.startsWith("White "))
-			tmp = tmp.substring(6);
-		return tmp;
-	}
-
-	private void itemNames(int blk, Set<String> blockList) {
-		if (blk < 10000) {
-			// Wool, Carpet, Stained Glass, Glass Pane, Clay
-			if (blk == 35 || blk == 95 || blk == 159 || blk == 160 || blk == 171) {
-				blockList.add(itemName(blk));
-				return;
-			}
-			for (int ix = 0; ix < 16; ix++) {
-				int shiftedID = (blk<<4) + ix + 10000;
-				blockList.add(itemName(shiftedID));
-			}
-		}
-		else {
-			blockList.add(itemName(blk));
-		}
-	}
-
 	private void appendFlyBlocks(StringBuilder sbReq, StringBuilder sbLimit,
 			HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks) {
 		for (ArrayList<Integer> i : flyBlocks.keySet()) {
-			String blockName = itemName(i.get(0));
+			String blockName = BlockNames.itemName(i.get(0));
 			Double minPercentage = flyBlocks.get(i).get(0);
 			Double maxPercentage = flyBlocks.get(i).get(1);
 

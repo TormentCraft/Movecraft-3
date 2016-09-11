@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 
 import java.util.logging.Level;
 
@@ -602,4 +603,21 @@ public class CraftType {
     public boolean  allowVerticalTakeoffAndLanding(){
         return allowVerticalTakeoffAndLanding;
     }
+    
+	public boolean isAllowedBlock(int blockId, int data) {
+		if((Arrays.binarySearch(this.allowedBlocks, blockId)>=0)
+				|| (Arrays.binarySearch(this.allowedBlocks, (blockId<<4)+data+10000)>=0)) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isForbiddenBlock(int blockId, int data) {
+		if((Arrays.binarySearch(this.forbiddenBlocks, blockId)>=0)
+				|| (Arrays.binarySearch(this.forbiddenBlocks, (blockId<<4)+data+10000)>=0)) {
+			return true;
+		}
+		return false;
+	}
+
 }

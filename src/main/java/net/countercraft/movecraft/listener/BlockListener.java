@@ -35,6 +35,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -42,6 +44,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
@@ -79,6 +82,25 @@ public class BlockListener implements Listener {
 				}
 
 			}.runTask( Movecraft.getInstance() );
+		}
+	}
+	
+	@EventHandler 
+	public void onStopSnowForming(BlockFormEvent event) {
+		BlockState info = event.getNewState();
+		if (info.getType() == Material.SNOW) {
+			Block below = event.getBlock().getRelative(BlockFace.DOWN);
+			MovecraftLocation mloc = new MovecraftLocation(below.getX(), below.getY(), below.getZ());
+			boolean blockInCraft=false;
+			Craft[] crafts = CraftManager.getInstance().getCraftsInWorld(info.getWorld());
+			if(crafts != null) {
+				for(Craft craft : crafts) {
+					if(craft != null && craft.isCraftBlock(mloc)) {
+						event.setCancelled(true);
+						return;
+					}				
+				}
+			}
 		}
 	}
 

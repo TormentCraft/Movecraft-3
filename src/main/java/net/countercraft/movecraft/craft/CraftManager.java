@@ -19,13 +19,24 @@ package net.countercraft.movecraft.craft;
 
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.utils.MovecraftLocation;
+
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -99,6 +110,7 @@ public class CraftManager {
 		}
 		craftList.get( c.getW() ).add( c );
 		craftPlayerIndex.put( p, c );
+		destroySnowOnPilot(p, c);
 	}
 
 	public void removeCraft( Craft c ) {
@@ -116,13 +128,89 @@ public class CraftManager {
 			return;
 		}
 		craftList.get( c.getW() ).remove( c );
-		if ( getPlayerFromCraft( c ) != null ) {
-			getPlayerFromCraft( c ).sendMessage( String.format( I18nSupport.getInternationalisedString( "Release - Craft has been released message" ) ) );
+		Player pilot = getPlayerFromCraft( c );
+		if ( pilot != null ) {
+			pilot.sendMessage( String.format( I18nSupport.getInternationalisedString( "Release - Craft has been released message" ) ) );
 			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString( "Release - Player has released a craft console" ), c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length, c.getMinX(), c.getMinZ() ) );
 		} else {
 			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString( "NULL Player has released a craft of type %s with size %d at coordinates : %d x , %d z" ),  c.getType().getCraftName(), c.getBlockList().length, c.getMinX(), c.getMinZ() ) );
 		}
-		craftPlayerIndex.remove( getPlayerFromCraft( c ) );
+		craftPlayerIndex.remove( pilot );
+		
+		destroyBindingBlocks(pilot, c);
+	}
+
+	private boolean canPilotBreakBlock(Player pilot, Block block) {
+		if (pilot == null || !pilot.isOnline()) {
+			return false;
+		}
+		BlockBreakEvent be = new BlockBreakEvent(block, pilot);
+		Movecraft.getInstance().getServer().getPluginManager().callEvent(be);
+		if (be.isCancelled()) {
+			return false;
+		}
+		return true;
+	}
+
+	private void destroySnowOnPilot(Player pilot, Craft craft) {
+		if (pilot == null || !pilot.isOnline())
+			return;
+		
+		HashSet<MovecraftLocation> craftBlocks=new HashSet<MovecraftLocation>(Arrays.asList(craft.getBlockList()));
+		for(MovecraftLocation block : craftBlocks) {
+			MovecraftLocation test=new MovecraftLocation(block.x, block.y + 1, block.z);
+			if(!craftBlocks.contains(test)) {
+				Block testBlock = craft.getW().getBlockAt(test.x, test.y, test.z);
+				
+				if (testBlock.getType() == Material.SNOW && testBlock.getData() == 0) {
+					Collection<ItemStack> drops = testBlock.getDrops(new ItemStack(Material.WOOD_SPADE, 1, (short)5));
+					testBlock.setType(Material.AIR);
+					for (ItemStack drop : drops)
+						testBlock.getWorld().dropItemNaturally(testBlock.getLocation(), drop);
+				}
+			}
+		}
+	}
+
+	private void destroyBindingBlocks(Player pilot, Craft craft) {
+		if (pilot != null && (pilot.getGameMode() == GameMode.CREATIVE || pilot.hasPermission("*"))) {
+			return;
+		}
+		
+		HashSet<MovecraftLocation> craftBlocks=new HashSet<MovecraftLocation>(Arrays.asList(craft.getBlockList()));
+		int blockedBroken = 0;
+		for(MovecraftLocation block : craftBlocks) {
+			for (int x = -1; x <= 1; x++) {
+				for (int y = -1; y <= 1; y++) {
+					for (int z = -1; z <= 1; z++) {
+						//No diagonals
+						if ((z != 0 && x != 0) || (x == 0 && y == 0 && z == 0))
+							continue;
+						
+						MovecraftLocation test=new MovecraftLocation(block.x + x, block.y + y, block.z + z);
+						if(!craftBlocks.contains(test)) {
+							Block testBlock = craft.getW().getBlockAt(test.x, test.y, test.z);
+							if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) 
+									|| craft.getType().isForbiddenBlock(testBlock.getTypeId(), testBlock.getData())) {
+
+								testBlock = craft.getW().getBlockAt(block.x, block.y, block.z);
+								if (!canPilotBreakBlock(pilot, testBlock)) {
+									blockedBroken++;
+									Collection<ItemStack> drops = testBlock.getDrops();
+									testBlock.setType(Material.AIR);
+									for (ItemStack drop : drops)
+										testBlock.getWorld().dropItemNaturally(testBlock.getLocation(), drop);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if (blockedBroken > 0 && pilot != null && pilot.isOnline()) {
+			pilot.sendMessage(ChatColor.RED + "WARNING: Some of your craft has been destroyed.");
+		}
 	}
 
 	public Craft[] getCraftsInWorld( World w ) {

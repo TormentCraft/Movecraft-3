@@ -26,6 +26,7 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.BoundingBoxUtils;
 import net.countercraft.movecraft.utils.MovecraftLocation;
 
@@ -107,7 +108,7 @@ public class DetectionTask extends AsyncTask {
 			return;
 		}
 
-		if ( isWithinLimit( blockList.size(), minSize, maxSize ) ) {
+		if ( isWithinLimit( blockList.size(), minSize, maxSize, false ) ) {
 
 			data.setBlockList( finaliseBlockList( blockList ) );
 
@@ -156,8 +157,10 @@ public class DetectionTask extends AsyncTask {
 			}
 			
 			if ( isForbiddenBlock( testID,testData ) ) {
-
-				fail( String.format( I18nSupport.getInternationalisedString( "Detection - Forbidden block found" ) ) );
+				fail( String.format( I18nSupport.getInternationalisedString( "Detection - Forbidden block found" )
+						+ String.format("\nInvalid Block: %s at (%d, %d, %d)", 
+								BlockNames.itemName(testID, testData, true), x, y, z)
+						) );
 
 			} else if ( isAllowedBlock( testID,testData ) ) {
 				//check for double chests
@@ -271,7 +274,7 @@ public class DetectionTask extends AsyncTask {
 					}
 				}
 
-				if ( isWithinLimit( blockList.size(), 0, maxSize ) ) {
+				if ( isWithinLimit( blockList.size(), 0, maxSize, true ) ) {
 
 					addToDetectionStack( workingLocation );
 
@@ -392,12 +395,14 @@ public class DetectionTask extends AsyncTask {
 		}
 	}
 
-	private boolean isWithinLimit( int size, int min, int max ) {
+	private boolean isWithinLimit( int size, int min, int max, boolean continueOver ) {
 		if ( size < min ) {
-			fail( String.format( I18nSupport.getInternationalisedString( "Detection - Craft too small" ), min ) );
+			fail( String.format( I18nSupport.getInternationalisedString( "Detection - Craft too small" ), min ) 
+					+ String.format("\nBlocks found: %d", size));
 			return false;
-		} else if ( size > max ) {
-			fail( String.format( I18nSupport.getInternationalisedString( "Detection - Craft too large" ), max ) );
+		} else if ( (!continueOver && size > max) || (continueOver && size > (max + 1000)) ) {
+			fail( String.format( I18nSupport.getInternationalisedString( "Detection - Craft too large" ), max ) 
+					+ String.format("\nBlocks found: %d", size));
 			return false;
 		} else {
 			return true;
@@ -439,46 +444,28 @@ public class DetectionTask extends AsyncTask {
 			float blockPercentage = ( ( ( float ) numberOfBlocks / data.getBlockList().length ) * 100 );
 			Double minPercentage = flyBlocks.get( i ).get( 0 );
 			Double maxPercentage = flyBlocks.get( i ).get( 1 );
+			String blockName = BlockNames.itemName(i.get(0));
+			
 			if ( minPercentage<10000.0 ) {
 				if ( blockPercentage < minPercentage ) {
-					if(i.get(0)<10000) {
-						fail( String.format( I18nSupport.getInternationalisedString( "Not enough flyblock" )+": %s %.2f%% < %.2f%%", Material.getMaterial(i.get(0)).name().toLowerCase().replace("_"," "), blockPercentage, minPercentage ) );
-						return false;
-					} else {
-						fail( String.format( I18nSupport.getInternationalisedString( "Not enough flyblock" )+": %s %.2f%% < %.2f%%", Material.getMaterial((i.get(0)-10000)>>4).name().toLowerCase().replace("_"," "), blockPercentage, minPercentage ) );
-						return false;
-					}
+					fail( String.format( I18nSupport.getInternationalisedString( "Not enough flyblock" )+": %s %.2f%% < %.2f%%", blockName, blockPercentage, minPercentage ) );
+					return false;
 				}
 			} else {
 				if(numberOfBlocks<flyBlocks.get( i ).get( 0 )-10000.0) {
-					if(i.get(0)<10000) {
-						fail( String.format( I18nSupport.getInternationalisedString( "Not enough flyblock" )+": %s %d < %d", Material.getMaterial(i.get(0)).name().toLowerCase().replace("_"," "), numberOfBlocks, flyBlocks.get( i ).get( 0 ).intValue()-10000 ) );
-						return false;
-					} else {
-						fail( String.format( I18nSupport.getInternationalisedString( "Not enough flyblock" )+": %s %d < %d", Material.getMaterial((i.get(0)-10000)>>4).name().toLowerCase().replace("_"," "), numberOfBlocks, flyBlocks.get( i ).get( 0 ).intValue()-10000 ) );						
-						return false;
-					}
+					fail( String.format( I18nSupport.getInternationalisedString( "Not enough flyblock" )+": %s %d < %d", blockName, numberOfBlocks, flyBlocks.get( i ).get( 0 ).intValue()-10000 ) );
+					return false;
 				}
 			}
 			if ( maxPercentage<10000.0 ) {				
 				if ( blockPercentage > maxPercentage ) {
-					if(i.get(0)<10000) {
-						fail( String.format( I18nSupport.getInternationalisedString( "Too much flyblock" )+": %s %.2f%% > %.2f%%", Material.getMaterial(i.get(0)).name().toLowerCase().replace("_"," "), blockPercentage, maxPercentage ) );
-						return false;
-					} else {
-						fail( String.format( I18nSupport.getInternationalisedString( "Too much flyblock" )+": %s %.2f%% > %.2f%%", Material.getMaterial((i.get(0)-10000)>>4).name().toLowerCase().replace("_"," "), blockPercentage, maxPercentage  ) );
-						return false;
-					}
+					fail( String.format( I18nSupport.getInternationalisedString( "Too much flyblock" )+": %s %.2f%% > %.2f%%", blockName, blockPercentage, maxPercentage ) );
+					return false;
 				}
 			} else {
 				if(numberOfBlocks>flyBlocks.get( i ).get( 1 )-10000.0) {
-					if(i.get(0)<10000) {
-						fail( String.format( I18nSupport.getInternationalisedString( "Too much flyblock" )+": %s %d > %d", Material.getMaterial(i.get(0)).name().toLowerCase().replace("_"," "), numberOfBlocks, flyBlocks.get( i ).get( 1 ).intValue()-10000 ) );
-						return false;
-					} else {
-						fail( String.format( I18nSupport.getInternationalisedString( "Too much flyblock" )+": %s %d > %d", Material.getMaterial((i.get(0)-10000)>>4).name().toLowerCase().replace("_"," "), numberOfBlocks, flyBlocks.get( i ).get( 1 ).intValue()-10000 ) );						
-						return false;
-					}
+					fail( String.format( I18nSupport.getInternationalisedString( "Too much flyblock" )+": %s %d > %d", blockName, numberOfBlocks, flyBlocks.get( i ).get( 1 ).intValue()-10000 ) );
+					return false;
 				}				
 			}
 		}
