@@ -33,6 +33,7 @@ import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.items.StorageChestItem;
 import net.countercraft.movecraft.listener.BlockListener;
 import net.countercraft.movecraft.listener.CommandListener;
+import net.countercraft.movecraft.listener.CraftHelpListener;
 import net.countercraft.movecraft.listener.InteractListener;
 import net.countercraft.movecraft.listener.PlayerListener;
 import net.countercraft.movecraft.listener.WorldEditInteractListener;
@@ -308,15 +309,17 @@ public class Movecraft extends JavaPlugin {
 //			getServer().getPluginManager().registerEvents(
 //					new CommandListener(), this);
 			this.getCommand("release").setExecutor(new CommandListener());
-			this.getCommand("pilot").setExecutor(new CommandListener());
+			//this.getCommand("pilot").setExecutor(new CommandListener());
 			this.getCommand("rotateleft").setExecutor(new CommandListener());
 			this.getCommand("rotateright").setExecutor(new CommandListener());
+			this.getCommand("rotate").setExecutor(new CommandListener());
 			this.getCommand("cruise").setExecutor(new CommandListener());
 			this.getCommand("cruiseoff").setExecutor(new CommandListener());
 			this.getCommand("craftreport").setExecutor(new CommandListener());
 			this.getCommand("manoverboard").setExecutor(new CommandListener());
 			this.getCommand("contacts").setExecutor(new CommandListener());
-			this.getCommand("siege").setExecutor(new CommandListener());
+			//this.getCommand("siege").setExecutor(new CommandListener());
+			this.getCommand("craft").setExecutor(new CraftHelpListener());
 			
 			getServer().getPluginManager().registerEvents(new BlockListener(),
 					this);

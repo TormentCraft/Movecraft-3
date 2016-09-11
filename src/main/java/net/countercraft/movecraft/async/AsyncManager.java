@@ -383,33 +383,40 @@ public class AsyncManager extends BukkitRunnable {
 								int dy=0;
 
 								// ascend
-								if(pcraft.getCruiseDirection()==0x42) {
+								if((pcraft.getCruiseDirection() & 0x10) != 0) {
 									dy=0+1+pcraft.getType().getVertCruiseSkipBlocks();
 								}
 								// descend
-								if(pcraft.getCruiseDirection()==0x43) {
+								if((pcraft.getCruiseDirection() & 0x20) != 0) {
 									dy=0-1-pcraft.getType().getVertCruiseSkipBlocks();
 									if(pcraft.getMinY()<=w.getSeaLevel())
 										dy=-1;
 								}
 								// ship faces west
-								if(pcraft.getCruiseDirection()==0x5) {
+								if((pcraft.getCruiseDirection() & 0x08) != 0) {
 									dx=0-1-pcraft.getType().getCruiseSkipBlocks();
 								}
 								// ship faces east
-								if(pcraft.getCruiseDirection()==0x4) {
+								if((pcraft.getCruiseDirection() & 0x02) != 0) {
 									dx=1+pcraft.getType().getCruiseSkipBlocks();
 								}
 								// ship faces north
-								if(pcraft.getCruiseDirection()==0x2) {
-									dz=1+pcraft.getType().getCruiseSkipBlocks();
+								if((pcraft.getCruiseDirection() & 0x01) != 0) {
+									dz=0-1-pcraft.getType().getCruiseSkipBlocks();
 								}
 								// ship faces south
-								if(pcraft.getCruiseDirection()==0x3) {
-									dz=0-1-pcraft.getType().getCruiseSkipBlocks();
+								if((pcraft.getCruiseDirection() & 0x04) != 0) {
+									dz=1+pcraft.getType().getCruiseSkipBlocks();
 								}
 								if(pcraft.getType().getCruiseOnPilot())
 									dy=pcraft.getType().getCruiseOnPilotVertMove();
+								
+								if ((dx != 0 && dz != 0) || ((dx + dz) != 0 && dy != 0)) {
+									// we need to slow the skip speed...
+									if (Math.abs(dx) > 1) dx /= 2;
+									if (Math.abs(dz) > 1) dz /= 2;
+								}
+								
 								pcraft.translate(dx, dy, dz);
 								pcraft.setLastDX(dx);
 								pcraft.setLastDZ(dz);
@@ -1090,7 +1097,7 @@ public class AsyncManager extends BukkitRunnable {
 		processTNTContactExplosives();
 		processFadingBlocks();
 		processDetection();
-		processSiege();
+		//processSiege();
 		processAlgorithmQueue();
 	}
 
