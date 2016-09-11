@@ -35,6 +35,9 @@ commands:
   manoverboard:
     description: If enabled, returns you to a craft you have fallen out of
     usage: /manoverboard
+  craft:
+    description: Allows inspecting the type of crafts that you can build
+    usage: /craft list|<name of craft>
 #  siege:
 #    description: If the region you are standing in is configured for Siege, lays siege to it
 #    usage: /siege
