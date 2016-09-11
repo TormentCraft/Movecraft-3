@@ -85,56 +85,51 @@
 
     </build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
-            <version>LATEST</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../spigot/craftbukkit.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.sk89q.worldedit</groupId>
-            <artifactId>worldedit-bukkit</artifactId>
-            <version>14.6</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../../plugins/worldedit-bukkit/worldedit-bukkit.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>net.milkbowl.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.32</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../../plugins/Vault/Vault.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>at.pavlov.Cannons</groupId>
-            <artifactId>Cannons</artifactId>
-            <version>2.4.3</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../../plugins/Cannons/Cannons.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldguard</artifactId>
-            <version>LATEST</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../../plugins/worldguard-bukkit/worldguard-bukkit.jar</systemPath>
-        </dependency>
+    <repositories>
+        <repository>
+            <id>bukkit-repo</id>
+            <url>http://repo.bukkit.org/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>sk89q-repo</id>
+        <url>http://maven.sk89q.com/repo/</url>
+        </repository>
+        <repository>
+            <id>cannons-repo</id>
+        <url>https://github.com/DerPavlov/mvn-repo/raw/master/</url>
+        </repository>
+        <repository>
+            <id>vault-repo</id>
+            <url>http://nexus.hc.to/content/repositories/pub_releases</url>
+        </repository>
+    </repositories>
 
+    <dependencies>
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.10</version>
         </dependency>
-        
+
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
         </dependency>
 
-        <!-- This doesn't have a maven repo but its own -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.1.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>worldguard</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
         <dependency>
             <groupId>com.palmergames</groupId>
             <artifactId>Towny</artifactId>
@@ -149,13 +144,57 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/WGCustomFlags.jar</systemPath>
         </dependency>
+
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.1.1</version>
-            <scope>test</scope>
+            <groupId>com.sk89q</groupId>
+            <artifactId>worldedit</artifactId>
+            <version>LATEST</version>
         </dependency>
 
+        <dependency>
+            <groupId>at.pavlov</groupId>
+            <artifactId>Cannons</artifactId>
+            <version>LATEST</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>dummypermscompat</artifactId>
+                    <groupId>com.sk89q</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>worldedit-bukkit</artifactId>
+                    <groupId>com.sk89q.worldedit</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.10.2-R0.1-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>craftbukkit</artifactId>
+            <version>1.10.2-R0.1-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.milkbowl.vault</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ess3</groupId>
+            <artifactId>Essentials</artifactId>
+            <version>LATEST</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/EssentialsX-2.0.1.jar</systemPath>
+        </dependency>
     </dependencies>
 
 </project>
