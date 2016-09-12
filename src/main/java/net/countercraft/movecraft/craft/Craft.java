@@ -22,6 +22,7 @@ import net.countercraft.movecraft.async.detection.DetectionTask;
 import net.countercraft.movecraft.async.rotation.RotationTask;
 import net.countercraft.movecraft.async.translation.TranslationTask;
 import net.countercraft.movecraft.async.translation.TranslationTaskData;
+import net.countercraft.movecraft.math.Direction;
 import net.countercraft.movecraft.utils.MovecraftLocation;
 import net.countercraft.movecraft.utils.Rotation;
 
@@ -43,7 +44,7 @@ public class Craft {
 	private int minX, minZ, maxHeightLimit;
 	private boolean cruising;
 	private boolean sinking;
-	private byte cruiseDirection;
+	private Direction cruiseDirection;
 	private long lastCruiseUpdate;
 	private long lastBlockCheck;
 	private long lastRightClick;
@@ -322,11 +323,11 @@ public class Craft {
 		return sinking;
 	}
 	
-	public void setCruiseDirection(byte cruiseDirection) {
+	public void setCruiseDirection(Direction cruiseDirection) {
 		this.cruiseDirection=cruiseDirection;
 	}
 
-	public byte getCruiseDirection() {
+	public Direction getCruiseDirection() {
 		return cruiseDirection;
 	}
 	
