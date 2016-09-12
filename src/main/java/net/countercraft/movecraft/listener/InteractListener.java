@@ -23,6 +23,7 @@ import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.math.Direction;
 import net.countercraft.movecraft.utils.MathUtils;
 import net.countercraft.movecraft.utils.MovecraftLocation;
 import net.countercraft.movecraft.utils.Rotation;
@@ -228,18 +229,6 @@ public class InteractListener implements Listener {
 		}
 	}
 
-	private byte translateToDirection(byte rawData) {
-		if (rawData == ((byte)0x3))
-			return 1;//north
-		if (rawData == ((byte)0x4))
-			return 2;//east
-		if (rawData == ((byte)0x2))
-			return 4;//south
-		if (rawData == ((byte)0x5))
-			return 8;//west
-		return 0;
-	}
-
 	private void onSignRightClick( PlayerInteractEvent event ) {
 		Sign sign = ( Sign ) event.getClickedBlock().getState();
 		String signText = org.bukkit.ChatColor.stripColor(sign.getLine( 0 ));
@@ -266,7 +255,7 @@ public class InteractListener implements Listener {
 				
 				if(c.getType().getCruiseOnPilot()==true) {
 					c.detect( null, event.getPlayer(), startPoint );
-					c.setCruiseDirection(translateToDirection(sign.getRawData()));
+					c.setCruiseDirection(Direction.fromSignDirection(sign));
 					c.setLastCruisUpdate(System.currentTimeMillis());
 					c.setCruising(true);
 					BukkitTask releaseTask = new BukkitRunnable() {
@@ -391,7 +380,7 @@ public class InteractListener implements Listener {
 					sign.setLine( 0, "Cruise: ON" );
 					sign.update( true );
 
-					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruiseDirection(translateToDirection(sign.getRawData()));
+					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruiseDirection(Direction.fromSignDirection(sign));
 					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setLastCruisUpdate(System.currentTimeMillis());
 					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruising(true);
 					
@@ -408,7 +397,7 @@ public class InteractListener implements Listener {
 					sign.setLine( 0, "Ascend: ON" );
 					sign.update( true );
 
-					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruiseDirection((byte) 0x20);
+					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruiseDirection(Direction.UP);
 					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setLastCruisUpdate(System.currentTimeMillis());
 					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruising(true);
 					
@@ -425,7 +414,7 @@ public class InteractListener implements Listener {
 					sign.setLine( 0, "Descend: ON" );
 					sign.update( true );
 
-					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruiseDirection((byte) 0x10);
+					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruiseDirection(Direction.DOWN);
 					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setLastCruisUpdate(System.currentTimeMillis());
 					CraftManager.getInstance().getCraftByPlayer(event.getPlayer()).setCruising(true);
 					

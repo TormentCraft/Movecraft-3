@@ -26,6 +26,7 @@ import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.math.Direction;
 import net.countercraft.movecraft.utils.BlockUtils;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
@@ -378,36 +379,15 @@ public class AsyncManager extends BukkitRunnable {
 								ticksElapsed=ticksElapsed>>1;
 		
 							if ( Math.abs( ticksElapsed ) >= pcraft.getType().getCruiseTickCooldown() ) {
-								int dx=0;
-								int dz=0;
-								int dy=0;
+								Direction direction = pcraft.getCruiseDirection();
+								int dx = direction.x * (1 + pcraft.getType().getCruiseSkipBlocks());
+								int dz = direction.z * (1 + pcraft.getType().getCruiseSkipBlocks());
+								int dy = direction.y * (1 + pcraft.getType().getVertCruiseSkipBlocks());
 
-								// ascend
-								if((pcraft.getCruiseDirection() & 0x10) != 0) {
-									dy=0+1+pcraft.getType().getVertCruiseSkipBlocks();
+								if(direction.y == -1 && pcraft.getMinY() <= w.getSeaLevel()) {
+									dy = -1;
 								}
-								// descend
-								if((pcraft.getCruiseDirection() & 0x20) != 0) {
-									dy=0-1-pcraft.getType().getVertCruiseSkipBlocks();
-									if(pcraft.getMinY()<=w.getSeaLevel())
-										dy=-1;
-								}
-								// ship faces west
-								if((pcraft.getCruiseDirection() & 0x08) != 0) {
-									dx=0-1-pcraft.getType().getCruiseSkipBlocks();
-								}
-								// ship faces east
-								if((pcraft.getCruiseDirection() & 0x02) != 0) {
-									dx=1+pcraft.getType().getCruiseSkipBlocks();
-								}
-								// ship faces north
-								if((pcraft.getCruiseDirection() & 0x01) != 0) {
-									dz=0-1-pcraft.getType().getCruiseSkipBlocks();
-								}
-								// ship faces south
-								if((pcraft.getCruiseDirection() & 0x04) != 0) {
-									dz=1+pcraft.getType().getCruiseSkipBlocks();
-								}
+
 								if(pcraft.getType().getCruiseOnPilot())
 									dy=pcraft.getType().getCruiseOnPilotVertMove();
 								
