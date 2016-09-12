@@ -243,10 +243,10 @@ public class RotationTask extends AsyncTask {
 		// make the centered block list, and check for a cruise control sign to reset to off
 		for ( int i = 0; i < blockList.length; i++ ) {
 			centeredBlockList[i] = blockList[i].subtract( originPoint );
-			if(getCraft().getCruising()) {
-				getCraft().resetSigns(true, true, true);
-				}
-			}
+		}
+		if(getCraft().getCruising()) {
+			getCraft().resetSigns(true, true, true);
+		}
 		
 		getCraft().setCruising(false);
 
