@@ -26,9 +26,11 @@ import net.countercraft.movecraft.utils.MovecraftLocation;
 import net.countercraft.movecraft.utils.Rotation;
 
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -295,7 +297,23 @@ public class Craft {
 	public void setMinZ( int minZ ) {
 		this.minZ = minZ;
 	}
-	
+
+	public boolean isCraftBlock(MovecraftLocation mloc) {
+
+		if (mloc.x < getMinX() || mloc.x > getMaxX())
+			return false;
+		if (mloc.z < getMinZ() || mloc.z > getMaxZ())
+			return false;
+		if (mloc.y < getMinY() || mloc.y > getMaxY())
+			return false;
+		
+		for (MovecraftLocation loc : getBlockList()) {
+			if (loc.x == mloc.x && loc.y == mloc.y && loc.z == mloc.z)
+				return true;
+		}
+		return false;
+	}
+
 	public boolean getCruising() {
 		return cruising;
 	}
@@ -435,5 +453,4 @@ public class Craft {
 	public Player getNotificationPlayer() {
 		return notificationPlayer;
 	}
-	
 }
