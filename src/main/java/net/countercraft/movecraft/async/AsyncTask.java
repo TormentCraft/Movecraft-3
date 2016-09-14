@@ -33,7 +33,7 @@ public abstract class AsyncTask extends BukkitRunnable {
 
     @Override public void run() {
         try {
-            excecute();
+            execute();
             AsyncManager.getInstance().submitCompletedTask(this);
         } catch (Exception e) {
             Movecraft.getInstance().getLogger().log(Level.SEVERE, I18nSupport.getInternationalisedString(
@@ -42,7 +42,7 @@ public abstract class AsyncTask extends BukkitRunnable {
         }
     }
 
-    protected abstract void excecute();
+    protected abstract void execute();
 
     protected Craft getCraft() {
         return craft;

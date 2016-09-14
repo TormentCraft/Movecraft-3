@@ -68,7 +68,7 @@ public class TranslationTask extends AsyncTask {
         this.data = data;
     }
 
-    @Override public void excecute() {
+    @Override public void execute() {
         MovecraftLocation[] blocksList = data.getBlockList();
 
         final int[] fallThroughBlocks = new int[]{
@@ -927,7 +927,7 @@ public class TranslationTask extends AsyncTask {
 //                        *   so I replaced Lists with Sets
 //                        * 
 //                        *   Caused by: java.lang.NoClassDefFoundError: org/apache/commons/collections/ListUtils
-//                        *   at net.countercraft.movecraft.async.translation.TranslationTask.excecute
+//                        *   at net.countercraft.movecraft.async.translation.TranslationTask.execute
 // (TranslationTask.java:716)
 //                        *
 // mwkaicz 24-02-2015

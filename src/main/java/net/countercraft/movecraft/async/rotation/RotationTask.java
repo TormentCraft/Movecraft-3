@@ -89,7 +89,7 @@ public class RotationTask extends AsyncTask {
         this.isSubCraft = isSubCraft;
     }
 
-    @Override public void excecute() {
+    @Override public void execute() {
 
         int waterLine = 0;
 

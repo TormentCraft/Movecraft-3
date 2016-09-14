@@ -89,7 +89,7 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    @Override public void excecute() {
+    @Override public void execute() {
 
         Map<ArrayList<Integer>, ArrayList<Double>> flyBlocks = new HashMap<>(
                 getCraft().getType().getFlyBlocks());
