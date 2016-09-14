@@ -74,11 +74,11 @@ public class StorageChestItem {
     }
 
     public static void addRecipe() {
-        ShapedRecipe storageCrateRecipie = new ShapedRecipe(new StorageChestItem().getItemStack());
-        storageCrateRecipie.shape("WWW", "WCW", "WWW");
-        storageCrateRecipie.setIngredient('C', Material.CHEST);
-        storageCrateRecipie.setIngredient('W', Material.WOOD);
-        Movecraft.getInstance().getServer().addRecipe(storageCrateRecipie);
+        ShapedRecipe storageCrateRecipe = new ShapedRecipe(new StorageChestItem().getItemStack());
+        storageCrateRecipe.shape("WWW", "WCW", "WWW");
+        storageCrateRecipe.setIngredient('C', Material.CHEST);
+        storageCrateRecipe.setIngredient('W', Material.WOOD);
+        Movecraft.getInstance().getServer().addRecipe(storageCrateRecipe);
     }
 
     public static void saveToDisk() {
