@@ -36,8 +36,8 @@ public final class BlockNames {
         return tmp;
     }
 
-    public static String itemName(int mvcftId) {
-        int blockData = 0, blockId = mvcftId;
+    public static String itemName(int movecraftId) {
+        int blockData = 0, blockId = movecraftId;
         boolean hasData = false;
         if (blockId > 10000) {
             blockId -= 10000;
