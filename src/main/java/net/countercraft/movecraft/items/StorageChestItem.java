@@ -69,8 +69,8 @@ public class StorageChestItem {
     }
 
     public static void createNewInventory(MovecraftLocation l, World w) {
-        crateInventories.get(w).put(l, Bukkit.createInventory(null, 27,
-                                                              I18nSupport.getInternationalisedString("Item - Storage Crate name")));
+        crateInventories.get(w).put(l, Bukkit.createInventory(null, 27, I18nSupport
+                .getInternationalisedString("Item - Storage Crate name")));
     }
 
     public static void addRecipe() {
@@ -152,8 +152,8 @@ public class StorageChestItem {
                     }
                 }
 
-                Inventory inv = Bukkit.createInventory(null, 27,
-                                                       I18nSupport.getInternationalisedString("Item - Storage Crate name"));
+                Inventory inv = Bukkit
+                        .createInventory(null, 27, I18nSupport.getInternationalisedString("Item - Storage Crate name"));
                 inv.setContents(is);
                 String[] split = entry.getKey().split(" ");
                 World w = Movecraft.getInstance().getServer().getWorld(split[0]);

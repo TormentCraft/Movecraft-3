@@ -91,8 +91,7 @@ public class DetectionTask extends AsyncTask {
 
     @Override public void execute() {
 
-        Map<ArrayList<Integer>, ArrayList<Double>> flyBlocks = new HashMap<>(
-                getCraft().getType().getFlyBlocks());
+        Map<ArrayList<Integer>, ArrayList<Double>> flyBlocks = new HashMap<>(getCraft().getType().getFlyBlocks());
         dFlyBlocks = flyBlocks;
 
         blockStack.push(startLocation);
@@ -147,8 +146,8 @@ public class DetectionTask extends AsyncTask {
                             foundPilot = true;
                         }
                         if (!foundPilot && (!data.getPlayer().hasPermission("movecraft.bypasslock"))) {
-                            fail(I18nSupport.getInternationalisedString(
-                                    "Not one of the registered pilots on this craft"));
+                            fail(I18nSupport
+                                         .getInternationalisedString("Not one of the registered pilots on this craft"));
                         }
                     }
                 }
@@ -156,8 +155,8 @@ public class DetectionTask extends AsyncTask {
 
             if (isForbiddenBlock(testID, testData)) {
                 fail(I18nSupport.getInternationalisedString("Detection - Forbidden block found") +
-                     String.format("\nInvalid Block: %s at (%d, %d, %d)",
-                                                 BlockNames.itemName(testID, testData, true), x, y, z));
+                     String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(testID, testData, true),
+                                   x, y, z));
             } else if (isAllowedBlock(testID, testData)) {
                 //check for double chests
                 if (testID == 54) {
@@ -250,8 +249,7 @@ public class DetectionTask extends AsyncTask {
                                             if (Movecraft.getInstance().getWorldGuardPlugin() != null &&
                                                 Movecraft.getInstance().getWGCustomFlagsPlugin() != null &&
                                                 Settings.WGCustomFlagsUsePilotFlag) {
-                                                LocalPlayer lp = Movecraft.getInstance()
-                                                                          .getWorldGuardPlugin()
+                                                LocalPlayer lp = Movecraft.getInstance().getWorldGuardPlugin()
                                                                           .wrapPlayer(p);
                                                 ApplicableRegionSet regions = Movecraft.getInstance()
                                                                                        .getWorldGuardPlugin()
@@ -430,8 +428,8 @@ public class DetectionTask extends AsyncTask {
     {
         if (getCraft().getType().getRequireWaterContact()) {
             if (!data.getWaterContact()) {
-                fail(I18nSupport.getInternationalisedString(
-                        "Detection - Failed - Water contact required but not found"));
+                fail(I18nSupport
+                             .getInternationalisedString("Detection - Failed - Water contact required but not found"));
                 return false;
             }
         }
@@ -457,8 +455,7 @@ public class DetectionTask extends AsyncTask {
             } else {
                 if (numberOfBlocks < entry.getValue().get(0) - 10000.0) {
                     fail(String.format(I18nSupport.getInternationalisedString("Not enough flyblock") + ": %s %d < %d",
-                                       blockName, numberOfBlocks,
-                                       entry.getValue().get(0).intValue() - 10000));
+                                       blockName, numberOfBlocks, entry.getValue().get(0).intValue() - 10000));
                     return false;
                 }
             }
@@ -472,8 +469,7 @@ public class DetectionTask extends AsyncTask {
             } else {
                 if (numberOfBlocks > entry.getValue().get(1) - 10000.0) {
                     fail(String.format(I18nSupport.getInternationalisedString("Too much flyblock") + ": %s %d > %d",
-                                       blockName, numberOfBlocks,
-                                       entry.getValue().get(1).intValue() - 10000));
+                                       blockName, numberOfBlocks, entry.getValue().get(1).intValue() - 10000));
                     return false;
                 }
             }

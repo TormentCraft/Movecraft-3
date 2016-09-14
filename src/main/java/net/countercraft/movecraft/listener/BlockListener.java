@@ -68,8 +68,8 @@ public class BlockListener implements Listener {
             e.setCancelled(true);
         } else if (e.getItemInHand().getItemMeta() != null &&
                    e.getItemInHand().getItemMeta().getDisplayName() != null &&
-                   e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(
-                           I18nSupport.getInternationalisedString("Item - Storage Crate name"))) {
+                   e.getItemInHand().getItemMeta().getDisplayName()
+                    .equalsIgnoreCase(I18nSupport.getInternationalisedString("Item - Storage Crate name"))) {
             e.getBlockPlaced().setTypeId(33);
             Location l = e.getBlockPlaced().getLocation();
             MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());

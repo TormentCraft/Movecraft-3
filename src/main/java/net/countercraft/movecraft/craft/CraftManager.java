@@ -254,8 +254,8 @@ public final class CraftManager {
     public void removePlayerFromCraft(Craft c) {
         if (getPlayerFromCraft(c) != null) {
             removeReleaseTask(c);
-            getPlayerFromCraft(c).sendMessage(
-                    I18nSupport.getInternationalisedString("Release - Craft has been released message"));
+            getPlayerFromCraft(c)
+                    .sendMessage(I18nSupport.getInternationalisedString("Release - Craft has been released message"));
             Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
                     I18nSupport.getInternationalisedString("Release - Player has released a craft console"),
                     c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,

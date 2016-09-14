@@ -207,8 +207,7 @@ public class CommandListener implements CommandExecutor {
             if (playerCraft == null) {
             } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
                 MovecraftLocation midPoint = getCraftMidPoint(playerCraft);
-                playerCraft
-                            .rotate(Rotation.ANTICLOCKWISE, midPoint);
+                playerCraft.rotate(Rotation.ANTICLOCKWISE, midPoint);
             } else {
                 player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
             }
@@ -363,8 +362,8 @@ public class CommandListener implements CommandExecutor {
                         playerCraft.getNotificationPlayer().sendMessage(notification);
                     }
                 }
-                if (!foundContact) player.sendMessage(
-                        I18nSupport.getInternationalisedString("No contacts within range"));
+                if (!foundContact)
+                    player.sendMessage(I18nSupport.getInternationalisedString("No contacts within range"));
                 return true;
             } else {
                 player.sendMessage(I18nSupport.getInternationalisedString("You must be piloting a craft"));
@@ -374,8 +373,7 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("manOverBoard")) {
             if (playerCraft != null) {
-                Location telPoint = getCraftTeleportPoint(playerCraft,
-                                                          playerCraft.getW());
+                Location telPoint = getCraftTeleportPoint(playerCraft, playerCraft.getW());
                 player.teleport(telPoint);
             } else {
                 for (World w : Bukkit.getWorlds()) {

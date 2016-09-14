@@ -104,8 +104,7 @@ public class WorldEditInteractListener implements Listener {
                     }
                     Craft pCraft = CraftManager.getInstance().getCraftByPlayer(player);
                     if (pCraft == null) {
-                        player.sendMessage(
-                                I18nSupport.getInternationalisedString("You must be piloting a craft"));
+                        player.sendMessage(I18nSupport.getInternationalisedString("You must be piloting a craft"));
                         return;
                     }
 
@@ -189,8 +188,7 @@ public class WorldEditInteractListener implements Listener {
                 return;
             }
             if (!player.hasPermission("movecraft." + craft.getType().getCraftName() + ".repair")) {
-                player
-                     .sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 return;
             }
             // load up the repair state
@@ -201,8 +199,7 @@ public class WorldEditInteractListener implements Listener {
             repairStateName += sign.getLine(1);
             File file = new File(repairStateName);
             if (!file.exists()) {
-                player
-                     .sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
+                player.sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
                 return;
             }
             SchematicFormat sf = SchematicFormat.getFormat(file);
@@ -210,13 +207,11 @@ public class WorldEditInteractListener implements Listener {
             try {
                 cc = sf.load(file);
             } catch (com.sk89q.worldedit.data.DataException e) {
-                player
-                     .sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
+                player.sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
                 e.printStackTrace();
                 return;
             } catch (IOException e) {
-                player
-                     .sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
+                player.sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
                 e.printStackTrace();
                 return;
             }
@@ -307,7 +302,8 @@ public class WorldEditInteractListener implements Listener {
             }
             if (secondClick) {
                 // check all the chests for materials for the repair
-                Map<Integer, ArrayList<InventoryHolder>> chestsToTakeFrom = new HashMap<>(); // typeid, list of chest inventories
+                Map<Integer, ArrayList<InventoryHolder>> chestsToTakeFrom = new HashMap<>(); // typeid, list of chest
+                // inventories
                 boolean enoughMaterial = true;
                 for (Map.Entry<Integer, Integer> entry : numMissingItems.entrySet()) {
                     int remainingQty = entry.getValue();
@@ -345,8 +341,7 @@ public class WorldEditInteractListener implements Listener {
                     if (Movecraft.getInstance().getEconomy().has(player, moneyCost)) {
                         Movecraft.getInstance().getEconomy().withdrawPlayer(player, moneyCost);
                     } else {
-                        player.sendMessage(
-                                I18nSupport.getInternationalisedString("You do not have enough money"));
+                        player.sendMessage(I18nSupport.getInternationalisedString("You do not have enough money"));
                         enoughMaterial = false;
                     }
                 }
@@ -356,8 +351,7 @@ public class WorldEditInteractListener implements Listener {
                         int remainingQty = entry.getValue();
                         final Integer itemType = entry.getKey();
                         for (InventoryHolder inventoryHolder : chestsToTakeFrom.get(itemType)) {
-                            Map<Integer, ? extends ItemStack> foundItems = inventoryHolder.getInventory()
-                                                                                          .all(itemType);
+                            Map<Integer, ? extends ItemStack> foundItems = inventoryHolder.getInventory().all(itemType);
                             for (ItemStack istack : foundItems.values()) {
                                 if (istack.getAmount() <= remainingQty) {
                                     remainingQty -= istack.getAmount();
@@ -443,10 +437,8 @@ public class WorldEditInteractListener implements Listener {
                     for (Map.Entry<Integer, Integer> entry : numMissingItems.entrySet()) {
                         final Integer itemType = entry.getKey();
                         final Integer amount = entry.getValue();
-                        player.sendMessage(String.format("%s : %d",
-                                                                    Material.getMaterial(itemType).name()
-                                                                            .toLowerCase().replace("_", " "),
-                                                                    amount));
+                        player.sendMessage(String.format("%s : %d", Material.getMaterial(itemType).name().toLowerCase()
+                                                                            .replace("_", " "), amount));
                     }
                     int durationInSeconds = numdiffblocks * Settings.RepairTicksPerBlock / 20;
                     player.sendMessage(

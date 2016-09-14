@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -443,16 +442,14 @@ public class TranslationTask extends AsyncTask {
             } else if (!waterCraft) {
                 // New block is not air or a piston head and is not part of the existing ship
                 testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
-                blockObstructed =
-                        (testMaterial != Material.AIR && testMaterial != Material.PISTON_EXTENSION) &&
-                        !existingBlockSet.contains(newLoc);
+                blockObstructed = (testMaterial != Material.AIR && testMaterial != Material.PISTON_EXTENSION) &&
+                                  !existingBlockSet.contains(newLoc);
             } else {
                 // New block is not air or water or a piston head and is not part of the existing ship
                 testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
-                blockObstructed =
-                        (testMaterial != Material.AIR && testMaterial != Material.STATIONARY_WATER &&
-                         testMaterial != Material.WATER && testMaterial != Material.PISTON_EXTENSION) &&
-                        !existingBlockSet.contains(newLoc);
+                blockObstructed = (testMaterial != Material.AIR && testMaterial != Material.STATIONARY_WATER &&
+                                   testMaterial != Material.WATER && testMaterial != Material.PISTON_EXTENSION) &&
+                                  !existingBlockSet.contains(newLoc);
             }
 
             boolean ignoreBlock = false;
@@ -1035,15 +1032,13 @@ public class TranslationTask extends AsyncTask {
             boolean blockObstructed;
             if (waterCraft) {
                 // New block is not air or water or a piston head and is not part of the existing ship
-                blockObstructed =
-                        (testMaterial != Material.AIR && testMaterial != Material.STATIONARY_WATER &&
-                         testMaterial != Material.WATER && testMaterial != Material.PISTON_EXTENSION) &&
-                        !existingBlockSet.contains(newLoc);
+                blockObstructed = (testMaterial != Material.AIR && testMaterial != Material.STATIONARY_WATER &&
+                                   testMaterial != Material.WATER && testMaterial != Material.PISTON_EXTENSION) &&
+                                  !existingBlockSet.contains(newLoc);
             } else {
                 // New block is not air or a piston head and is not part of the existing ship
-                blockObstructed =
-                        (testMaterial != Material.AIR && testMaterial != Material.PISTON_EXTENSION) &&
-                        !existingBlockSet.contains(newLoc);
+                blockObstructed = (testMaterial != Material.AIR && testMaterial != Material.PISTON_EXTENSION) &&
+                                  !existingBlockSet.contains(newLoc);
             }
             if (blockObstructed && hoverCraft) {
                 // New block is not harvested block and is not part of the existing craft

@@ -256,8 +256,8 @@ public final class AsyncManager extends BukkitRunnable {
                         boolean failed = MapUpdateManager.getInstance().addWorldUpdate(c.getW(), updates, null, null);
 
                         if (failed) {
-                            Movecraft.getInstance().getLogger().log(Level.SEVERE,
-                                                                    I18nSupport.getInternationalisedString("Translation - Craft collision"));
+                            Movecraft.getInstance().getLogger().log(Level.SEVERE, I18nSupport
+                                    .getInternationalisedString("Translation - Craft collision"));
                         } else {
                             sentMapUpdate = true;
                         }

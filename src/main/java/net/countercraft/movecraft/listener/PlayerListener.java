@@ -103,10 +103,9 @@ public class PlayerListener implements Listener {
                     .playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
                                                    MathUtils.bukkit2MovecraftLoc(player.getLocation())))) {
 
-                if (!craftManager.getReleaseEvents().containsKey(player) &&
-                    craft.getType().getMoveEntities()) {
-                    if (Settings.ManOverBoardTimeout == 0) player.sendMessage(
-                            I18nSupport.getInternationalisedString("Release - Player has left craft"));
+                if (!craftManager.getReleaseEvents().containsKey(player) && craft.getType().getMoveEntities()) {
+                    if (Settings.ManOverBoardTimeout == 0)
+                        player.sendMessage(I18nSupport.getInternationalisedString("Release - Player has left craft"));
                     else player.sendMessage(I18nSupport.getInternationalisedString(
                             "You have left your craft. You may return to your craft by typing /manoverboard any time " +
                             "before the timeout expires"));
@@ -118,10 +117,10 @@ public class PlayerListener implements Listener {
                         String ret = checkCraftBorders(craft);
                         if (ret != null) {
                             player.sendMessage(ChatColor.RED +
-                                                          I18nSupport.getInternationalisedString(
-                                                                  "WARNING! There are blocks near your craft, part of" +
-                                                                  " your craft may be damaged!") +
-                                                          ChatColor.RESET + "\n" + ret);
+                                               I18nSupport.getInternationalisedString(
+                                                       "WARNING! There are blocks near your craft, part of" +
+                                                       " your craft may be damaged!") +
+                                               ChatColor.RESET + "\n" + ret);
                         }
                     }
 
@@ -135,8 +134,7 @@ public class PlayerListener implements Listener {
                     craftManager.getReleaseEvents().put(player, releaseTask);
                 }
             } else {
-                if (craftManager.getReleaseEvents().containsKey(player) &&
-                    craft.getType().getMoveEntities()) {
+                if (craftManager.getReleaseEvents().containsKey(player) && craft.getType().getMoveEntities()) {
                     craftManager.removeReleaseTask(craft);
                 }
             }
