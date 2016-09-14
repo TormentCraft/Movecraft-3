@@ -84,9 +84,10 @@ public class StorageChestItem {
     public static void saveToDisk() {
         Map<String, CardboardBox[]> data = new HashMap<>();
 
-        for (World w : crateInventories.keySet()) {
-            for (MovecraftLocation l : crateInventories.get(w).keySet()) {
-                Inventory inventory = crateInventories.get(w).get(l);
+        for (Map.Entry<World, Map<MovecraftLocation, Inventory>> entry : crateInventories.entrySet()) {
+            final Map<MovecraftLocation, Inventory> inventoryMap = entry.getValue();
+            for (Map.Entry<MovecraftLocation, Inventory> containerEntry : inventoryMap.entrySet()) {
+                Inventory inventory = containerEntry.getValue();
                 ItemStack[] is = inventory.getContents();
                 CardboardBox[] cardboardBoxes = new CardboardBox[is.length];
 
@@ -98,7 +99,9 @@ public class StorageChestItem {
                     }
                 }
 
-                String key = w.getName() + " " + l.x + " " + l.y + " " + l.z;
+                final World world = entry.getKey();
+                final MovecraftLocation location = containerEntry.getKey();
+                String key = world.getName() + " " + location.x + " " + location.y + " " + location.z;
                 data.put(key, cardboardBoxes);
             }
         }
@@ -137,8 +140,8 @@ public class StorageChestItem {
             ObjectInputStream in = new ObjectInputStream(input);
             Map<String, CardboardBox[]> data = (Map<String, CardboardBox[]>) in.readObject();
 
-            for (String s : data.keySet()) {
-                CardboardBox[] cardboardBoxes = data.get(s);
+            for (Map.Entry<String, CardboardBox[]> entry : data.entrySet()) {
+                CardboardBox[] cardboardBoxes = entry.getValue();
                 ItemStack[] is = new ItemStack[cardboardBoxes.length];
 
                 for (int i = 0; i < is.length; i++) {
@@ -152,7 +155,7 @@ public class StorageChestItem {
                 Inventory inv = Bukkit.createInventory(null, 27,
                                                        I18nSupport.getInternationalisedString("Item - Storage Crate name"));
                 inv.setContents(is);
-                String[] split = s.split(" ");
+                String[] split = entry.getKey().split(" ");
                 World w = Movecraft.getInstance().getServer().getWorld(split[0]);
                 if (w != null) {
 

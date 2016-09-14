@@ -230,11 +230,10 @@ public final class CraftManager {
     }
 
     public Craft getCraftByPlayerName(String name) {
-        Set<Player> players = craftPlayerIndex.keySet();
-        for (Player player : players) {
-            if (player != null) {
-                if (player.getName().equals(name)) {
-                    return craftPlayerIndex.get(player);
+        for (Map.Entry<Player, Craft> entry : craftPlayerIndex.entrySet()) {
+            if (entry.getKey() != null) {
+                if (entry.getKey().getName().equals(name)) {
+                    return entry.getValue();
                 }
             }
         }

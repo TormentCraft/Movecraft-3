@@ -263,14 +263,15 @@ Changed for 1.8, and quite possibly wrong:
 
     private void updateData(Map<MovecraftLocation, TransferData> dataMap, World w) {
         // Restore block specific information
-        for (MovecraftLocation l : dataMap.keySet()) {
+        for (Map.Entry<MovecraftLocation, TransferData> entry : dataMap.entrySet()) {
             try {
-                TransferData transferData = dataMap.get(l);
+                TransferData transferData = entry.getValue();
 
                 if (transferData instanceof SignTransferHolder) {
 
                     SignTransferHolder signData = (SignTransferHolder) transferData;
-                    BlockState bs = w.getBlockAt(l.x, l.y, l.z).getState();
+                    BlockState bs = w.getBlockAt(entry.getKey().x, entry
+                            .getKey().y, entry.getKey().z).getState();
                     if (bs instanceof Sign) {
                         Sign sign = (Sign) bs;
                         for (int i = 0; i < signData.getLines().length; i++) {
@@ -305,19 +306,26 @@ Changed for 1.8, and quite possibly wrong:
                     Inventory inventory = Bukkit.createInventory(null, 27,
                                                                  I18nSupport.getInternationalisedString("Item - Storage Crate name"));
                     inventory.setContents(((StorageCrateTransferHolder) transferData).getInvetory());
-                    StorageChestItem.setInventoryOfCrateAtLocation(inventory, l, w);
+                    StorageChestItem.setInventoryOfCrateAtLocation(inventory,
+                                                                   entry.getKey(), w);
                 } else if (transferData instanceof InventoryTransferHolder) {
                     InventoryTransferHolder invData = (InventoryTransferHolder) transferData;
-                    InventoryHolder inventoryHolder = (InventoryHolder) w.getBlockAt(l.x, l.y, l.z).getState();
+                    InventoryHolder inventoryHolder = (InventoryHolder) w.getBlockAt(
+                            entry.getKey().x, entry.getKey
+                                    ().y,
+                            entry.getKey().z).getState();
                     inventoryHolder.getInventory().setContents(invData.getInvetory());
                 } else if (transferData instanceof CommandBlockTransferHolder) {
                     CommandBlockTransferHolder cbData = (CommandBlockTransferHolder) transferData;
-                    CommandBlock cblock = (CommandBlock) w.getBlockAt(l.x, l.y, l.z).getState();
+                    CommandBlock cblock = (CommandBlock) w.getBlockAt(entry.getKey().x, entry
+                            .getKey().y, entry.getKey().z).getState();
                     cblock.setCommand(cbData.getText());
                     cblock.setName(cbData.getName());
                     cblock.update();
                 }
-                w.getBlockAt(l.x, l.y, l.z).setData(transferData.getData());
+                w.getBlockAt(entry.getKey().x, entry.getKey
+                        ().y, entry
+                        .getKey().z).setData(transferData.getData());
             } catch (IndexOutOfBoundsException e) {
                 Movecraft.getInstance().getLogger().log(Level.SEVERE, "Severe error in map updater");
             } catch (IllegalArgumentException e) {
@@ -429,11 +437,11 @@ Changed for 1.8, and quite possibly wrong:
                 150, 151, 171, 323, 324, 330, 331, 356, 404};
         Arrays.sort(fragileBlocks);
 
-        for (World w : updates.keySet()) {
-            if (w != null) {
-                List<MapUpdateCommand> updatesInWorld = updates.get(w);
-                List<EntityUpdateCommand> entityUpdatesInWorld = entityUpdates.get(w);
-                List<ItemDropUpdateCommand> itemDropUpdatesInWorld = itemDropUpdates.get(w);
+        for (Map.Entry<World, ArrayList<MapUpdateCommand>> entry : updates.entrySet()) {
+            if (entry.getKey() != null) {
+                List<MapUpdateCommand> updatesInWorld = entry.getValue();
+                List<EntityUpdateCommand> entityUpdatesInWorld = entityUpdates.get(entry.getKey());
+                List<ItemDropUpdateCommand> itemDropUpdatesInWorld = itemDropUpdates.get(entry.getKey());
                 Map<MovecraftLocation, List<EntityUpdateCommand>> entityMap = new HashMap<>();
                 Map<MovecraftLocation, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
                 Map<MovecraftLocation, TransferData> dataMap = new HashMap<>();
@@ -457,18 +465,19 @@ Changed for 1.8, and quite possibly wrong:
 
                     if (l != null) {
                         // keep track of the light levels that were present before moving the craft
-                        origLightMap.put(l, w.getBlockAt(l.x, l.y, l.z).getLightLevel());
+                        origLightMap.put(l, entry.getKey().getBlockAt(l.x, l.y, l.z).getLightLevel());
 
                         // keep track of block data for later reconstruction
-                        TransferData blockDataPacket = getBlockDataPacket(w.getBlockAt(l.x, l.y, l.z).getState(),
-                                                                          c.getRotation());
+                        TransferData blockDataPacket = getBlockDataPacket(
+                                entry.getKey().getBlockAt(l.x, l.y, l.z).getState(),
+                                c.getRotation());
                         if (blockDataPacket != null) {
                             dataMap.put(c.getNewBlockLocation(), blockDataPacket);
                         }
 
                         //remove dispensers and replace them with half slabs to prevent them firing during
                         // reconstruction
-                        if (w.getBlockAt(l.x, l.y, l.z).getTypeId() == 23) {
+                        if (entry.getKey().getBlockAt(l.x, l.y, l.z).getTypeId() == 23) {
                             MapUpdateCommand blankCommand = new MapUpdateCommand(c.getOldBlockLocation(), 23,
                                                                                  c.getDataID(), c.getCraft());
 //							if(Settings.CompatibilityMode) {
@@ -479,7 +488,7 @@ Changed for 1.8, and quite possibly wrong:
                         }
                         //remove redstone blocks and replace them with stone to prevent redstone activation during
                         // reconstruction
-                        if (w.getBlockAt(l.x, l.y, l.z).getTypeId() == 152) {
+                        if (entry.getKey().getBlockAt(l.x, l.y, l.z).getTypeId() == 152) {
                             MapUpdateCommand blankCommand = new MapUpdateCommand(c.getOldBlockLocation(), 1, (byte) 0,
                                                                                  c.getCraft());
 //							if(Settings.CompatibilityMode) {
@@ -490,11 +499,12 @@ Changed for 1.8, and quite possibly wrong:
                         }
                         //remove water and lava blocks and replace them with stone to prevent spillage during
                         // reconstruction
-                        if (w.getBlockAt(l.x, l.y, l.z).getTypeId() >= 8 &&
-                            w.getBlockAt(l.x, l.y, l.z).getTypeId() <= 11) {
+                        if (entry.getKey().getBlockAt(l.x, l.y, l.z).getTypeId() >= 8 &&
+                            entry.getKey().getBlockAt(l.x, l.y, l.z).getTypeId() <= 11) {
                             MapUpdateCommand blankCommand = new MapUpdateCommand(c.getOldBlockLocation(), 0, (byte) 0,
                                                                                  c.getCraft());
-                            updateBlock(blankCommand, w, dataMap, chunks, cmChunks, origLightMap, false);
+                            updateBlock(blankCommand, entry.getKey(), dataMap, chunks, cmChunks,
+                                        origLightMap, false);
                         }
                     }
                 }
@@ -522,8 +532,8 @@ Changed for 1.8, and quite possibly wrong:
                                     int distx = Math.abs(muc.getNewBlockLocation().x - i.getNewLocation().getBlockX());
                                     int distz = Math.abs(muc.getNewBlockLocation().z - i.getNewLocation().getBlockZ());
                                     if (disty < 2 && distx < 2 && distz < 2) {
-                                        updateBlock(muc, w, dataMap, chunks, cmChunks, origLightMap, false);
-                                        Location nloc = new Location(w, muc.getNewBlockLocation().x,
+                                        updateBlock(muc, entry.getKey(), dataMap, chunks, cmChunks, origLightMap, false);
+                                        Location nloc = new Location(entry.getKey(), muc.getNewBlockLocation().x,
                                                                      muc.getNewBlockLocation().y,
                                                                      muc.getNewBlockLocation().z);
                                         p.sendBlockChange(nloc, muc.getTypeID(), muc.getDataID());
@@ -539,8 +549,8 @@ Changed for 1.8, and quite possibly wrong:
                 for (MapUpdateCommand i : updatesInWorld) {
                     if (i != null) {
                         if (i.getTypeID() >= 0) {
-                            int prevType = w.getBlockAt(i.getNewBlockLocation().x, i.getNewBlockLocation().y,
-                                                        i.getNewBlockLocation().z).getTypeId();
+                            int prevType = entry.getKey().getBlockAt(i.getNewBlockLocation().x, i.getNewBlockLocation().y,
+                                                                                   i.getNewBlockLocation().z).getTypeId();
                             boolean prevIsFragile = (Arrays.binarySearch(fragileBlocks, prevType) >= 0);
                             boolean isFragile = (Arrays.binarySearch(fragileBlocks, i.getTypeID()) >= 0);
                             if (prevIsFragile && (!isFragile)) {
@@ -574,7 +584,7 @@ Changed for 1.8, and quite possibly wrong:
                                 if (m.getTypeID() < -10) { // don't bother with tiny explosions
                                     float explosionPower = m.getTypeID();
                                     explosionPower = 0.0F - explosionPower / 100.0F;
-                                    Location loc = new Location(w, m.getNewBlockLocation().x + 0.5,
+                                    Location loc = new Location(entry.getKey(), m.getNewBlockLocation().x + 0.5,
                                                                 m.getNewBlockLocation().y + 0.5,
                                                                 m.getNewBlockLocation().z);
                                     this.createExplosion(loc, explosionPower);
@@ -687,9 +697,9 @@ Changed for 1.8, and quite possibly wrong:
                 for (MapUpdateCommand i : updatesInWorld) {
                     if (i != null) {
                         if (i.getSmoke() == 1) {
-                            Location loc = new Location(w, i.getNewBlockLocation().x, i.getNewBlockLocation().y,
+                            Location loc = new Location(entry.getKey(), i.getNewBlockLocation().x, i.getNewBlockLocation().y,
                                                         i.getNewBlockLocation().z);
-                            w.playEffect(loc, Effect.SMOKE, 4);
+                            entry.getKey().playEffect(loc, Effect.SMOKE, 4);
                         }
                     }
                 }
@@ -701,7 +711,7 @@ Changed for 1.8, and quite possibly wrong:
                              .broadcastMessage("Map update setup took (ms): " + (endTime - startTime));
                 }
                 try {
-                    runQueue(queuedMapUpdateCommands, queuedPlaceDispensers, w, chunks, cmChunks, origLightMap, dataMap,
+                    runQueue(queuedMapUpdateCommands, queuedPlaceDispensers, entry.getKey(), chunks, cmChunks, origLightMap, dataMap,
                              updatesInWorld, entityMap);
                 } catch (Exception e) {
                     StringWriter sw = new StringWriter();
@@ -763,7 +773,7 @@ Changed for 1.8, and quite possibly wrong:
                 if (itemDropUpdatesInWorld != null) {
                     for (ItemDropUpdateCommand i : itemDropUpdatesInWorld) {
                         if (i != null) {
-                            final World world = w;
+                            final World world = entry.getKey();
                             final Location loc = i.getLocation();
                             final ItemStack stack = i.getItemStack();
                             if (i.getItemStack() instanceof ItemStack) {

@@ -309,16 +309,18 @@ public class WorldEditInteractListener implements Listener {
                 // check all the chests for materials for the repair
                 Map<Integer, ArrayList<InventoryHolder>> chestsToTakeFrom = new HashMap<>(); // typeid, list of chest inventories
                 boolean enoughMaterial = true;
-                for (Integer typeID : numMissingItems.keySet()) {
-                    int remainingQty = numMissingItems.get(typeID);
+                for (Map.Entry<Integer, Integer> entry : numMissingItems.entrySet()) {
+                    int remainingQty = entry.getValue();
+                    final int itemTypeId = entry.getKey();
                     ArrayList<InventoryHolder> chests = new ArrayList<>();
+
                     for (MovecraftLocation loc : pCraft.getBlockList()) {
                         Block b = pCraft.getW().getBlockAt(loc.x, loc.y, loc.z);
                         if ((b.getTypeId() == 54) || (b.getTypeId() == 146)) {
                             InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
-                            if (inventoryHolder.getInventory().contains(typeID) && remainingQty > 0) {
+                            if (inventoryHolder.getInventory().contains(itemTypeId) && remainingQty > 0) {
                                 Map<Integer, ? extends ItemStack> foundItems = inventoryHolder.getInventory()
-                                                                                              .all(typeID);
+                                                                                              .all(itemTypeId);
                                 // count how many were in the chest
                                 int numfound = 0;
                                 for (ItemStack istack : foundItems.values()) {
@@ -332,10 +334,10 @@ public class WorldEditInteractListener implements Listener {
                     if (remainingQty > 0) {
                         event.getPlayer().sendMessage(String.format(
                                 I18nSupport.getInternationalisedString("Need more of material") + ": %s - %d",
-                                Material.getMaterial(typeID).name().toLowerCase().replace("_", " "), remainingQty));
+                                Material.getMaterial(itemTypeId).name().toLowerCase().replace("_", " "), remainingQty));
                         enoughMaterial = false;
                     } else {
-                        chestsToTakeFrom.put(typeID, chests);
+                        chestsToTakeFrom.put(itemTypeId, chests);
                     }
                 }
                 if (Movecraft.getInstance().getEconomy() != null && enoughMaterial) {
@@ -350,11 +352,12 @@ public class WorldEditInteractListener implements Listener {
                 }
                 if (enoughMaterial) {
                     // we know we have enough materials to make the repairs, so remove the materials from the chests
-                    for (Integer typeID : numMissingItems.keySet()) {
-                        int remainingQty = numMissingItems.get(typeID);
-                        for (InventoryHolder inventoryHolder : chestsToTakeFrom.get(typeID)) {
+                    for (Map.Entry<Integer, Integer> entry : numMissingItems.entrySet()) {
+                        int remainingQty = entry.getValue();
+                        final Integer itemType = entry.getKey();
+                        for (InventoryHolder inventoryHolder : chestsToTakeFrom.get(itemType)) {
                             Map<Integer, ? extends ItemStack> foundItems = inventoryHolder.getInventory()
-                                                                                          .all(typeID);
+                                                                                          .all(itemType);
                             for (ItemStack istack : foundItems.values()) {
                                 if (istack.getAmount() <= remainingQty) {
                                     remainingQty -= istack.getAmount();
@@ -442,11 +445,13 @@ public class WorldEditInteractListener implements Listener {
                 if (numdiffblocks != 0) {
                     event.getPlayer()
                          .sendMessage(I18nSupport.getInternationalisedString("SUPPLIES NEEDED"));
-                    for (Integer blockTypeInteger : numMissingItems.keySet()) {
+                    for (Map.Entry<Integer, Integer> entry : numMissingItems.entrySet()) {
+                        final Integer itemType = entry.getKey();
+                        final Integer amount = entry.getValue();
                         event.getPlayer().sendMessage(String.format("%s : %d",
-                                                                    Material.getMaterial(blockTypeInteger).name()
+                                                                    Material.getMaterial(itemType).name()
                                                                             .toLowerCase().replace("_", " "),
-                                                                    numMissingItems.get(blockTypeInteger)));
+                                                                    amount));
                     }
                     int durationInSeconds = numdiffblocks * Settings.RepairTicksPerBlock / 20;
                     event.getPlayer().sendMessage(

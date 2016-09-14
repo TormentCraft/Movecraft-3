@@ -435,17 +435,17 @@ public class DetectionTask extends AsyncTask {
                 return false;
             }
         }
-        for (ArrayList<Integer> i : flyBlocks.keySet()) {
-            Integer numberOfBlocks = countData.get(i);
+        for (Map.Entry<ArrayList<Integer>, ArrayList<Double>> entry : flyBlocks.entrySet()) {
+            Integer numberOfBlocks = countData.get(entry.getKey());
 
             if (numberOfBlocks == null) {
                 numberOfBlocks = 0;
             }
 
             float blockPercentage = (((float) numberOfBlocks / data.getBlockList().length) * 100);
-            Double minPercentage = flyBlocks.get(i).get(0);
-            Double maxPercentage = flyBlocks.get(i).get(1);
-            String blockName = BlockNames.itemName(i.get(0));
+            Double minPercentage = entry.getValue().get(0);
+            Double maxPercentage = entry.getValue().get(1);
+            String blockName = BlockNames.itemName(entry.getKey().get(0));
 
             if (minPercentage < 10000.0) {
                 if (blockPercentage < minPercentage) {
@@ -455,9 +455,10 @@ public class DetectionTask extends AsyncTask {
                     return false;
                 }
             } else {
-                if (numberOfBlocks < flyBlocks.get(i).get(0) - 10000.0) {
+                if (numberOfBlocks < entry.getValue().get(0) - 10000.0) {
                     fail(String.format(I18nSupport.getInternationalisedString("Not enough flyblock") + ": %s %d < %d",
-                                       blockName, numberOfBlocks, flyBlocks.get(i).get(0).intValue() - 10000));
+                                       blockName, numberOfBlocks,
+                                       entry.getValue().get(0).intValue() - 10000));
                     return false;
                 }
             }
@@ -469,9 +470,10 @@ public class DetectionTask extends AsyncTask {
                     return false;
                 }
             } else {
-                if (numberOfBlocks > flyBlocks.get(i).get(1) - 10000.0) {
+                if (numberOfBlocks > entry.getValue().get(1) - 10000.0) {
                     fail(String.format(I18nSupport.getInternationalisedString("Too much flyblock") + ": %s %d > %d",
-                                       blockName, numberOfBlocks, flyBlocks.get(i).get(1).intValue() - 10000));
+                                       blockName, numberOfBlocks,
+                                       entry.getValue().get(1).intValue() - 10000));
                     return false;
                 }
             }

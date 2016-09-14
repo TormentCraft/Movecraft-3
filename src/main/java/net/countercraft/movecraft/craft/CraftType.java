@@ -131,19 +131,19 @@ public class CraftType {
 
         HashMap<ArrayList<Integer>, ArrayList<Double>> returnMap = new HashMap<>();
         HashMap<Object, Object> objMap = (HashMap<Object, Object>) obj;
-        for (Object i : objMap.keySet()) {
+        for (Map.Entry<Object, Object> entry : objMap.entrySet()) {
             ArrayList<Integer> rowList = new ArrayList<>();
 
             // first read in the list of the blocks that type of flyblock. It could be a single string (with or
             // without a ":") or integer, or it could be multiple of them
-            if (i instanceof ArrayList<?>) {
-                for (Object o : (ArrayList<Object>) i) {
+            if (entry.getKey() instanceof ArrayList<?>) {
+                for (Object o : (ArrayList<Object>) entry.getKey()) {
                     rowList.add(blockIDFromObject(o));
                 }
-            } else rowList.add(blockIDFromObject(i));
+            } else rowList.add(blockIDFromObject(entry.getKey()));
 
             // then read in the limitation values, low and high
-            ArrayList<Object> objList = (ArrayList<Object>) objMap.get(i);
+            ArrayList<Object> objList = (ArrayList<Object>) entry.getValue();
             ArrayList<Double> limitList = new ArrayList<>();
             for (Object limitObj : objList) {
                 if (limitObj instanceof String) {

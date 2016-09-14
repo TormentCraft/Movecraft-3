@@ -101,10 +101,10 @@ public class CraftHelpListener implements CommandExecutor {
     private void appendFlyBlocks(StringBuilder sbReq, StringBuilder sbLimit,
                                  Map<ArrayList<Integer>, ArrayList<Double>> flyBlocks)
     {
-        for (ArrayList<Integer> i : flyBlocks.keySet()) {
-            String blockName = BlockNames.itemName(i.get(0));
-            Double minPercentage = flyBlocks.get(i).get(0);
-            Double maxPercentage = flyBlocks.get(i).get(1);
+        for (Map.Entry<ArrayList<Integer>, ArrayList<Double>> entry : flyBlocks.entrySet()) {
+            String blockName = BlockNames.itemName(entry.getKey().get(0));
+            Double minPercentage = entry.getValue().get(0);
+            Double maxPercentage = entry.getValue().get(1);
 
             if (minPercentage > 0.01) {
                 if (sbReq.length() > 0) sbReq.append(", ");

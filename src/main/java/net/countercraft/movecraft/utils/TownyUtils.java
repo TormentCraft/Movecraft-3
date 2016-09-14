@@ -192,22 +192,22 @@ public final class TownyUtils {
     private static void saveWorldLimits() {
         Map<String, TownyWorldHeightLimits> worldsMap = Settings.TownProtectionHeightLimits;
         Map<String, Object> townyWorldsMap = new HashMap<>();
-        Set<String> worlds = worldsMap.keySet();
 
-        for (String world : worlds) {
-            World w = Movecraft.getInstance().getServer().getWorld(world);
+        for (Map.Entry<String, TownyWorldHeightLimits> entry : worldsMap.entrySet()) {
+            World w = Movecraft.getInstance().getServer().getWorld(entry.getKey());
             if (w != null) {
                 TownyWorld tw = getTownyWorld(w);
                 if (tw != null) {
                     if (tw.isUsingTowny()) {
                         Map<String, Integer> townyTWorldMap = new HashMap<>();
-                        TownyWorldHeightLimits twhl = worldsMap.get(world);
+                        TownyWorldHeightLimits twhl = entry.getValue();
                         townyTWorldMap.put(TOWN_MIN, twhl.world_min);
                         townyTWorldMap.put(TOWN_MAX, twhl.world_max);
                         townyTWorldMap.put(TOWN_ABOVE, twhl.above_town);
                         townyTWorldMap.put(TOWN_UNDER, twhl.under_town);
-                        townyWorldsMap.put(world, townyTWorldMap);
-                        Movecraft.getInstance().getConfig().set(TOWN_HEIGHT_LIMITS + "." + world, townyTWorldMap);
+                        townyWorldsMap.put(entry.getKey(), townyTWorldMap);
+                        Movecraft.getInstance().getConfig().set(TOWN_HEIGHT_LIMITS + "." +
+                                                                entry.getKey(), townyTWorldMap);
                     }
                 }
             }

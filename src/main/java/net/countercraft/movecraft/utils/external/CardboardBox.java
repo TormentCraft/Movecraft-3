@@ -35,8 +35,8 @@ public class CardboardBox implements Serializable {
 
         Map<Enchantment, Integer> enchantments = item.getEnchantments();
 
-        for (Enchantment enchantment : enchantments.keySet()) {
-            map.put(new CardboardEnchantment(enchantment), enchantments.get(enchantment));
+        for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
+            map.put(new CardboardEnchantment(entry.getKey()), entry.getValue());
         }
 
         this.enchants = map;
@@ -47,8 +47,8 @@ public class CardboardBox implements Serializable {
 
         Map<Enchantment, Integer> map = new HashMap<>();
 
-        for (CardboardEnchantment cEnchantment : enchants.keySet()) {
-            map.put(cEnchantment.unbox(), enchants.get(cEnchantment));
+        for (Map.Entry<CardboardEnchantment, Integer> entry : enchants.entrySet()) {
+            map.put(entry.getKey().unbox(), entry.getValue());
         }
 
         item.addUnsafeEnchantments(map);

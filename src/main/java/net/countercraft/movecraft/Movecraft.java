@@ -152,19 +152,19 @@ public class Movecraft extends JavaPlugin {
             Settings.SiegeControlRegion = new HashMap<>();
             Settings.SiegeDelay = new HashMap<>();
             Settings.SiegeDuration = new HashMap<>();
-            for (String siegeName : siegesMap.keySet()) {
-                Settings.SiegeRegion.put(siegeName, (String) siegesMap.get(siegeName).get("SiegeRegion"));
-                Settings.SiegeCraftsToWin
-                        .put(siegeName, (ArrayList<String>) siegesMap.get(siegeName).get("CraftsToWin"));
-                Settings.SiegeCost.put(siegeName, (Integer) siegesMap.get(siegeName).get("CostToSiege"));
-                Settings.SiegeDoubleCost
-                        .put(siegeName, (Boolean) siegesMap.get(siegeName).get("DoubleCostPerOwnedSiegeRegion"));
-                Settings.SiegeIncome.put(siegeName, (Integer) siegesMap.get(siegeName).get("DailyIncome"));
-                Settings.SiegeScheduleStart.put(siegeName, (Integer) siegesMap.get(siegeName).get("ScheduleStart"));
-                Settings.SiegeScheduleEnd.put(siegeName, (Integer) siegesMap.get(siegeName).get("ScheduleEnd"));
-                Settings.SiegeControlRegion.put(siegeName, (String) siegesMap.get(siegeName).get("RegionToControl"));
-                Settings.SiegeDelay.put(siegeName, (Integer) siegesMap.get(siegeName).get("DelayBeforeStart"));
-                Settings.SiegeDuration.put(siegeName, (Integer) siegesMap.get(siegeName).get("SiegeDuration"));
+            for (Map.Entry<String, Map> entry : siegesMap.entrySet()) {
+                final Map siegeInfo = entry.getValue();
+                final String siegeName = entry.getKey();
+                Settings.SiegeRegion.put(siegeName, (String) siegeInfo.get("SiegeRegion"));
+                Settings.SiegeCraftsToWin.put(siegeName, (ArrayList<String>) siegeInfo.get("CraftsToWin"));
+                Settings.SiegeCost.put(siegeName, (Integer) siegeInfo.get("CostToSiege"));
+                Settings.SiegeDoubleCost.put(siegeName, (Boolean) siegeInfo.get("DoubleCostPerOwnedSiegeRegion"));
+                Settings.SiegeIncome.put(siegeName, (Integer) siegeInfo.get("DailyIncome"));
+                Settings.SiegeScheduleStart.put(siegeName, (Integer) siegeInfo.get("ScheduleStart"));
+                Settings.SiegeScheduleEnd.put(siegeName, (Integer) siegeInfo.get("ScheduleEnd"));
+                Settings.SiegeControlRegion.put(siegeName, (String) siegeInfo.get("RegionToControl"));
+                Settings.SiegeDelay.put(siegeName, (Integer) siegeInfo.get("DelayBeforeStart"));
+                Settings.SiegeDuration.put(siegeName, (Integer) siegeInfo.get("SiegeDuration"));
             }
             logger.log(Level.INFO, "Siege configuration loaded.");
         }
