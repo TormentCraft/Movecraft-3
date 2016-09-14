@@ -303,8 +303,8 @@ Changed for 1.8, and quite possibly wrong:
                         sign.update(true, false);
                     }
                 } else if (transferData instanceof StorageCrateTransferHolder) {
-                    Inventory inventory = Bukkit.createInventory(null, 27, String.format(
-                            I18nSupport.getInternationalisedString("Item - Storage Crate name")));
+                    Inventory inventory = Bukkit.createInventory(null, 27,
+                                                                 I18nSupport.getInternationalisedString("Item - Storage Crate name"));
                     inventory.setContents(((StorageCrateTransferHolder) transferData).getInvetory());
                     StorageChestItem.setInventoryOfCrateAtLocation(inventory, l, w);
                 } else if (transferData instanceof InventoryTransferHolder) {

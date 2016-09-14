@@ -280,10 +280,9 @@ public class Movecraft extends JavaPlugin {
 
         I18nSupport.init();
         if (shuttingDown && Settings.IGNORE_RESET) {
-            logger.log(Level.SEVERE,
-                       String.format(I18nSupport.getInternationalisedString("Startup - Error - Reload error")));
-            logger.log(Level.INFO, String.format(
-                    I18nSupport.getInternationalisedString("Startup - Error - Disable warning for reload")));
+            logger.log(Level.SEVERE, I18nSupport.getInternationalisedString("Startup - Error - Reload error"));
+            logger.log(Level.INFO,
+                       I18nSupport.getInternationalisedString("Startup - Error - Disable warning for reload"));
             getPluginLoader().disablePlugin(this);
         } else {
 

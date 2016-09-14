@@ -147,17 +147,17 @@ public class DetectionTask extends AsyncTask {
                             foundPilot = true;
                         }
                         if (!foundPilot && (!data.getPlayer().hasPermission("movecraft.bypasslock"))) {
-                            fail(String.format(I18nSupport.getInternationalisedString(
-                                    "Not one of the registered pilots on this craft")));
+                            fail(I18nSupport.getInternationalisedString(
+                                    "Not one of the registered pilots on this craft"));
                         }
                     }
                 }
             }
 
             if (isForbiddenBlock(testID, testData)) {
-                fail(String.format(I18nSupport.getInternationalisedString("Detection - Forbidden block found") +
-                                   String.format("\nInvalid Block: %s at (%d, %d, %d)",
-                                                 BlockNames.itemName(testID, testData, true), x, y, z)));
+                fail(I18nSupport.getInternationalisedString("Detection - Forbidden block found") +
+                     String.format("\nInvalid Block: %s at (%d, %d, %d)",
+                                                 BlockNames.itemName(testID, testData, true), x, y, z));
             } else if (isAllowedBlock(testID, testData)) {
                 //check for double chests
                 if (testID == 54) {
@@ -175,8 +175,7 @@ public class DetectionTask extends AsyncTask {
                         foundDoubleChest = true;
                     }
                     if (foundDoubleChest) {
-                        fail(String.format(
-                                I18nSupport.getInternationalisedString("Detection - ERROR: Double chest found")));
+                        fail(I18nSupport.getInternationalisedString("Detection - ERROR: Double chest found"));
                     }
                 }
                 //check for double trapped chests
@@ -195,8 +194,7 @@ public class DetectionTask extends AsyncTask {
                         foundDoubleChest = true;
                     }
                     if (foundDoubleChest) {
-                        fail(String.format(
-                                I18nSupport.getInternationalisedString("Detection - ERROR: Double chest found")));
+                        fail(I18nSupport.getInternationalisedString("Detection - ERROR: Double chest found"));
                     }
                 }
 
@@ -432,8 +430,8 @@ public class DetectionTask extends AsyncTask {
     {
         if (getCraft().getType().getRequireWaterContact() == true) {
             if (data.getWaterContact() == false) {
-                fail(String.format(I18nSupport.getInternationalisedString(
-                        "Detection - Failed - Water contact required but not found")));
+                fail(I18nSupport.getInternationalisedString(
+                        "Detection - Failed - Water contact required but not found"));
                 return false;
             }
         }

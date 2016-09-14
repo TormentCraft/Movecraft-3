@@ -190,8 +190,7 @@ public class RotationTask extends AsyncTask {
                 }
                 if (fuelHolder == null) {
                     failed = true;
-                    failMessage = String
-                            .format(I18nSupport.getInternationalisedString("Translation - Failed Craft out of fuel"));
+                    failMessage = I18nSupport.getInternationalisedString("Translation - Failed Craft out of fuel");
                 } else {
                     InventoryHolder inventoryHolder = (InventoryHolder) fuelHolder.getState();
                     if (inventoryHolder.getInventory().contains(263)) {
@@ -601,7 +600,7 @@ public class RotationTask extends AsyncTask {
                         // found a parent craft
                         if (craft.isNotProcessing() == false) {
                             failed = true;
-                            failMessage = String.format(I18nSupport.getInternationalisedString("Parent Craft is busy"));
+                            failMessage = I18nSupport.getInternationalisedString("Parent Craft is busy");
                             return;
                         }
 

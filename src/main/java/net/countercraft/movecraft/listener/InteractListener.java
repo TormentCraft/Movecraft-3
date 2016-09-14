@@ -73,14 +73,14 @@ public class InteractListener implements Listener {
                         }
 
                     if (foundCraft == null) {
-                        event.getPlayer().sendMessage(String.format(I18nSupport.getInternationalisedString(
-                                "ERROR: Remote Sign must be a part of a piloted craft!")));
+                        event.getPlayer().sendMessage(I18nSupport.getInternationalisedString(
+                                "ERROR: Remote Sign must be a part of a piloted craft!"));
                         return;
                     }
 
                     if (foundCraft.getType().allowRemoteSign() == false) {
-                        event.getPlayer().sendMessage(String.format(I18nSupport.getInternationalisedString(
-                                "ERROR: Remote Signs not allowed on this craft!")));
+                        event.getPlayer().sendMessage(I18nSupport.getInternationalisedString(
+                                "ERROR: Remote Signs not allowed on this craft!"));
                         return;
                     }
 
@@ -111,8 +111,8 @@ public class InteractListener implements Listener {
                         }
                     }
                     if (foundLoc == null) {
-                        event.getPlayer().sendMessage(String.format(
-                                I18nSupport.getInternationalisedString("ERROR: Could not find target sign!")));
+                        event.getPlayer().sendMessage(
+                                I18nSupport.getInternationalisedString("ERROR: Could not find target sign!"));
                         return;
                     }
 
@@ -189,7 +189,7 @@ public class InteractListener implements Listener {
                             }
                         } else {
                             event.getPlayer().sendMessage(
-                                    String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                                    I18nSupport.getInternationalisedString("Insufficient Permissions"));
                         }
                     }
                 }
@@ -236,7 +236,7 @@ public class InteractListener implements Listener {
                             event.setCancelled(true);
                         } else {
                             event.getPlayer().sendMessage(
-                                    String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                                    I18nSupport.getInternationalisedString("Insufficient Permissions"));
                         }
                     }
                 }
@@ -295,7 +295,7 @@ public class InteractListener implements Listener {
                 event.setCancelled(true);
             } else {
                 event.getPlayer()
-                     .sendMessage(String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                     .sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
             }
         } else if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("[helm]")) {
             sign.setLine(0, "\\  ||  /");
@@ -341,8 +341,7 @@ public class InteractListener implements Listener {
                         event.setCancelled(true);
                     }
                 } else {
-                    event.getPlayer().sendMessage(
-                            String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                    event.getPlayer().sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 }
             }
         } else if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Subcraft Rotate")) {
@@ -386,8 +385,7 @@ public class InteractListener implements Listener {
                     timeMap.put(event.getPlayer(), System.currentTimeMillis());
                     event.setCancelled(true);
                 } else {
-                    event.getPlayer().sendMessage(
-                            String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                    event.getPlayer().sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 }
             }
         } else if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Cruise: OFF")) {
@@ -484,8 +482,7 @@ public class InteractListener implements Listener {
                         ;
                     }
                 } else {
-                    event.getPlayer().sendMessage(
-                            String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                    event.getPlayer().sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 }
             }
         } else if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Release")) {
@@ -534,8 +531,7 @@ public class InteractListener implements Listener {
                                     .setLastCruisUpdate(System.currentTimeMillis());
                     }
                 } else {
-                    event.getPlayer().sendMessage(
-                            String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                    event.getPlayer().sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 }
             }
         } else if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("RMove:")) {
@@ -603,8 +599,7 @@ public class InteractListener implements Listener {
                                     .setLastCruisUpdate(System.currentTimeMillis());
                     }
                 } else {
-                    event.getPlayer().sendMessage(
-                            String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                    event.getPlayer().sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 }
             }
         }
@@ -714,7 +709,7 @@ public class InteractListener implements Listener {
                             }
                         } else {
                             event.getPlayer().sendMessage(
-                                    String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                                    I18nSupport.getInternationalisedString("Insufficient Permissions"));
                         }
                     }
                 }
@@ -731,18 +726,18 @@ public class InteractListener implements Listener {
                             craft.setPilotLockedX(event.getPlayer().getLocation().getBlockX() + 0.5);
                             craft.setPilotLockedY(event.getPlayer().getLocation().getY());
                             craft.setPilotLockedZ(event.getPlayer().getLocation().getBlockZ() + 0.5);
-                            event.getPlayer().sendMessage(String.format(
-                                    I18nSupport.getInternationalisedString("Entering Direct Control Mode")));
+                            event.getPlayer().sendMessage(
+                                    I18nSupport.getInternationalisedString("Entering Direct Control Mode"));
                             event.setCancelled(true);
                             return;
                         } else {
                             event.getPlayer().sendMessage(
-                                    String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                                    I18nSupport.getInternationalisedString("Insufficient Permissions"));
                         }
                     } else {
                         craft.setPilotLocked(false);
                         event.getPlayer().sendMessage(
-                                String.format(I18nSupport.getInternationalisedString("Leaving Direct Control Mode")));
+                                I18nSupport.getInternationalisedString("Leaving Direct Control Mode"));
                         event.setCancelled(true);
                         return;
                     }

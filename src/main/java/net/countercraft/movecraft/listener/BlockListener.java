@@ -69,7 +69,7 @@ public class BlockListener implements Listener {
         } else if (e.getItemInHand().getItemMeta() != null &&
                    e.getItemInHand().getItemMeta().getDisplayName() != null &&
                    e.getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(
-                           String.format(I18nSupport.getInternationalisedString("Item - Storage Crate name")))) {
+                           I18nSupport.getInternationalisedString("Item - Storage Crate name"))) {
             e.getBlockPlaced().setTypeId(33);
             Location l = e.getBlockPlaced().getLocation();
             MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
@@ -132,8 +132,7 @@ public class BlockListener implements Listener {
                     }
                 }
             if (blockInCraft) {
-                e.getPlayer().sendMessage(
-                        String.format(I18nSupport.getInternationalisedString("BLOCK IS PART OF A PILOTED CRAFT")));
+                e.getPlayer().sendMessage(I18nSupport.getInternationalisedString("BLOCK IS PART OF A PILOTED CRAFT"));
                 e.setCancelled(true);
             }
         }
@@ -240,21 +239,20 @@ public class BlockListener implements Listener {
             }
             if (p.hasPermission("movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create") ==
                 false) {
-                p.sendMessage(String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                p.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Cruise: OFF") || signText.equalsIgnoreCase("Cruise: ON")) {
             if (p.hasPermission("movecraft.cruisesign") == false && Settings.RequireCreatePerm) {
-                p.sendMessage(String.format(I18nSupport.getInternationalisedString("Insufficient Permissions")));
+                p.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Crew:")) {
             String crewName = org.bukkit.ChatColor.stripColor(event.getLine(1));
             if (!p.getName().equalsIgnoreCase(crewName)) {
-                p.sendMessage(String.format(
-                        I18nSupport.getInternationalisedString("You can only create a Crew: sign for yourself")));
+                p.sendMessage(I18nSupport.getInternationalisedString("You can only create a Crew: sign for yourself"));
                 event.setLine(1, p.getName());
 //				event.setCancelled(true);
             }

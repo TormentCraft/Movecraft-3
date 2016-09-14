@@ -47,7 +47,7 @@ public class StorageChestItem {
     public StorageChestItem() {
         this.itemStack = new ItemStack(54, 1);
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(String.format(I18nSupport.getInternationalisedString("Item - Storage Crate name")));
+        itemMeta.setDisplayName(I18nSupport.getInternationalisedString("Item - Storage Crate name"));
         itemStack.setItemMeta(itemMeta);
     }
 
@@ -69,8 +69,8 @@ public class StorageChestItem {
     }
 
     public static void createNewInventory(MovecraftLocation l, World w) {
-        crateInventories.get(w).put(l, Bukkit.createInventory(null, 27, String.format(
-                I18nSupport.getInternationalisedString("Item - Storage Crate name"))));
+        crateInventories.get(w).put(l, Bukkit.createInventory(null, 27,
+                                                              I18nSupport.getInternationalisedString("Item - Storage Crate name")));
     }
 
     public static void addRecipie() {
@@ -149,8 +149,8 @@ public class StorageChestItem {
                     }
                 }
 
-                Inventory inv = Bukkit.createInventory(null, 27, String.format(
-                        I18nSupport.getInternationalisedString("Item - Storage Crate name")));
+                Inventory inv = Bukkit.createInventory(null, 27,
+                                                       I18nSupport.getInternationalisedString("Item - Storage Crate name"));
                 inv.setContents(is);
                 String[] split = s.split(" ");
                 World w = Movecraft.getInstance().getServer().getWorld(split[0]);

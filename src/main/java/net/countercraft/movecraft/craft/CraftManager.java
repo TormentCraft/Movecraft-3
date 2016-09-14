@@ -129,8 +129,7 @@ public class CraftManager {
         craftList.get(c.getW()).remove(c);
         Player pilot = getPlayerFromCraft(c);
         if (pilot != null) {
-            pilot.sendMessage(
-                    String.format(I18nSupport.getInternationalisedString("Release - Craft has been released message")));
+            pilot.sendMessage(I18nSupport.getInternationalisedString("Release - Craft has been released message"));
             Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
                     I18nSupport.getInternationalisedString("Release - Player has released a craft console"),
                     c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,
@@ -260,7 +259,7 @@ public class CraftManager {
         if (getPlayerFromCraft(c) != null) {
             removeReleaseTask(c);
             getPlayerFromCraft(c).sendMessage(
-                    String.format(I18nSupport.getInternationalisedString("Release - Craft has been released message")));
+                    I18nSupport.getInternationalisedString("Release - Craft has been released message"));
             Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
                     I18nSupport.getInternationalisedString("Release - Player has released a craft console"),
                     c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,
@@ -278,7 +277,7 @@ public class CraftManager {
     public final void addReleaseTask(final Craft c) {
         Player p = getPlayerFromCraft(c);
         if (!getReleaseEvents().containsKey(p)) {
-            p.sendMessage(String.format(I18nSupport.getInternationalisedString("Release - Player has left craft")));
+            p.sendMessage(I18nSupport.getInternationalisedString("Release - Player has left craft"));
             BukkitTask releaseTask = new BukkitRunnable() {
                 @Override public void run() {
                     removeCraft(c);

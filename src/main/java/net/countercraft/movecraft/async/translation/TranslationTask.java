@@ -239,8 +239,7 @@ public class TranslationTask extends AsyncTask {
                     }
                 }
                 if (fuelHolder == null) {
-                    fail(String.format(
-                            I18nSupport.getInternationalisedString("Translation - Failed Craft out of fuel")));
+                    fail(I18nSupport.getInternationalisedString("Translation - Failed Craft out of fuel"));
                 } else {
                     InventoryHolder inventoryHolder = (InventoryHolder) fuelHolder.getState();
                     if (inventoryHolder.getInventory().contains(263)) {
@@ -321,12 +320,10 @@ public class TranslationTask extends AsyncTask {
             MovecraftLocation newLoc = oldLoc.translate(data.getDx(), data.getDy(), data.getDz());
 
             if (newLoc.y > data.getMaxHeight() && newLoc.y > oldLoc.y) {
-                fail(String.format(
-                        I18nSupport.getInternationalisedString("Translation - Failed Craft hit height limit")));
+                fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit height limit"));
                 break;
             } else if (newLoc.y < data.getMinHeight() && newLoc.y < oldLoc.y && getCraft().getSinking() == false) {
-                fail(String.format(
-                        I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum height limit")));
+                fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum height limit"));
                 break;
             }
 
@@ -659,8 +656,8 @@ public class TranslationTask extends AsyncTask {
                             }
                             if (iFreeSpace > hoverLimit) {
                                 if (bladeOK) {
-                                    fail(String.format(I18nSupport.getInternationalisedString(
-                                            "Translation - Failed Craft hit height limit")));
+                                    fail(I18nSupport.getInternationalisedString(
+                                            "Translation - Failed Craft hit height limit"));
                                 } else {
                                     fail(String.format(I18nSupport.getInternationalisedString(
                                             "Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s", oldLoc.x,
@@ -803,7 +800,7 @@ public class TranslationTask extends AsyncTask {
             data.setBlockList(newBlockList);
             data.setUpdates(explosionSet.toArray(new MapUpdateCommand[1]));
 
-            fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft is obstructed")));
+            fail(I18nSupport.getInternationalisedString("Translation - Failed Craft is obstructed"));
             if (getCraft().getSinking() == true) {
                 if (getCraft().getType().getSinkPercent() != 0.0) {
                     getCraft().setLastBlockCheck(0);
@@ -1029,8 +1026,7 @@ public class TranslationTask extends AsyncTask {
             Material testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
             if (!canHoverOverWater) {
                 if (testMaterial.equals(Material.STATIONARY_WATER) || testMaterial.equals(Material.WATER)) {
-                    fail(String.format(
-                            I18nSupport.getInternationalisedString("Translation - Failed Craft over water")));
+                    fail(I18nSupport.getInternationalisedString("Translation - Failed Craft over water"));
                 }
             }
 
