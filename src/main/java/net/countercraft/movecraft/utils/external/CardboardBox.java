@@ -31,7 +31,7 @@ public class CardboardBox implements Serializable {
         this.damage = item.getDurability();
         this.data = item.getData().getData();
 
-        HashMap<CardboardEnchantment, Integer> map = new HashMap<>();
+        Map<CardboardEnchantment, Integer> map = new HashMap<>();
 
         Map<Enchantment, Integer> enchantments = item.getEnchantments();
 

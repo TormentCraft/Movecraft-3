@@ -1116,7 +1116,7 @@ public class TranslationTask extends AsyncTask {
             return;
         }
 
-        HashMap<Material, ArrayList<Block>> crates = new HashMap<>();
+        Map<Material, ArrayList<Block>> crates = new HashMap<>();
         HashSet<ItemDropUpdateCommand> itemDropUpdateSet = new HashSet<>();
         Set<Material> droppedSet = new HashSet<>();
         HashMap<MovecraftLocation, ItemStack[]> droppedMap = new HashMap<>();

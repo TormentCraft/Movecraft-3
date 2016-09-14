@@ -55,9 +55,9 @@ public class DetectionTask extends AsyncTask {
     private Integer maxZ;
     private Integer minY;
     private final Stack<MovecraftLocation> blockStack = new Stack<>();
-    private final HashSet<MovecraftLocation> blockList = new HashSet<>();
-    private final HashSet<MovecraftLocation> visited = new HashSet<>();
-    private final HashMap<ArrayList<Integer>, Integer> blockTypeCount = new HashMap<>();
+    private final Set<MovecraftLocation> blockList = new HashSet<>();
+    private final Set<MovecraftLocation> visited = new HashSet<>();
+    private final Map<ArrayList<Integer>, Integer> blockTypeCount = new HashMap<>();
     private Map<ArrayList<Integer>, ArrayList<Double>> dFlyBlocks;
     private final DetectionTaskData data;
 
@@ -91,9 +91,8 @@ public class DetectionTask extends AsyncTask {
 
     @Override public void excecute() {
 
-        HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks = (HashMap<ArrayList<Integer>, ArrayList<Double>>)
-                getCraft()
-                .getType().getFlyBlocks().clone();
+        Map<ArrayList<Integer>, ArrayList<Double>> flyBlocks = new HashMap<>(
+                getCraft().getType().getFlyBlocks());
         dFlyBlocks = flyBlocks;
 
         blockStack.push(startLocation);

@@ -46,7 +46,7 @@ public class CraftManager {
     private CraftType[] craftTypes;
     private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<>();
     private final Map<Player, Craft> craftPlayerIndex = new HashMap<>();
-    private final HashMap<Player, BukkitTask> releaseEvents = new HashMap<>();
+    private final Map<Player, BukkitTask> releaseEvents = new HashMap<>();
 
     public static CraftManager getInstance() {
         return ourInstance;

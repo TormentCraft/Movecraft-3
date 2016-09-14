@@ -223,7 +223,7 @@ public class RotationTask extends AsyncTask {
         // Rotate the block set
         MovecraftLocation[] centeredBlockList = new MovecraftLocation[blockList.length];
         MovecraftLocation[] originalBlockList = blockList.clone();
-        HashSet<MovecraftLocation> existingBlockSet = new HashSet<>(Arrays.asList(originalBlockList));
+        Set<MovecraftLocation> existingBlockSet = new HashSet<>(Arrays.asList(originalBlockList));
         Set<MapUpdateCommand> mapUpdates = new HashSet<>();
         HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<>();
 
