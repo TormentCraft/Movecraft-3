@@ -528,7 +528,7 @@ public class TranslationTask extends AsyncTask {
                             hoverCraft = false;
                         }
                     } else {
-                        // no way - reached MaxHeight during looking new way upstairss
+                        // no way - reached MaxHeight during looking new way upstairs
                         if (hoverUseGravity && newLoc.y - 1 >= data.getMinHeight()) {
                             //we are on the maximum of top
                             //if we can't go up so we test bottom side
@@ -634,7 +634,7 @@ public class TranslationTask extends AsyncTask {
                                 clearNewData = true;
                             }
                         } else if (hoverOver == 1 && !airCraft) {
-                            //prevent fly heigher than hoverLimit
+                            //prevent fly higher than hoverLimit
                             for (int ii = -1; ii > -hoverLimit - 2; ii--) {
                                 if (!isFreeSpace(data.getDx(), hoverOver + ii, data.getDz(), blocksList,
                                                  existingBlockSet, waterCraft, hoverCraft, harvestBlocks,
@@ -660,7 +660,7 @@ public class TranslationTask extends AsyncTask {
                                 break;
                             }
                         } else if (hoverOver > 1) {
-                            //prevent jump thru block
+                            //prevent jump through block
                             for (int ii = 1; ii < hoverOver - 1; ii++) {
                                 if (!isFreeSpace(0, ii, 0, blocksList, existingBlockSet, waterCraft, hoverCraft,
                                                  harvestBlocks, canHoverOverWater, checkHover)) {
@@ -677,7 +677,7 @@ public class TranslationTask extends AsyncTask {
                                 clearNewData = true;
                             }
                         } else if (hoverOver < -1) {
-                            //prevent jump thru block
+                            //prevent jump through block
                             for (int ii = -1; ii > hoverOver + 1; ii--) {
                                 if (!isFreeSpace(0, ii, 0, blocksList, existingBlockSet, waterCraft, hoverCraft,
                                                  harvestBlocks, canHoverOverWater, checkHover)) {
@@ -916,7 +916,7 @@ public class TranslationTask extends AsyncTask {
 
 //
 // /**********************************************************************************************************
-//                        *   I had problems with ListUtils (I tryied commons-collections 3.2.1. and 4.0 without
+//                        *   I had problems with ListUtils (I tried commons-collections 3.2.1. and 4.0 without
 // success)
 //                        *   so I replaced Lists with Sets
 //                        * 
@@ -1005,8 +1005,8 @@ public class TranslationTask extends AsyncTask {
                                 List<Material> harvestBlocks, boolean canHoverOverWater, boolean checkHover)
     {
         boolean isFree = true;
-        // this checking for hovercrafts should be faster with separating horizontal layers and checking only realy
-        // necesseries,
+        // this checking for hovercrafts should be faster with separating horizontal layers and checking only really
+        // necessaries,
         // or more better: remember what checked in each translation, but it's beyond my current abilities, I will
         // try to solve it in future
         for (MovecraftLocation oldLoc : blocksList) {
@@ -1288,7 +1288,7 @@ public class TranslationTask extends AsyncTask {
             mat == Material.WOODEN_DOOR ||
             mat == Material.IRON_DOOR_BLOCK
 //            ||                            
-//                mat.equals(Material.BANNER)    // Aparently Material.Banner was removed from the class
+//                mat.equals(Material.BANNER)    // Apparently Material.Banner was removed from the class
                 ) {
             if (getCraft().getW().getBlockAt(loc.x, loc.y + 1, loc.z).getType() == mat) {
                 MovecraftLocation tmpLoc = loc.translate(0, 1, 0);

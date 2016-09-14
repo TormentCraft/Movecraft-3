@@ -23,8 +23,8 @@ public final class BlockNames {
     public static String itemName(int blockId, int blockData, boolean hasData) {
         String tmp = null;
         try {
-            ItemStack stck = new ItemStack(Item.getById(blockId), 0, blockData);
-            tmp = stck == null ? null : stck.getName();
+            ItemStack stack = new ItemStack(Item.getById(blockId), 0, blockData);
+            tmp = stack == null ? null : stack.getName();
         } catch (Exception e) {
         }
         if (tmp == null || tmp.isEmpty()) {

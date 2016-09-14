@@ -1,7 +1,7 @@
 /*
  * This code is not part of the Movecraft project but belongs to NuclearW
  *
- *  Attribtuion : http://forums.bukkit.org/threads/cardboard-serializable-itemstack-with-enchantments.75768/
+ *  Attribution : http://forums.bukkit.org/threads/cardboard-serializable-itemstack-with-enchantments.75768/
  */
 
 package net.countercraft.movecraft.utils.external;
