@@ -316,7 +316,7 @@ public class Movecraft extends JavaPlugin {
 
             if (!Settings.DisableCrates) {
                 StorageChestItem.readFromDisk();
-                StorageChestItem.addRecipie();
+                StorageChestItem.addRecipe();
             }
 
             new MovecraftMetrics(CraftManager.getInstance().getCraftTypes().length);

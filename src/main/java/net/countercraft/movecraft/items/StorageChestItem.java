@@ -73,7 +73,7 @@ public class StorageChestItem {
                                                               I18nSupport.getInternationalisedString("Item - Storage Crate name")));
     }
 
-    public static void addRecipie() {
+    public static void addRecipe() {
         ShapedRecipe storageCrateRecipie = new ShapedRecipe(new StorageChestItem().getItemStack());
         storageCrateRecipie.shape("WWW", "WCW", "WWW");
         storageCrateRecipie.setIngredient('C', Material.CHEST);
