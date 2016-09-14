@@ -355,7 +355,6 @@ Changed for 1.8, and quite possibly wrong:
                         StringWriter sw = new StringWriter();
                         PrintWriter pw = new PrintWriter(sw);
                         e.printStackTrace(pw);
-                        sw.toString();
                         Movecraft.getInstance().getLogger().log(Level.SEVERE, sw.toString());
                     }
                 }
@@ -709,7 +708,6 @@ Changed for 1.8, and quite possibly wrong:
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
                     e.printStackTrace(pw);
-                    sw.toString();
                     Movecraft.getInstance().getLogger().log(Level.SEVERE, sw.toString());
                 }
 /*				} else {
