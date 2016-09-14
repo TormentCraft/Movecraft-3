@@ -6,7 +6,7 @@ import org.bukkit.Material;
 
 import java.util.Set;
 
-public class BlockNames {
+public final class BlockNames {
 
     public static String properCase(String text) {
         char[] chars = text.toCharArray();

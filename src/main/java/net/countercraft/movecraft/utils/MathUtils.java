@@ -19,7 +19,7 @@ package net.countercraft.movecraft.utils;
 
 import org.bukkit.Location;
 
-public class MathUtils {
+public final class MathUtils {
 
     public static boolean playerIsWithinBoundingPolygon(int[][][] box, int minX, int minZ, MovecraftLocation l) {
 

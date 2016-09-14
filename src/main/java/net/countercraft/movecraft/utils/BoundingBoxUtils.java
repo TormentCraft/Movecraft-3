@@ -17,7 +17,7 @@
 
 package net.countercraft.movecraft.utils;
 
-public class BoundingBoxUtils {
+public final class BoundingBoxUtils {
 
     public static int[][][] formBoundingBox(MovecraftLocation[] blockList, Integer minX, Integer maxX, Integer minZ,
                                             Integer maxZ)

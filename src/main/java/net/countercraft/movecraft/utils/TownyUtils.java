@@ -31,7 +31,7 @@ import java.util.logging.Level;
 /**
  * @author mwkaicz <mwkaicz@gmail.com>
  */
-public class TownyUtils {
+public final class TownyUtils {
     public static final String TOWN_MIN = "worldMin";
     public static final String TOWN_MAX = "worldMax";
     public static final String TOWN_ABOVE = "aboveTownSpawn";

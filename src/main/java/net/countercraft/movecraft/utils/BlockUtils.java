@@ -19,7 +19,7 @@ package net.countercraft.movecraft.utils;
 
 import java.util.Arrays;
 
-public class BlockUtils {
+public final class BlockUtils {
     private static final int[] dataBlocks = new int[]{
             2, 3, 5, 6, 8, 9, 10, 11, 17, 18, 23, 24, 25, 26, 27, 28, 29, 31, 33, 34, 35, 43, 44, 46, 50, 51, 52, 53,
             55, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 75, 76, 77, 78, 81, 83, 84, 86, 91, 92, 93, 94,

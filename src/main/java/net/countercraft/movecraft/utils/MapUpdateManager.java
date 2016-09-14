@@ -75,7 +75,7 @@ public class MapUpdateManager extends BukkitRunnable {
         return MapUpdateManagerHolder.INSTANCE;
     }
 
-    private static class MapUpdateManagerHolder {
+    private static final class MapUpdateManagerHolder {
         private static final MapUpdateManager INSTANCE = new MapUpdateManager();
     }
 

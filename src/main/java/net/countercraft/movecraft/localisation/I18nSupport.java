@@ -28,7 +28,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 
-public class I18nSupport {
+public final class I18nSupport {
     private static Properties languageFile;
 
     public static void init() {
