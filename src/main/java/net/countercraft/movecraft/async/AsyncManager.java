@@ -760,7 +760,7 @@ public class AsyncManager extends BukkitRunnable {
                             .getEntitiesByClass(org.bukkit.entity.SmallFireball.class)) {
                         if (!(fireball.getShooter() instanceof org.bukkit.entity.LivingEntity)) { // means it was
                             // launched by a dispenser
-                            if (w.getPlayers().size() > 0) {
+                            if (!w.getPlayers().isEmpty()) {
                                 Player p = w.getPlayers().get(0);
                                 double closest = 1000000000.0;
                                 for (Player pi : w.getPlayers()) {
@@ -903,7 +903,7 @@ public class AsyncManager extends BukkitRunnable {
                             }
                         }
                     }
-                    if (updateCommands.size() > 0) {
+                    if (!updateCommands.isEmpty()) {
                         MapUpdateManager.getInstance()
                                         .addWorldUpdate(w, updateCommands.toArray(new MapUpdateCommand[1]), null, null);
                     }

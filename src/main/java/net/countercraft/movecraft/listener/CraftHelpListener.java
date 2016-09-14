@@ -20,7 +20,7 @@ public class CraftHelpListener implements CommandExecutor {
 
     private CraftType getCraftByName(String string) {
         CraftType[] crafts = CraftManager.getInstance().getCraftTypes();
-        if (crafts == null || string == null || string.length() == 0) {
+        if (crafts == null || string == null || string.isEmpty()) {
             return null;
         }
 
@@ -40,7 +40,7 @@ public class CraftHelpListener implements CommandExecutor {
     }
 
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args.length == 0 || args[0].length() == 0) {
+        if (args.length == 0 || args[0].isEmpty()) {
             args = new String[]{"list"};
         }
 

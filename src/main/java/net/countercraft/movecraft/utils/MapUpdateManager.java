@@ -345,7 +345,7 @@ Changed for 1.8, and quite possibly wrong:
             queuedPlaceDispensers.remove(0);
         }
         long end = System.currentTimeMillis();
-        if (queuedMapUpdateCommands.size() > 0) {
+        if (!queuedMapUpdateCommands.isEmpty()) {
             BukkitTask nextQueueRun = new BukkitRunnable() {
                 @Override public void run() {
                     try {

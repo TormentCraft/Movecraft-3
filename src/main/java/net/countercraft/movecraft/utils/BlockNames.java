@@ -27,7 +27,7 @@ public final class BlockNames {
             tmp = stck == null ? null : stck.getName();
         } catch (Exception e) {
         }
-        if (tmp == null || tmp.length() == 0) {
+        if (tmp == null || tmp.isEmpty()) {
             tmp = Material.getMaterial(blockId).name();
         }
         tmp = properCase(tmp);

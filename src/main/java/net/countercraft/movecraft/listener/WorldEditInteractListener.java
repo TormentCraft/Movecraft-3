@@ -384,7 +384,7 @@ public class WorldEditInteractListener implements Listener {
                                                                           bb, pCraft);
                         updateCommands.add(updateCom);
                     }
-                    if (updateCommands.size() > 0) {
+                    if (!updateCommands.isEmpty()) {
                         final Craft fpCraft = pCraft;
                         final MapUpdateCommand[] fUpdateCommands = updateCommands.toArray(new MapUpdateCommand[1]);
                         int durationInTicks = numdiffblocks * Settings.RepairTicksPerBlock;

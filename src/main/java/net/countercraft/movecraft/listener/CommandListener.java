@@ -261,7 +261,7 @@ public class CommandListener implements CommandExecutor {
                     } else {
                         Direction dir = Direction.OFF;
                         for (String a : args) {
-                            if (a.length() == 0) {
+                            if (a.isEmpty()) {
                                 continue;
                             }
 

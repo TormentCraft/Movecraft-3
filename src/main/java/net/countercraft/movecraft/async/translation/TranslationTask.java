@@ -469,11 +469,11 @@ public class TranslationTask extends AsyncTask {
 
             testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
             if (blockObstructed) {
-                if (hoverCraft || harvestBlocks.size() > 0) {
+                if (hoverCraft || !harvestBlocks.isEmpty()) {
                     // New block is not harvested block
                     if (harvestBlocks.contains(testMaterial) && !existingBlockSet.contains(newLoc)) {
                         Material tmpType = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType();
-                        if (harvesterBladeBlocks.size() > 0) {
+                        if (!harvesterBladeBlocks.isEmpty()) {
                             if (!harvesterBladeBlocks.contains(tmpType)) {
                                 bladeOK = false;
                             }
@@ -1233,7 +1233,7 @@ public class TranslationTask extends AsyncTask {
                         blocks = new ArrayList<>();
                     }
 
-                    if (blocks.size() > 0) {
+                    if (!blocks.isEmpty()) {
                         chests.put(mat, blocks); //restore chests array in HashMap
                     } else if (chests.get(mat) == null) {
                         if (inv.firstEmpty() == -1) {
@@ -1264,7 +1264,7 @@ public class TranslationTask extends AsyncTask {
                     if (blocks == null) {
                         blocks = new ArrayList<>();
                     }
-                    if (blocks.size() > 0) {
+                    if (!blocks.isEmpty()) {
                         if (inv.firstEmpty() != -1) {
                             chests.put(mat, blocks);
                         }
