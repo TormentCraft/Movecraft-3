@@ -176,7 +176,7 @@ public class Movecraft extends JavaPlugin {
             getServer().getPluginManager().getPlugin("WorldGuard");
         }
 
-        if (wGPlugin == null || !(wGPlugin instanceof WorldGuardPlugin)) {
+        if (!(wGPlugin instanceof WorldGuardPlugin)) {
             logger.log(Level.INFO,
                        "Movecraft did not find a compatible version of WorldGuard. Disabling WorldGuard integration");
             Settings.SiegeName = null;
@@ -191,7 +191,7 @@ public class Movecraft extends JavaPlugin {
 
         //load up WorldEdit if it's present
         Plugin wEPlugin = getServer().getPluginManager().getPlugin("WorldEdit");
-        if (wEPlugin == null || !(wEPlugin instanceof WorldEditPlugin)) {
+        if (!(wEPlugin instanceof WorldEditPlugin)) {
             logger.log(Level.INFO,
                        "Movecraft did not find a compatible version of WorldEdit. Disabling WorldEdit integration");
         } else {
@@ -202,7 +202,7 @@ public class Movecraft extends JavaPlugin {
 
         // next is Cannons
         Plugin plug = getServer().getPluginManager().getPlugin("Cannons");
-        if (plug != null && plug instanceof Cannons) {
+        if (plug instanceof Cannons) {
             cannonsPlugin = (Cannons) plug;
             logger.log(Level.INFO, "Found a compatible version of Cannons. Enabling Cannons integration");
         }
@@ -210,7 +210,7 @@ public class Movecraft extends JavaPlugin {
         if (worldGuardPlugin != null || worldGuardPlugin instanceof WorldGuardPlugin) {
             if (worldGuardPlugin.isEnabled()) {
                 Plugin tempWGCustomFlagsPlugin = getServer().getPluginManager().getPlugin("WGCustomFlags");
-                if (tempWGCustomFlagsPlugin != null && tempWGCustomFlagsPlugin instanceof WGCustomFlagsPlugin) {
+                if (tempWGCustomFlagsPlugin instanceof WGCustomFlagsPlugin) {
                     logger.log(Level.INFO,
                                "Found a compatible version of WGCustomFlags. Enabling WGCustomFlags integration.");
                     wgCustomFlagsPlugin = (WGCustomFlagsPlugin) tempWGCustomFlagsPlugin;
@@ -241,7 +241,7 @@ public class Movecraft extends JavaPlugin {
         }
 
         Plugin tempTownyPlugin = getServer().getPluginManager().getPlugin("Towny");
-        if (tempTownyPlugin != null && tempTownyPlugin instanceof Towny) {
+        if (tempTownyPlugin instanceof Towny) {
             logger.log(Level.INFO, "Found a compatible version of Towny. Enabling Towny integration.");
             townyPlugin = (Towny) tempTownyPlugin;
             TownyUtils.initTownyConfig();
