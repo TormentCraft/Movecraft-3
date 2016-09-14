@@ -21,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class StorageCrateTransferHolder extends InventoryTransferHolder {
 
-    public StorageCrateTransferHolder(byte data, ItemStack[] invetory) {
-        super(data, invetory);
+    public StorageCrateTransferHolder(byte data, ItemStack[] inventory) {
+        super(data, inventory);
     }
 }

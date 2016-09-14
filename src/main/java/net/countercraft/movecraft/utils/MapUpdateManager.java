@@ -304,13 +304,13 @@ Changed for 1.8, and quite possibly wrong:
                 } else if (transferData instanceof StorageCrateTransferHolder) {
                     Inventory inventory = Bukkit.createInventory(null, 27, I18nSupport
                             .getInternationalisedString("Item - Storage Crate name"));
-                    inventory.setContents(((StorageCrateTransferHolder) transferData).getInvetory());
+                    inventory.setContents(((StorageCrateTransferHolder) transferData).getInventory());
                     StorageChestItem.setInventoryOfCrateAtLocation(inventory, entry.getKey(), w);
                 } else if (transferData instanceof InventoryTransferHolder) {
                     InventoryTransferHolder invData = (InventoryTransferHolder) transferData;
                     InventoryHolder inventoryHolder = (InventoryHolder) w
                             .getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).getState();
-                    inventoryHolder.getInventory().setContents(invData.getInvetory());
+                    inventoryHolder.getInventory().setContents(invData.getInventory());
                 } else if (transferData instanceof CommandBlockTransferHolder) {
                     CommandBlockTransferHolder cbData = (CommandBlockTransferHolder) transferData;
                     CommandBlock cblock = (CommandBlock) w
