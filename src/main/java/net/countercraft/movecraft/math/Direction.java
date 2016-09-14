@@ -1,8 +1,6 @@
 package net.countercraft.movecraft.math;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 
 import java.util.Collections;
@@ -41,9 +39,9 @@ public final class Direction {
         return new Direction(this.x + that.x, this.y + that.y, this.z + that.z);
     }
 
-    public static Map<String,Direction> getNameMap() {
+    public static Map<String, Direction> getNameMap() {
         if (_nameMap == null) {
-        	HashMap<String, Direction> result = new HashMap<String, Direction>(); 
+            HashMap<String, Direction> result = new HashMap<String, Direction>();
             result.put("n", NORTH);
             result.put("north", NORTH);
 
@@ -80,7 +78,7 @@ public final class Direction {
 
         return _nameMap;
     }
-    
+
     public static Optional<Direction> named(String s) {
         return Optional.fromNullable(getNameMap().get(s.toLowerCase()));
     }
@@ -115,15 +113,11 @@ public final class Direction {
     }
 
     public static Direction fromSignDirection(Sign sign) {
-		byte rawData = sign.getRawData();
- 		if (rawData == ((byte)0x3))
- 			return NORTH;//north
- 		if (rawData == ((byte)0x4))
- 			return EAST;//east
- 		if (rawData == ((byte)0x2))
- 			return SOUTH;//south
- 		if (rawData == ((byte)0x5))
- 			return WEST;//west
- 		return OFF;
+        byte rawData = sign.getRawData();
+        if (rawData == ((byte) 0x3)) return NORTH;//north
+        if (rawData == ((byte) 0x4)) return EAST;//east
+        if (rawData == ((byte) 0x2)) return SOUTH;//south
+        if (rawData == ((byte) 0x5)) return WEST;//west
+        return OFF;
     }
 }

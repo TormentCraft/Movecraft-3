@@ -17,28 +17,25 @@
 
 package net.countercraft.movecraft.metrics;
 
-import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.config.Settings;
-import net.countercraft.movecraft.localisation.I18nSupport;
 // removed because repo is down import org.mcstats.Metrics;
 
-import java.io.IOException;
-import java.util.logging.Level;
+// removed because repo is down import org.mcstats.Metrics;
 
 public class MovecraftMetrics {
-	private final int classTypes;
+    private final int classTypes;
 
-	public MovecraftMetrics( int classTypes ) {
-		this.classTypes = classTypes;
+    public MovecraftMetrics(int classTypes) {
+        this.classTypes = classTypes;
 // removed because repo is down		uploadStatistics();
-	}
+    }
 /* removed becuase repo is down
-	private void uploadStatistics() {
+    private void uploadStatistics() {
 		try {
 			Metrics metrics = new Metrics( Movecraft.getInstance() );
 
 			if ( metrics.isOptOut() ) {
-				Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString( "MCStats - :( - Admin has opted out" ) ) );
+				Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport
+				.getInternationalisedString( "MCStats - :( - Admin has opted out" ) ) );
 			}
 
 			Metrics.Graph langaugeGraph = metrics.createGraph( "Language Used" );
@@ -59,10 +56,11 @@ public class MovecraftMetrics {
 
 			} );
 			metrics.start();
-			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString( "MCStats - Thank you message" ) ) );
+			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString
+			( "MCStats - Thank you message" ) ) );
 		} catch ( IOException e ) {
-			Movecraft.getInstance().getLogger().log( Level.WARNING, String.format( I18nSupport.getInternationalisedString( "MCStats - Error - Unable to upload stats" ) ) );
+			Movecraft.getInstance().getLogger().log( Level.WARNING, String.format( I18nSupport
+			.getInternationalisedString( "MCStats - Error - Unable to upload stats" ) ) );
 		}
 	}*/
-
 }

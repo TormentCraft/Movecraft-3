@@ -18,118 +18,120 @@
 package net.countercraft.movecraft.async.detection;
 
 import net.countercraft.movecraft.utils.MovecraftLocation;
-
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 public class DetectionTaskData {
-	private World w;
-	private boolean failed;
-	private boolean waterContact;
-	private String failMessage;
-	private MovecraftLocation[] blockList;
-	private Player player;
-	private Player notificationPlayer;
-	private int[][][] hitBox;
-	private Integer minX, minZ;
-	private Integer[] allowedBlocks, forbiddenBlocks;
+    private World w;
+    private boolean failed;
+    private boolean waterContact;
+    private String failMessage;
+    private MovecraftLocation[] blockList;
+    private Player player;
+    private Player notificationPlayer;
+    private int[][][] hitBox;
+    private Integer minX, minZ;
+    private Integer[] allowedBlocks, forbiddenBlocks;
 
-	public DetectionTaskData( World w, Player player, Player notificationPlayer, Integer[] allowedBlocks, Integer[] forbiddenBlocks ) {
-		this.w = w;
-		this.player = player;
-		this.notificationPlayer = notificationPlayer;
-		this.allowedBlocks = allowedBlocks;
-		this.forbiddenBlocks = forbiddenBlocks;
-		this.waterContact = false;
-	}
+    public DetectionTaskData(World w, Player player, Player notificationPlayer, Integer[] allowedBlocks,
+                             Integer[] forbiddenBlocks)
+    {
+        this.w = w;
+        this.player = player;
+        this.notificationPlayer = notificationPlayer;
+        this.allowedBlocks = allowedBlocks;
+        this.forbiddenBlocks = forbiddenBlocks;
+        this.waterContact = false;
+    }
 
-	public DetectionTaskData() {
-	}
+    public DetectionTaskData() {
+    }
 
-	public Integer[] getAllowedBlocks() {
-		return allowedBlocks;
-	}
+    public Integer[] getAllowedBlocks() {
+        return allowedBlocks;
+    }
 
-	public Integer[] getForbiddenBlocks() {
-		return forbiddenBlocks;
-	}
+    public Integer[] getForbiddenBlocks() {
+        return forbiddenBlocks;
+    }
 
-	public World getWorld() {
-		return w;
-	}
+    public World getWorld() {
+        return w;
+    }
 
-	void setWorld( World w ) {
-		this.w = w;
-	}
+    void setWorld(World w) {
+        this.w = w;
+    }
 
-	public boolean failed() {
-		return failed;
-	}
+    public boolean failed() {
+        return failed;
+    }
 
-	public boolean getWaterContact() {
-		return waterContact;
-	}
+    public boolean getWaterContact() {
+        return waterContact;
+    }
 
-	public String getFailMessage() {
-		return failMessage;
-	}
+    public String getFailMessage() {
+        return failMessage;
+    }
 
-	void setFailMessage( String failMessage ) {
-		this.failMessage = failMessage;
-	}
+    void setFailMessage(String failMessage) {
+        this.failMessage = failMessage;
+    }
 
-	public MovecraftLocation[] getBlockList() {
-		return blockList;
-	}
+    public MovecraftLocation[] getBlockList() {
+        return blockList;
+    }
 
-	void setBlockList( MovecraftLocation[] blockList ) {
-		this.blockList = blockList;
-	}
+    void setBlockList(MovecraftLocation[] blockList) {
+        this.blockList = blockList;
+    }
 
-	public Player getPlayer() {
-		return player;
-	}
+    public Player getPlayer() {
+        return player;
+    }
 
-	public Player getNotificationPlayer() {
-		return notificationPlayer;
-	}
+    public Player getNotificationPlayer() {
+        return notificationPlayer;
+    }
 
-	public int[][][] getHitBox() {
-		return hitBox;
-	}
+    public int[][][] getHitBox() {
+        return hitBox;
+    }
 
-	void setHitBox( int[][][] hitBox ) {
-		this.hitBox = hitBox;
-	}
+    void setHitBox(int[][][] hitBox) {
+        this.hitBox = hitBox;
+    }
 
-	public Integer getMinX() {
-		return minX;
-	}
+    public Integer getMinX() {
+        return minX;
+    }
 
-	void setMinX( Integer minX ) {
-		this.minX = minX;
-	}
+    void setMinX(Integer minX) {
+        this.minX = minX;
+    }
 
-	public Integer getMinZ() {
-		return minZ;
-	}
+    public Integer getMinZ() {
+        return minZ;
+    }
 
-	void setMinZ( Integer minZ ) {
-		this.minZ = minZ;
-	}
+    void setMinZ(Integer minZ) {
+        this.minZ = minZ;
+    }
 
-	void setFailed( boolean failed ) {
-		this.failed = failed;
-	}
+    void setFailed(boolean failed) {
+        this.failed = failed;
+    }
 
-	void setWaterContact( boolean waterContact ) {
-		this.waterContact = waterContact;
-	}
+    void setWaterContact(boolean waterContact) {
+        this.waterContact = waterContact;
+    }
 
-	void setPlayer( Player player ) {
-		this.player = player;
-	}
-	void setNotificationPlayer( Player notificationPlayer ) {
-		this.notificationPlayer = notificationPlayer;
-	}
+    void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    void setNotificationPlayer(Player notificationPlayer) {
+        this.notificationPlayer = notificationPlayer;
+    }
 }

@@ -18,53 +18,49 @@
 package net.countercraft.movecraft.utils;
 
 public final class MovecraftLocation {
-	public final int x, y, z;
+    public final int x, y, z;
 
-	public MovecraftLocation( int x, int y, int z ) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
+    public MovecraftLocation(int x, int y, int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 
-	/**
-	 * Returns a MovecraftLocation that has undergone the given translation.
-	 *
-	 * This does not change the MovecraftLocation that it is called upon and that should be accounted for in terms of Garbage Collection.
-	 *
-	 * @param dx - X translation
-	 * @param dy - Y translation
-	 * @param dz - Z translation
-	 * @return New MovecraftLocation shifted by specified amount
-	 */
-	public MovecraftLocation translate(int dx, int dy, int dz) {
-		return new MovecraftLocation( x + dx, y + dy, z + dz );
-	}
+    /**
+     * Returns a MovecraftLocation that has undergone the given translation.
+     * <p>
+     * This does not change the MovecraftLocation that it is called upon and that should be accounted for in terms of
+     * Garbage Collection.
+     *
+     * @param dx - X translation
+     * @param dy - Y translation
+     * @param dz - Z translation
+     * @return New MovecraftLocation shifted by specified amount
+     */
+    public MovecraftLocation translate(int dx, int dy, int dz) {
+        return new MovecraftLocation(x + dx, y + dy, z + dz);
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if(o instanceof MovecraftLocation){
-			MovecraftLocation location = (MovecraftLocation) o;
-			if (location.x == x && location.y == y && location.z == z) {
-				return true;
-			}
-		}
+    @Override public boolean equals(Object o) {
+        if (o instanceof MovecraftLocation) {
+            MovecraftLocation location = (MovecraftLocation) o;
+            if (location.x == x && location.y == y && location.z == z) {
+                return true;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	@Override
-	public int hashCode() {
-		return Integer.valueOf(x).hashCode() >> 13
-				^ Integer.valueOf(y).hashCode() >> 7
-				^ Integer.valueOf(z).hashCode();
-	}
+    @Override public int hashCode() {
+        return Integer.valueOf(x).hashCode() >> 13 ^ Integer.valueOf(y).hashCode() >> 7 ^ Integer.valueOf(z).hashCode();
+    }
 
-	public MovecraftLocation add( MovecraftLocation l ) {
-		return new MovecraftLocation( x + l.x, y + l.y, z + l.z);
-	}
+    public MovecraftLocation add(MovecraftLocation l) {
+        return new MovecraftLocation(x + l.x, y + l.y, z + l.z);
+    }
 
-	public MovecraftLocation subtract( MovecraftLocation l ) {
-		return new MovecraftLocation( x - l.x, y - l.y, z - l.z);
-	}
-
+    public MovecraftLocation subtract(MovecraftLocation l) {
+        return new MovecraftLocation(x - l.x, y - l.y, z - l.z);
+    }
 }
