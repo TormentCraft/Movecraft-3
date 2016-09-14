@@ -42,6 +42,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -827,13 +828,11 @@ public class TranslationTask extends AsyncTask {
                     }
                 }
 
-                Iterator<Entity> i = eList.iterator();
-                while (i.hasNext()) {
-                    Entity pTest = i.next();
+                for (Entity pTest : eList) {
                     if (MathUtils.playerIsWithinBoundingPolygon(getCraft().getHitBox(), getCraft().getMinX(),
                                                                 getCraft().getMinZ(),
                                                                 MathUtils.bukkit2MovecraftLoc(pTest.getLocation()))) {
-                        if (pTest.getType() == org.bukkit.entity.EntityType.PLAYER) {
+                        if (pTest.getType() == EntityType.PLAYER) {
                             Player player = (Player) pTest;
                             getCraft().getMovedPlayers().put(player, System.currentTimeMillis());
                         } // only move players for now, reduce monsters on airships
