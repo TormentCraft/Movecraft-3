@@ -23,7 +23,42 @@ public final class Direction {
     public static final Direction DOWN = new Direction(0, -1, 0);
     public static final Direction OFF = new Direction(0, 0, 0);
 
-    private static Map<String, Direction> _nameMap;
+    private static final Map<String, Direction> NAME_MAP;
+    static {
+        Map<String, Direction> result = new HashMap<>();
+        result.put("n", NORTH);
+        result.put("north", NORTH);
+
+        result.put("ne", NORTH_EAST);
+        result.put("northeast", NORTH_EAST);
+
+        result.put("e", EAST);
+        result.put("east", EAST);
+
+        result.put("se", SOUTH_EAST);
+        result.put("southeast", SOUTH_EAST);
+
+        result.put("s", SOUTH);
+        result.put("south", SOUTH);
+
+        result.put("sw", SOUTH_WEST);
+        result.put("southwest", SOUTH_WEST);
+
+        result.put("w", WEST);
+        result.put("west", WEST);
+
+        result.put("nw", NORTH_WEST);
+        result.put("northwest", NORTH_WEST);
+
+        result.put("u", UP);
+        result.put("up", UP);
+
+        result.put("d", DOWN);
+        result.put("down", DOWN);
+
+        result.put("off", OFF);
+        NAME_MAP = Collections.unmodifiableMap(result);
+    }
 
     public final int x;
     public final int y;
@@ -39,52 +74,12 @@ public final class Direction {
         return new Direction(this.x + that.x, this.y + that.y, this.z + that.z);
     }
 
-    public static Map<String, Direction> getNameMap() {
-        if (_nameMap == null) {
-            Map<String, Direction> result = new HashMap<>();
-            result.put("n", NORTH);
-            result.put("north", NORTH);
-
-            result.put("ne", NORTH_EAST);
-            result.put("northeast", NORTH_EAST);
-
-            result.put("e", EAST);
-            result.put("east", EAST);
-
-            result.put("se", SOUTH_EAST);
-            result.put("southeast", SOUTH_EAST);
-
-            result.put("s", SOUTH);
-            result.put("south", SOUTH);
-
-            result.put("sw", SOUTH_WEST);
-            result.put("southwest", SOUTH_WEST);
-
-            result.put("w", WEST);
-            result.put("west", WEST);
-
-            result.put("nw", NORTH_WEST);
-            result.put("northwest", NORTH_WEST);
-
-            result.put("u", UP);
-            result.put("up", UP);
-
-            result.put("d", DOWN);
-            result.put("down", DOWN);
-
-            result.put("off", OFF);
-            _nameMap = Collections.unmodifiableMap(result);
-        }
-
-        return _nameMap;
-    }
-
     public static Optional<Direction> named(String s) {
-        return Optional.fromNullable(getNameMap().get(s.toLowerCase()));
+        return Optional.fromNullable(NAME_MAP.get(s.toLowerCase()));
     }
 
     public static Direction namedOr(String s, Direction defaultValue) {
-        return getNameMap().getOrDefault(s.toLowerCase(), defaultValue);
+        return NAME_MAP.getOrDefault(s.toLowerCase(), defaultValue);
     }
 
     public static Direction fromYawPitch(double yaw, double pitch) {
