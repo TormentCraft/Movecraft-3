@@ -62,7 +62,7 @@ import java.util.Iterator;
 public class BlockListener implements Listener {
 
     @EventHandler public void onBlockPlace(final BlockPlaceEvent e) {
-        if (Settings.DisableCrates == true) return;
+        if (Settings.DisableCrates) return;
 
         if (e.getBlockAgainst().getTypeId() == 33 && e.getBlockAgainst().getData() == ((byte) 6)) {
             e.setCancelled(true);
@@ -104,7 +104,7 @@ public class BlockListener implements Listener {
     @EventHandler public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (event.getClickedBlock().getTypeId() == 33 && event.getClickedBlock().getData() == ((byte) 6)) {
-                if (Settings.DisableCrates == true) return;
+                if (Settings.DisableCrates) return;
                 Location l = event.getClickedBlock().getLocation();
                 MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
                 Inventory i = StorageChestItem.getInventoryOfCrateAtLocation(l1, event.getPlayer().getWorld());
@@ -137,7 +137,7 @@ public class BlockListener implements Listener {
             }
         }
         if (e.getBlock().getTypeId() == 33 && e.getBlock().getData() == ((byte) 6)) {
-            if (Settings.DisableCrates == true) return;
+            if (Settings.DisableCrates) return;
             Location l = e.getBlock().getLocation();
             MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
             for (ItemStack i : StorageChestItem.getInventoryOfCrateAtLocation(l1, e.getBlock().getWorld())
@@ -234,17 +234,16 @@ public class BlockListener implements Listener {
         String signText = org.bukkit.ChatColor.stripColor(event.getLine(0));
         // did the player try to create a craft command sign?
         if (getCraftTypeFromString(signText) != null) {
-            if (Settings.RequireCreatePerm == false) {
+            if (!Settings.RequireCreatePerm) {
                 return;
             }
-            if (p.hasPermission("movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create") ==
-                false) {
+            if (!p.hasPermission("movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create")) {
                 p.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Cruise: OFF") || signText.equalsIgnoreCase("Cruise: ON")) {
-            if (p.hasPermission("movecraft.cruisesign") == false && Settings.RequireCreatePerm) {
+            if (!p.hasPermission("movecraft.cruisesign") && Settings.RequireCreatePerm) {
                 p.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 event.setCancelled(true);
             }
@@ -277,7 +276,7 @@ public class BlockListener implements Listener {
                     ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin()
                                                        .getRegionManager(testBlock.getWorld())
                                                        .getApplicableRegions(testBlock.getLocation());
-                    if (set.allows(DefaultFlag.FIRE_SPREAD) == false) {
+                    if (!set.allows(DefaultFlag.FIRE_SPREAD)) {
                         isBurnAllowed = false;
                     }
                 }
@@ -303,7 +302,7 @@ public class BlockListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL) public void explodeEvent(EntityExplodeEvent e) {
         // Remove any blocks from the list that were adjacent to water, to prevent spillage
         Iterator<Block> i = e.blockList().iterator();
-        if (Settings.DisableSpillProtection == false) while (i.hasNext()) {
+        if (!Settings.DisableSpillProtection) while (i.hasNext()) {
             Block b = i.next();
             boolean isNearWater = false;
             if (b.getY() > b.getWorld().getSeaLevel()) for (int mx = -1; mx <= 1; mx++) {

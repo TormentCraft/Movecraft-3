@@ -78,7 +78,7 @@ public class InteractListener implements Listener {
                         return;
                     }
 
-                    if (foundCraft.getType().allowRemoteSign() == false) {
+                    if (!foundCraft.getType().allowRemoteSign()) {
                         event.getPlayer().sendMessage(I18nSupport.getInternationalisedString(
                                 "ERROR: Remote Signs not allowed on this craft!"));
                         return;
@@ -171,7 +171,7 @@ public class InteractListener implements Listener {
                                     .playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
                                                                    MathUtils.bukkit2MovecraftLoc(
                                                                            event.getPlayer().getLocation()))) {
-                                if (craft.getType().rotateAtMidpoint() == true) {
+                                if (craft.getType().rotateAtMidpoint()) {
                                     MovecraftLocation midpoint = new MovecraftLocation(
                                             (craft.getMaxX() + craft.getMinX()) / 2,
                                             (craft.getMaxY() + craft.getMinY()) / 2,
@@ -268,7 +268,7 @@ public class InteractListener implements Listener {
                 final Craft c = new Craft(getCraftTypeFromString(org.bukkit.ChatColor.stripColor(sign.getLine(0))),
                                           loc.getWorld());
 
-                if (c.getType().getCruiseOnPilot() == true) {
+                if (c.getType().getCruiseOnPilot()) {
                     c.detect(null, event.getPlayer(), startPoint);
                     c.setCruiseDirection(Direction.fromSignDirection(sign));
                     c.setLastCruisUpdate(System.currentTimeMillis());
@@ -326,7 +326,7 @@ public class InteractListener implements Listener {
                     if (MathUtils.playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
                                                                 MathUtils.bukkit2MovecraftLoc(
                                                                         event.getPlayer().getLocation()))) {
-                        if (craft.getType().rotateAtMidpoint() == true) {
+                        if (craft.getType().rotateAtMidpoint()) {
                             MovecraftLocation midpoint = new MovecraftLocation((craft.getMaxX() + craft.getMinX()) / 2,
                                                                                (craft.getMaxY() + craft.getMinY()) / 2,
                                                                                (craft.getMaxZ() + craft.getMinZ()) / 2);
@@ -645,7 +645,7 @@ public class InteractListener implements Listener {
                                                                         event.getPlayer().getLocation()))) {
 
                         if (event.getPlayer().hasPermission("movecraft." + craft.getType().getCraftName() + ".move")) {
-                            if (craft.getPilotLocked() == true) {
+                            if (craft.getPilotLocked()) {
                                 // right click moves up or down if using direct control
                                 int DY = 1;
                                 if (event.getPlayer().isSneaking()) DY = -1;
@@ -719,7 +719,7 @@ public class InteractListener implements Listener {
             if (event.getItem() != null && event.getItem().getTypeId() == Settings.PilotTool) {
                 Craft craft = CraftManager.getInstance().getCraftByPlayer(event.getPlayer());
                 if (craft != null) {
-                    if (craft.getPilotLocked() == false) {
+                    if (!craft.getPilotLocked()) {
                         if (event.getPlayer().hasPermission("movecraft." + craft.getType().getCraftName() + ".move") &&
                             craft.getType().getCanDirectControl()) {
                             craft.setPilotLocked(true);

@@ -175,7 +175,7 @@ public class RotationTask extends AsyncTask {
         // check for fuel, burn some from a furnace if needed. Blocks of coal are supported, in addition to coal and
         // charcoal
         double fuelBurnRate = getCraft().getType().getFuelBurnRate();
-        if (fuelBurnRate != 0.0 && getCraft().getSinking() == false) {
+        if (fuelBurnRate != 0.0 && !getCraft().getSinking()) {
             if (getCraft().getBurningFuel() < fuelBurnRate) {
                 Block fuelHolder = null;
                 for (MovecraftLocation bTest : blockList) {
@@ -275,7 +275,7 @@ public class RotationTask extends AsyncTask {
             if (craftPilot != null) {
                 // See if they are permitted to build in the area, if WorldGuard integration is turned on
                 if (Movecraft.getInstance().getWorldGuardPlugin() != null && Settings.WorldGuardBlockMoveOnBuildPerm) {
-                    if (Movecraft.getInstance().getWorldGuardPlugin().canBuild(craftPilot, plugLoc) == false) {
+                    if (!Movecraft.getInstance().getWorldGuardPlugin().canBuild(craftPilot, plugLoc)) {
                         failed = true;
                         failMessage = String.format(I18nSupport.getInternationalisedString(
                                 "Rotation - Player is not permitted to build in this WorldGuard region") +
@@ -425,7 +425,7 @@ public class RotationTask extends AsyncTask {
                         tOP.setX(tOP.getBlockX() + 0.5);
                         tOP.setZ(tOP.getBlockZ() + 0.5);
                         Location playerLoc = pTest.getLocation();
-                        if (getCraft().getPilotLocked() == true &&
+                        if (getCraft().getPilotLocked() &&
                             pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
                             playerLoc.setX(getCraft().getPilotLockedX());
                             playerLoc.setY(getCraft().getPilotLockedY());
@@ -455,7 +455,7 @@ public class RotationTask extends AsyncTask {
                         }
                         newPLoc.setYaw(newYaw);
 
-                        if (getCraft().getPilotLocked() == true &&
+                        if (getCraft().getPilotLocked() &&
                             pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
                             getCraft().setPilotLockedX(newPLoc.getX());
                             getCraft().setPilotLockedY(newPLoc.getY());
@@ -463,7 +463,7 @@ public class RotationTask extends AsyncTask {
                         }
                         EntityUpdateCommand eUp = new EntityUpdateCommand(pTest.getLocation().clone(), newPLoc, pTest);
                         entityUpdateSet.add(eUp);
-                        if (getCraft().getPilotLocked() == true &&
+                        if (getCraft().getPilotLocked() &&
                             pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
                             getCraft().setPilotLockedX(newPLoc.getX());
                             getCraft().setPilotLockedY(newPLoc.getY());
@@ -598,7 +598,7 @@ public class RotationTask extends AsyncTask {
                     if (BlockUtils.arrayContainsOverlap(craft.getBlockList(), originalBlockList) &&
                         craft != getCraft()) {
                         // found a parent craft
-                        if (craft.isNotProcessing() == false) {
+                        if (!craft.isNotProcessing()) {
                             failed = true;
                             failMessage = I18nSupport.getInternationalisedString("Parent Craft is busy");
                             return;

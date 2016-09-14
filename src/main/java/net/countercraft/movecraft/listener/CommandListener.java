@@ -411,7 +411,7 @@ public class CommandListener implements CommandExecutor {
                 player.sendMessage(I18nSupport.getInternationalisedString("Siege is not configured on this server"));
                 return true;
             }
-            if (Movecraft.getInstance().siegeInProgress == true) {
+            if (Movecraft.getInstance().siegeInProgress) {
                 player.sendMessage(I18nSupport.getInternationalisedString("A Siege is already taking place"));
                 return true;
             }

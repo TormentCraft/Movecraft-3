@@ -81,7 +81,7 @@ public class Movecraft extends JavaPlugin {
 
     @Override public void onDisable() {
         // Process the storage crates to disk
-        if (Settings.DisableCrates == false) StorageChestItem.saveToDisk();
+        if (!Settings.DisableCrates) StorageChestItem.saveToDisk();
         shuttingDown = true;
     }
 
@@ -102,7 +102,7 @@ public class Movecraft extends JavaPlugin {
         // if the CompatibilityMode is specified in the config.yml file, use it.
         // Otherwise set to false.
         Settings.CompatibilityMode = getConfig().getBoolean("CompatibilityMode", false);
-        if (Settings.CompatibilityMode == false) {
+        if (!Settings.CompatibilityMode) {
             try {
                 Class.forName("net.minecraft.server.v1_10_R1.Chunk");
             } catch (ClassNotFoundException e) {
@@ -314,7 +314,7 @@ public class Movecraft extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new BlockListener(), this);
             getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 
-            if (Settings.DisableCrates == false) {
+            if (!Settings.DisableCrates) {
                 StorageChestItem.readFromDisk();
                 StorageChestItem.addRecipie();
             }

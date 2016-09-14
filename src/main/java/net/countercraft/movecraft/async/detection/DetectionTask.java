@@ -428,8 +428,8 @@ public class DetectionTask extends AsyncTask {
     private boolean confirmStructureRequirements(Map<ArrayList<Integer>, ArrayList<Double>> flyBlocks,
                                                  Map<ArrayList<Integer>, Integer> countData)
     {
-        if (getCraft().getType().getRequireWaterContact() == true) {
-            if (data.getWaterContact() == false) {
+        if (getCraft().getType().getRequireWaterContact()) {
+            if (!data.getWaterContact()) {
                 fail(I18nSupport.getInternationalisedString(
                         "Detection - Failed - Water contact required but not found"));
                 return false;

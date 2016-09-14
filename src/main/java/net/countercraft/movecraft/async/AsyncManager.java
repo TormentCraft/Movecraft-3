@@ -148,7 +148,7 @@ public class AsyncManager extends BukkitRunnable {
                                         failed = true;
                                     } else { // if this is a different type than the overlapping craft, and is
                                         // smaller, this must be a child craft, like a fighter on a carrier
-                                        if (craft.isNotProcessing() == false) {
+                                        if (!craft.isNotProcessing()) {
                                             failed = true;
                                             notifyP.sendMessage(
                                                     I18nSupport.getInternationalisedString("Parent Craft is busy"));
@@ -437,7 +437,7 @@ public class AsyncManager extends BukkitRunnable {
                                     }
                                 }
                             }
-                            if (pcraft.getPilotLocked() == true && pcraft.isNotProcessing()) {
+                            if (pcraft.getPilotLocked() && pcraft.isNotProcessing()) {
 
                                 Player p = CraftManager.getInstance().getPlayerFromCraft(pcraft);
                                 if (p != null) if (MathUtils
@@ -498,12 +498,12 @@ public class AsyncManager extends BukkitRunnable {
 
     private boolean isRegionBlockedPVP(MovecraftLocation loc, World w) {
         if (Movecraft.getInstance().getWorldGuardPlugin() == null) return false;
-        if (Settings.WorldGuardBlockSinkOnPVPPerm == false) return false;
+        if (!Settings.WorldGuardBlockSinkOnPVPPerm) return false;
 
         Location nativeLoc = new Location(w, loc.x, loc.y, loc.z);
         ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(w)
                                            .getApplicableRegions(nativeLoc);
-        if (set.allows(DefaultFlag.PVP) == false) {
+        if (!set.allows(DefaultFlag.PVP)) {
             return true;
         }
         return false;
@@ -549,7 +549,7 @@ public class AsyncManager extends BukkitRunnable {
                 // check every few seconds for every craft to see if it should be sinking
                 for (Craft pcraft : CraftManager.getInstance().getCraftsInWorld(w)) {
                     Set<TownBlock> townBlockSet = new HashSet<>();
-                    if (pcraft != null && pcraft.getSinking() == false) {
+                    if (pcraft != null && !pcraft.getSinking()) {
                         if (pcraft.getType().getSinkPercent() != 0.0 && pcraft.isNotProcessing()) {
                             long ticksElapsed = (System.currentTimeMillis() - pcraft.getLastBlockCheck()) / 50;
 
@@ -681,7 +681,7 @@ public class AsyncManager extends BukkitRunnable {
                 // sink all the sinking ships
                 if (CraftManager.getInstance().getCraftsInWorld(w) != null)
                     for (Craft pcraft : CraftManager.getInstance().getCraftsInWorld(w)) {
-                        if (pcraft != null && pcraft.getSinking() == true) {
+                        if (pcraft != null && pcraft.getSinking()) {
                             if (pcraft.getBlockList().length == 0) {
                                 CraftManager.getInstance().removeCraft(pcraft);
                             }
@@ -882,14 +882,14 @@ public class AsyncManager extends BukkitRunnable {
                                     // load the chunk if it hasn't been already
                                     int cx = loc.x >> 4;
                                     int cz = loc.z >> 4;
-                                    if (w.isChunkLoaded(cx, cz) == false) {
+                                    if (!w.isChunkLoaded(cx, cz)) {
                                         w.loadChunk(cx, cz);
                                     }
                                     // check to see if the block type has changed, if so don't fade it
                                     if (w.getBlockTypeIdAt(loc.x, loc.y, loc.z) ==
                                         Movecraft.getInstance().blockFadeTypeMap.get(loc)) {
                                         // should it become water? if not, then air
-                                        if (Movecraft.getInstance().blockFadeWaterMap.get(loc) == true) {
+                                        if (Movecraft.getInstance().blockFadeWaterMap.get(loc)) {
                                             MapUpdateCommand updateCom = new MapUpdateCommand(loc, 9, (byte) 0, null);
                                             updateCommands.add(updateCom);
                                         } else {
@@ -1028,7 +1028,7 @@ public class AsyncManager extends BukkitRunnable {
                 int midX = 0;
                 int midY = 0;
                 int midZ = 0;
-                if (siegeLeaderPilotingShip == true) {
+                if (siegeLeaderPilotingShip) {
                     midX = (CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMaxX() +
                             CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMinX()) / 2;
                     midY = (CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMaxY() +
@@ -1045,7 +1045,7 @@ public class AsyncManager extends BukkitRunnable {
                 int timeLeft = (int) (Settings.SiegeDuration.get(Movecraft.getInstance().currentSiegeName) -
                                       timeLapsed);
                 if (timeLeft > 10) {
-                    if (siegeLeaderShipInRegion == true) {
+                    if (siegeLeaderShipInRegion) {
                         Bukkit.getServer().broadcastMessage(String.format(
                                 "The Siege of %s is under way. The Siege Flagship is a %s of size %d under the " +
                                 "command of %s at %d, %d, %d. Siege will end in %d minutes",
@@ -1061,7 +1061,7 @@ public class AsyncManager extends BukkitRunnable {
                                 siegeLeader.getDisplayName(), timeLeft / 60));
                     }
                 } else {
-                    if (siegeLeaderShipInRegion == true) {
+                    if (siegeLeaderShipInRegion) {
                         Bukkit.getServer().broadcastMessage(
                                 String.format("The Siege of %s has succeeded! The forces of %s have been victorious!",
                                               Movecraft.getInstance().currentSiegeName, siegeLeader.getDisplayName()));

@@ -384,7 +384,7 @@ Changed for 1.8, and quite possibly wrong:
                     }
                 }
             }
-            if (Settings.CompatibilityMode == false) {
+            if (!Settings.CompatibilityMode) {
                 // send updates to client
                 for (MapUpdateCommand c : updatesInWorld) {
                     Location loc = new Location(w, c.getNewBlockLocation().x, c.getNewBlockLocation().y,
@@ -950,7 +950,7 @@ Changed for 1.8, and quite possibly wrong:
         if (Movecraft.getInstance().getWorldGuardPlugin() != null) {
             ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(loc.getWorld())
                                                .getApplicableRegions(loc);
-            if (set.allows(DefaultFlag.OTHER_EXPLOSION) == false) {
+            if (!set.allows(DefaultFlag.OTHER_EXPLOSION)) {
                 explosionblocked = true;
             }
         }

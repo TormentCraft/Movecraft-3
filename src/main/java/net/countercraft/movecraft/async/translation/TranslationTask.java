@@ -226,7 +226,7 @@ public class TranslationTask extends AsyncTask {
         // going down doesn't require fuel
         if (data.getDy() == -1 && data.getDx() == 0 && data.getDz() == 0) fuelBurnRate = 0.0;
 
-        if (fuelBurnRate != 0.0 && getCraft().getSinking() == false) {
+        if (fuelBurnRate != 0.0 && !getCraft().getSinking()) {
             if (getCraft().getBurningFuel() < fuelBurnRate) {
                 Block fuelHolder = null;
                 for (MovecraftLocation bTest : blocksList) {
@@ -323,7 +323,7 @@ public class TranslationTask extends AsyncTask {
             if (newLoc.y > data.getMaxHeight() && newLoc.y > oldLoc.y) {
                 fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit height limit"));
                 break;
-            } else if (newLoc.y < data.getMinHeight() && newLoc.y < oldLoc.y && getCraft().getSinking() == false) {
+            } else if (newLoc.y < data.getMinHeight() && newLoc.y < oldLoc.y && !getCraft().getSinking()) {
                 fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum height limit"));
                 break;
             }
@@ -337,7 +337,7 @@ public class TranslationTask extends AsyncTask {
             if (craftPilot != null) {
                 // See if they are permitted to build in the area, if WorldGuard integration is turned on
                 if (Movecraft.getInstance().getWorldGuardPlugin() != null && Settings.WorldGuardBlockMoveOnBuildPerm) {
-                    if (Movecraft.getInstance().getWorldGuardPlugin().canBuild(craftPilot, plugLoc) == false) {
+                    if (!Movecraft.getInstance().getWorldGuardPlugin().canBuild(craftPilot, plugLoc)) {
                         fail(String.format(I18nSupport.getInternationalisedString(
                                 "Translation - Failed Player is not permitted to build in this WorldGuard region") +
                                            " @ %d,%d,%d", oldLoc.x, oldLoc.y, oldLoc.z));
@@ -763,7 +763,7 @@ public class TranslationTask extends AsyncTask {
 
                 // if the craft is sinking, remove all solid blocks above the one that hit the ground from the craft
                 // for smoothing sinking
-                if (getCraft().getSinking() == true &&
+                if (getCraft().getSinking() &&
                     (getCraft().getType().getExplodeOnCrash() == 0.0 || explosionBlockedByTowny)) {
                     int posy = m.getNewBlockLocation().y + 1;
                     int testID = getCraft().getW()
@@ -802,7 +802,7 @@ public class TranslationTask extends AsyncTask {
             data.setUpdates(explosionSet.toArray(new MapUpdateCommand[1]));
 
             fail(I18nSupport.getInternationalisedString("Translation - Failed Craft is obstructed"));
-            if (getCraft().getSinking() == true) {
+            if (getCraft().getSinking()) {
                 if (getCraft().getType().getSinkPercent() != 0.0) {
                     getCraft().setLastBlockCheck(0);
                 }
@@ -815,7 +815,7 @@ public class TranslationTask extends AsyncTask {
             data.setBlockList(newBlockList);
 
             //prevents torpedo and rocket pilots :)
-            if (getCraft().getType().getMoveEntities() && getCraft().getSinking() == false) {
+            if (getCraft().getType().getMoveEntities() && !getCraft().getSinking()) {
                 // Move entities within the craft
                 List<Entity> eList = null;
                 int numTries = 0;
@@ -840,7 +840,7 @@ public class TranslationTask extends AsyncTask {
                         //if(pTest.getType()!=org.bukkit.entity.EntityType.DROPPED_ITEM ) {
                         if (pTest instanceof LivingEntity) {
                             Location tempLoc = pTest.getLocation();
-                            if (getCraft().getPilotLocked() == true &&
+                            if (getCraft().getPilotLocked() &&
                                 pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
                                 tempLoc.setX(getCraft().getPilotLockedX());
                                 tempLoc.setY(getCraft().getPilotLockedY());
@@ -855,7 +855,7 @@ public class TranslationTask extends AsyncTask {
                             EntityUpdateCommand eUp = new EntityUpdateCommand(pTest.getLocation().clone(), newPLoc,
                                                                               pTest);
                             entityUpdateSet.add(eUp);
-                            if (getCraft().getPilotLocked() == true &&
+                            if (getCraft().getPilotLocked() &&
                                 pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
                                 getCraft().setPilotLockedX(tempLoc.getX());
                                 getCraft().setPilotLockedY(tempLoc.getY());
@@ -866,8 +866,7 @@ public class TranslationTask extends AsyncTask {
                 }
             } else {
                 //add releaseTask without playermove to manager
-                if (getCraft().getType().getCruiseOnPilot() == false &&
-                    getCraft().getSinking() == false)  // not necessary to release
+                if (!getCraft().getType().getCruiseOnPilot() && !getCraft().getSinking())  // not necessary to release
                     // cruiseonpilot crafts, because they will already be released
                     CraftManager.getInstance().addReleaseTask(getCraft());
             }
