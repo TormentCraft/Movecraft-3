@@ -677,11 +677,10 @@ public class InteractListener implements Listener {
 
                                 int dx = (Math.abs(nx) >= 0.5 ? 1 : 0) * (int) Math.signum(nx);
                                 int dz = (Math.abs(nz) > 0.5 ? 1 : 0) * (int) Math.signum(nz);
-                                int dy;
 
                                 float p = event.getPlayer().getLocation().getPitch();
 
-                                dy = -(Math.abs(p) >= 25 ? 1 : 0) * (int) Math.signum(p);
+                                int dy = -(Math.abs(p) >= 25 ? 1 : 0) * (int) Math.signum(p);
 
                                 if (Math.abs(event.getPlayer().getLocation().getPitch()) >= 75) {
                                     dx = 0;

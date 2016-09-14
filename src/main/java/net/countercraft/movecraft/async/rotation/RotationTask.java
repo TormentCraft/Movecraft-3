@@ -91,8 +91,6 @@ public class RotationTask extends AsyncTask {
 
     @Override public void execute() {
 
-        int waterLine = 0;
-
         int[][][] hb = getCraft().getHitBox();
         if (hb == null) return;
 
@@ -126,12 +124,12 @@ public class RotationTask extends AsyncTask {
         // blockedByWater=false means an ocean-going vessel
         boolean waterCraft = !getCraft().getType().blockedByWater();
 
+        int waterLine = 0;
         if (waterCraft) {
             // next figure out the water level by examining blocks next to the outer boundaries of the craft
             for (int posY = maxY; (posY >= minY) && (waterLine == 0); posY--) {
                 int posX;
-                int posZ;
-                posZ = getCraft().getMinZ() - 1;
+                int posZ = getCraft().getMinZ() - 1;
                 for (posX = getCraft().getMinX() - 1; (posX <= maxX + 1) && (waterLine == 0); posX++) {
                     if (w.getBlockAt(posX, posY, posZ).getTypeId() == 9) {
                         waterLine = posY;
@@ -242,8 +240,6 @@ public class RotationTask extends AsyncTask {
         } else {
             townyEnabled = false;
         }
-        int craftMinY = 0;
-        int craftMaxY = 0;
         // make the centered block list, and check for a cruise control sign to reset to off
         for (int i = 0; i < blockList.length; i++) {
             centeredBlockList[i] = blockList[i].subtract(originPoint);
@@ -254,6 +250,8 @@ public class RotationTask extends AsyncTask {
 
         getCraft().setCruising(false);
 
+        int craftMinY = 0;
+        int craftMaxY = 0;
         for (int i = 0; i < blockList.length; i++) {
 
             blockList[i] = MathUtils.rotateVec(rotation, centeredBlockList[i]).add(originPoint);
@@ -534,9 +532,8 @@ public class RotationTask extends AsyncTask {
             }
 
             // Rerun the polygonal bounding formula for the newly formed craft
-            int sizeX, sizeZ;
-            sizeX = (maxX - minX) + 1;
-            sizeZ = (maxZ - minZ) + 1;
+            int sizeX = (maxX - minX) + 1;
+            int sizeZ = (maxZ - minZ) + 1;
 
             int[][][] polygonalBox = new int[sizeX][][];
 
@@ -627,9 +624,8 @@ public class RotationTask extends AsyncTask {
                                 parentMinZ = l.z;
                             }
                         }
-                        int parentSizeX, parentSizeZ;
-                        parentSizeX = (parentMaxX - parentMinX) + 1;
-                        parentSizeZ = (parentMaxZ - parentMinZ) + 1;
+                        int parentSizeX = (parentMaxX - parentMinX) + 1;
+                        int parentSizeZ = (parentMaxZ - parentMinZ) + 1;
                         int[][][] parentPolygonalBox = new int[parentSizeX][][];
                         for (MovecraftLocation l : parentBlockList) {
                             if (parentPolygonalBox[l.x - parentMinX] == null) {
@@ -702,13 +698,9 @@ public class RotationTask extends AsyncTask {
         return isSubCraft;
     }
 
-    private boolean checkChests(Material mBlock, MovecraftLocation newLoc, Set<MovecraftLocation> existingBlockSet)
-    {
-        Material testMaterial;
-        MovecraftLocation aroundNewLoc;
-
-        aroundNewLoc = newLoc.translate(1, 0, 0);
-        testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
+    private boolean checkChests(Material mBlock, MovecraftLocation newLoc, Set<MovecraftLocation> existingBlockSet) {
+        MovecraftLocation aroundNewLoc = newLoc.translate(1, 0, 0);
+        Material testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
         if (testMaterial == mBlock) {
             if (!existingBlockSet.contains(aroundNewLoc)) {
                 return false;

@@ -235,10 +235,10 @@ public class DetectionTask extends AsyncTask {
                                     oChange = true;
                                 }
                                 if (oChange) {
-                                    boolean failed = false;
                                     Town town = TownyUtils.getTown(townBlock);
                                     if (town != null) {
                                         Location locSpawn = TownyUtils.getTownSpawn(townBlock);
+                                        boolean failed = false;
                                         if (locSpawn != null) {
                                             if (!this.townyWorldHeightLimits.validate(y, locSpawn.getBlockY())) {
                                                 failed = true;

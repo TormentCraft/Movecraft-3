@@ -89,7 +89,6 @@ public class MapUpdateManager extends BukkitRunnable {
         int x = workingL.x;
         int y = workingL.y;
         int z = workingL.z;
-        Chunk chunk = null;
 
         int newTypeID = m.getTypeID();
 
@@ -97,7 +96,7 @@ public class MapUpdateManager extends BukkitRunnable {
             return;
         }
 
-        chunk = w.getBlockAt(x, y, z).getChunk();
+        Chunk chunk = w.getBlockAt(x, y, z).getChunk();
 
         net.minecraft.server.v1_10_R1.Chunk c = null;
         Chunk cmC = null;
@@ -116,7 +115,6 @@ public class MapUpdateManager extends BukkitRunnable {
 
         int origType = w.getBlockAt(x, y, z).getTypeId();
         byte origData = w.getBlockAt(x, y, z).getData();
-        boolean success = false;
 
         if (Settings.CompatibilityMode) {
 
@@ -166,6 +164,7 @@ public class MapUpdateManager extends BukkitRunnable {
         } else {
             BlockPosition position = new BlockPosition(x, y, z);
 
+            boolean success = false;
             if ((origType == 149 || origType == 150) &&
                 m.getWorldEditBaseBlock() == null) { // bukkit can't remove comparators safely, it screws
                 // up the NBT data. So turn it to a sign, then remove it.

@@ -32,16 +32,14 @@ public final class BoundingBoxUtils {
                 polygonalBox[l.x - minX] = new int[sizeZ][];
             }
 
-            int minY, maxY;
-
             if (polygonalBox[l.x - minX][l.z - minZ] == null) {
 
                 polygonalBox[l.x - minX][l.z - minZ] = new int[2];
                 polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
                 polygonalBox[l.x - minX][l.z - minZ][1] = l.y;
             } else {
-                minY = polygonalBox[l.x - minX][l.z - minZ][0];
-                maxY = polygonalBox[l.x - minX][l.z - minZ][1];
+                int minY = polygonalBox[l.x - minX][l.z - minZ][0];
+                int maxY = polygonalBox[l.x - minX][l.z - minZ][1];
 
                 if (l.y < minY) {
                     polygonalBox[l.x - minX][l.z - minZ][0] = l.y;

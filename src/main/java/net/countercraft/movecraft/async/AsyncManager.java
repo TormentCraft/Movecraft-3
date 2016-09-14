@@ -180,9 +180,8 @@ public class AsyncManager extends BukkitRunnable {
                                                 parentMinZ = l.z;
                                             }
                                         }
-                                        int parentSizeX, parentSizeZ;
-                                        parentSizeX = (parentMaxX - parentMinX) + 1;
-                                        parentSizeZ = (parentMaxZ - parentMinZ) + 1;
+                                        int parentSizeX = (parentMaxX - parentMinX) + 1;
+                                        int parentSizeZ = (parentMaxZ - parentMinZ) + 1;
                                         int[][][] parentPolygonalBox = new int[parentSizeX][][];
                                         for (MovecraftLocation l : parentBlockList) {
                                             if (parentPolygonalBox[l.x - parentMinX] == null) {
@@ -445,9 +444,9 @@ public class AsyncManager extends BukkitRunnable {
                                     double movedX = p.getLocation().getX() - pcraft.getPilotLockedX();
                                     double movedZ = p.getLocation().getZ() - pcraft.getPilotLockedZ();
                                     int dX = 0;
-                                    int dZ = 0;
                                     if (movedX > 0.15) dX = 1;
                                     else if (movedX < -0.15) dX = -1;
+                                    int dZ = 0;
                                     if (movedZ > 0.15) dZ = 1;
                                     else if (movedZ < -0.15) dZ = -1;
                                     if (dX != 0 || dZ != 0) {
@@ -533,10 +532,9 @@ public class AsyncManager extends BukkitRunnable {
     public void processSinking() {
         for (World w : Bukkit.getWorlds()) {
             if (w != null && CraftManager.getInstance().getCraftsInWorld(w) != null) {
-                TownyWorld townyWorld = null;
                 boolean townyEnabled = false;
                 if (Movecraft.getInstance().getTownyPlugin() != null && Settings.TownyBlockSinkOnNoPVP) {
-                    townyWorld = TownyUtils.getTownyWorld(w);
+                    TownyWorld townyWorld = TownyUtils.getTownyWorld(w);
                     if (townyWorld != null) {
                         townyEnabled = townyWorld.isUsingTowny();
                     }

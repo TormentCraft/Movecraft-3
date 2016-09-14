@@ -95,7 +95,6 @@ public final class Direction {
         // Yaw is between -180 .. 180.
 
         int x = 0;
-        int y = 0;
         int z = 0;
 
         if (pitch > -80 && pitch < 80) {
@@ -106,6 +105,7 @@ public final class Direction {
             if (yaw >= -150.0 && yaw <= -30.0) x = 1;
         }
 
+        int y = 0;
         if (pitch <= -30) y = 1;//up
         else if (pitch >= 30) y = -1;//down
 

@@ -66,9 +66,7 @@ public final class TownyUtils {
 
     public static Town getTown(TownBlock townBlock) {
         try {
-            Town town;
-            town = townBlock.getTown();
-            return town;
+            return townBlock.getTown();
         } catch (TownyException e) {
             //Logger.getLogger(TownyUtils.class.getName()).log(Level.SEVERE, null, ex);
             //none
@@ -92,9 +90,8 @@ public final class TownyUtils {
     }
 
     public static boolean validateResident(Player player) {
-        Resident resident;
         try {
-            resident = TownyUniverse.getDataSource().getResident(player.getName());
+            Resident resident = TownyUniverse.getDataSource().getResident(player.getName());
             return true;
         } catch (TownyException e) {
             //System.out.print("Failed to fetch resident: " + player.getName());

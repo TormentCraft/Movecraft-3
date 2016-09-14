@@ -153,9 +153,8 @@ public class TranslationTask extends AsyncTask {
                 for (int posY = maxY + 1; (posY >= minY - 1) && (waterLine == 0); posY--) {
                     int numWater = 0;
                     int numAir = 0;
+                    int posZ = minZ - 1;
                     int posX;
-                    int posZ;
-                    posZ = minZ - 1;
                     for (posX = minX - 1; (posX <= maxX + 1) && (waterLine == 0); posX++) {
                         int typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId();
                         if (typeID == 9) numWater++;
@@ -286,17 +285,11 @@ public class TranslationTask extends AsyncTask {
         List<Material> harvesterBladeBlocks = getCraft().getType().getHarvesterBladeBlocks();
 
         int hoverOver = data.getDy();
-        int craftMinY = 0;
-        int craftMaxY = 0;
-        boolean clearNewData = false;
         boolean hoverUseGravity = getCraft().getType().getUseGravity();
         boolean checkHover = (data.getDx() != 0 || data.getDz() != 0);// we want to check only horizontal moves
         boolean canHoverOverWater = getCraft().getType().getCanHoverOverWater();
         boolean townyEnabled = Movecraft.getInstance().getTownyPlugin() != null;
-        boolean explosionBlockedByTowny = false;
-        boolean moveBlockedByTowny = false;
         boolean validateTownyExplosion = false;
-        String townName = "";
 
         Set<TownBlock> townBlockSet = new HashSet<>();
         TownyWorld townyWorld = null;
@@ -317,6 +310,12 @@ public class TranslationTask extends AsyncTask {
             townyEnabled = false;
         }
 
+        int craftMinY = 0;
+        int craftMaxY = 0;
+        boolean clearNewData = false;
+        boolean explosionBlockedByTowny = false;
+        boolean moveBlockedByTowny = false;
+        String townName = "";
         for (int i = 0; i < blocksList.length; i++) {
             MovecraftLocation oldLoc = blocksList[i];
             MovecraftLocation newLoc = oldLoc.translate(data.getDx(), data.getDy(), data.getDz());
@@ -329,11 +328,6 @@ public class TranslationTask extends AsyncTask {
                 fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum height limit"));
                 break;
             }
-
-            boolean blockObstructed = false;
-            boolean harvestBlock = false;
-            boolean bladeOK = true;
-            Material testMaterial;
 
             Location plugLoc = new Location(getCraft().getW(), newLoc.x, newLoc.y, newLoc.z);
             if (craftPilot != null) {
@@ -389,10 +383,10 @@ public class TranslationTask extends AsyncTask {
                                 oChange = true;
                             }
                             if (oChange) {
-                                boolean failed = false;
                                 Town town = TownyUtils.getTown(townBlock);
                                 if (town != null) {
                                     Location locSpawn = TownyUtils.getTownSpawn(townBlock);
+                                    boolean failed = false;
                                     if (locSpawn != null) {
                                         if (!townyWorldHeightLimits.validate(y, locSpawn.getBlockY())) {
                                             failed = true;
@@ -429,7 +423,7 @@ public class TranslationTask extends AsyncTask {
             }
 
             //check for chests around
-            testMaterial = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType();
+            Material testMaterial = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType();
             if (testMaterial == Material.CHEST || testMaterial == Material.TRAPPED_CHEST) {
                 if (!checkChests(testMaterial, newLoc, existingBlockSet)) {
                     //prevent chests collision
@@ -441,6 +435,7 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
+            boolean blockObstructed = false;
             if (getCraft().getSinking()) {
                 int testID = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getTypeId();
                 blockObstructed =
@@ -469,6 +464,7 @@ public class TranslationTask extends AsyncTask {
             }
 
             testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
+            boolean bladeOK = true;
             if (blockObstructed) {
                 if (hoverCraft || !harvestBlocks.isEmpty()) {
                     // New block is not harvested block
@@ -481,7 +477,7 @@ public class TranslationTask extends AsyncTask {
                         }
                         if (bladeOK) {
                             blockObstructed = false;
-                            harvestBlock = true;
+                            boolean harvestBlock = true;
                             tryPutToDestroyBox(testMaterial, newLoc, harvestedBlocks, droppedBlocks, destroyedBlocks);
                             harvestedBlocks.add(newLoc);
                         }
@@ -563,8 +559,8 @@ public class TranslationTask extends AsyncTask {
                             }
                         } else {
                             // use the explosion code to clean up the craft, but not with enough force to do anything
-                            int explosionKey = 0 - 1;
                             if (getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType() != Material.AIR) {
+                                int explosionKey = 0 - 1;
                                 explosionSet.add(new MapUpdateCommand(oldLoc, explosionKey, (byte) 0, getCraft()));
                                 data.setCollisionExplosion(true);
                             }
@@ -587,8 +583,8 @@ public class TranslationTask extends AsyncTask {
                             }
                             break;
                         } else if (explosionBlockedByTowny) {
-                            int explosionKey = 0 - 1;
                             if (getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType() != Material.AIR) {
+                                int explosionKey = 0 - 1;
                                 explosionSet.add(new MapUpdateCommand(oldLoc, explosionKey, (byte) 0, getCraft()));
                                 data.setCollisionExplosion(true);
                             }
@@ -1064,11 +1060,9 @@ public class TranslationTask extends AsyncTask {
 
     private boolean checkChests(Material mBlock, MovecraftLocation newLoc, Set<MovecraftLocation> existingBlockSet)
     {
-        Material testMaterial;
-        MovecraftLocation aroundNewLoc;
 
-        aroundNewLoc = newLoc.translate(1, 0, 0);
-        testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
+        MovecraftLocation aroundNewLoc = newLoc.translate(1, 0, 0);
+        Material testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
         if (testMaterial == mBlock) {
             if (!existingBlockSet.contains(aroundNewLoc)) {
                 return false;
@@ -1114,13 +1108,11 @@ public class TranslationTask extends AsyncTask {
         HashMap<MovecraftLocation, ItemStack[]> droppedMap = new HashMap<>();
         harvestedBlocks.addAll(droppedBlocks);
 
-        ItemStack retStack;
-        boolean oSomethingToDrop, oWheat;
         for (MovecraftLocation harvestedBlock : harvestedBlocks) {
             Block block = getCraft().getW().getBlockAt(harvestedBlock.x, harvestedBlock.y, harvestedBlock.z);
             ItemStack[] drops = block.getDrops().toArray(new ItemStack[block.getDrops().size()]);
-            oSomethingToDrop = false;
-            oWheat = false;
+            boolean oSomethingToDrop = false;
+            boolean oWheat = false;
             for (ItemStack drop : drops) {
                 if (drop != null) {
                     oSomethingToDrop = true;
@@ -1189,6 +1181,7 @@ public class TranslationTask extends AsyncTask {
             if (droppedMap.containsKey(harvestedBlock)) {
                 ItemStack[] drops = droppedMap.get(harvestedBlock);
                 for (ItemStack drop : drops) {
+                    ItemStack retStack;
                     if (droppedBlocks.contains(harvestedBlock)) {
                         retStack = drop;
                     } else {

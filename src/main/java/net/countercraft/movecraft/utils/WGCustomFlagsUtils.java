@@ -20,9 +20,8 @@ public class WGCustomFlagsUtils {
         if (cc == null) {
             return null;
         }
-        Object o;
         try {
-            o = cc.newInstance(name, def);
+            Object o = cc.newInstance(name, def);
             return (StateFlag) o;
         } catch (InstantiationException ex) {
             return null;
