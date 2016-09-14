@@ -94,27 +94,30 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler public void onPlayerMove(PlayerMoveEvent event) {
-        final Craft c = CraftManager.getInstance().getCraftByPlayer(event.getPlayer());
-        if (c != null) {
-            if (c.isNotProcessing() && (!MathUtils
-                    .playerIsWithinBoundingPolygon(c.getHitBox(), c.getMinX(), c.getMinZ(),
-                                                   MathUtils.bukkit2MovecraftLoc(event.getPlayer().getLocation())))) {
+        final CraftManager craftManager = CraftManager.getInstance();
+        final Player player = event.getPlayer();
+        final Craft craft = craftManager.getCraftByPlayer(player);
 
-                if (!CraftManager.getInstance().getReleaseEvents().containsKey(event.getPlayer()) &&
-                    c.getType().getMoveEntities()) {
-                    if (Settings.ManOverBoardTimeout == 0) event.getPlayer().sendMessage(
+        if (craft != null) {
+            if (craft.isNotProcessing() && (!MathUtils
+                    .playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
+                                                   MathUtils.bukkit2MovecraftLoc(player.getLocation())))) {
+
+                if (!craftManager.getReleaseEvents().containsKey(player) &&
+                    craft.getType().getMoveEntities()) {
+                    if (Settings.ManOverBoardTimeout == 0) player.sendMessage(
                             I18nSupport.getInternationalisedString("Release - Player has left craft"));
-                    else event.getPlayer().sendMessage(I18nSupport.getInternationalisedString(
+                    else player.sendMessage(I18nSupport.getInternationalisedString(
                             "You have left your craft. You may return to your craft by typing /manoverboard any time " +
                             "before the timeout expires"));
-                    if (c.getBlockList().length > 11000) {
-                        event.getPlayer().sendMessage(I18nSupport.getInternationalisedString(
+                    if (craft.getBlockList().length > 11000) {
+                        player.sendMessage(I18nSupport.getInternationalisedString(
                                 "Craft is too big to check its borders. Make sure this area is safe to release your " +
                                 "craft in."));
                     } else {
-                        String ret = checkCraftBorders(c);
+                        String ret = checkCraftBorders(craft);
                         if (ret != null) {
-                            event.getPlayer().sendMessage(ChatColor.RED +
+                            player.sendMessage(ChatColor.RED +
                                                           I18nSupport.getInternationalisedString(
                                                                   "WARNING! There are blocks near your craft, part of" +
                                                                   " your craft may be damaged!") +
@@ -125,16 +128,16 @@ public class PlayerListener implements Listener {
                     BukkitTask releaseTask = new BukkitRunnable() {
 
                         @Override public void run() {
-                            CraftManager.getInstance().removeCraft(c);
+                            craftManager.removeCraft(craft);
                         }
                     }.runTaskLater(Movecraft.getInstance(), (20 * 30));
 
-                    CraftManager.getInstance().getReleaseEvents().put(event.getPlayer(), releaseTask);
+                    craftManager.getReleaseEvents().put(player, releaseTask);
                 }
             } else {
-                if (CraftManager.getInstance().getReleaseEvents().containsKey(event.getPlayer()) &&
-                    c.getType().getMoveEntities()) {
-                    CraftManager.getInstance().removeReleaseTask(c);
+                if (craftManager.getReleaseEvents().containsKey(player) &&
+                    craft.getType().getMoveEntities()) {
+                    craftManager.removeReleaseTask(craft);
                 }
             }
         }

@@ -96,14 +96,15 @@ public class WorldEditInteractListener implements Listener {
 
                 if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase(
                         "Repair:")) { // left click the Repair sign, and it saves the state
+                    final Player player = event.getPlayer();
                     if (Settings.RepairTicksPerBlock == 0) {
-                        event.getPlayer().sendMessage(I18nSupport.getInternationalisedString(
+                        player.sendMessage(I18nSupport.getInternationalisedString(
                                 "Repair functionality is disabled or WorldEdit was not detected"));
                         return;
                     }
-                    Craft pCraft = CraftManager.getInstance().getCraftByPlayer(event.getPlayer());
+                    Craft pCraft = CraftManager.getInstance().getCraftByPlayer(player);
                     if (pCraft == null) {
-                        event.getPlayer().sendMessage(
+                        player.sendMessage(
                                 I18nSupport.getInternationalisedString("You must be piloting a craft"));
                         return;
                     }
@@ -115,7 +116,7 @@ public class WorldEditInteractListener implements Listener {
                         file.mkdirs();
                     }
                     repairStateName += "/";
-                    repairStateName += event.getPlayer().getName();
+                    repairStateName += player.getName();
                     repairStateName += sign.getLine(1);
                     file = new File(repairStateName);
 
@@ -150,12 +151,11 @@ public class WorldEditInteractListener implements Listener {
                     try {
                         cc.saveSchematic(file);
                     } catch (Exception e) {
-                        event.getPlayer()
-                             .sendMessage(I18nSupport.getInternationalisedString("Could not save file"));
+                        player.sendMessage(I18nSupport.getInternationalisedString("Could not save file"));
                         e.printStackTrace();
                         return;
                     }
-                    event.getPlayer().sendMessage(I18nSupport.getInternationalisedString("State saved"));
+                    player.sendMessage(I18nSupport.getInternationalisedString("State saved"));
                     event.setCancelled(true);
                 }
             }
@@ -171,24 +171,25 @@ public class WorldEditInteractListener implements Listener {
         }
 
         // don't process commands if this is a pilot tool click
+        final CraftManager craftManager = CraftManager.getInstance();
+        final Player player = event.getPlayer();
+        final Craft craft = craftManager.getCraftByPlayer(player);
         if (event.getItem() != null && event.getItem().getTypeId() == Settings.PilotTool) {
-            Craft c = CraftManager.getInstance().getCraftByPlayer(event.getPlayer());
-            if (c != null) return;
+            if (craft != null) return;
         }
 
         if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Repair:")) {
             if (Settings.RepairTicksPerBlock == 0) {
-                event.getPlayer().sendMessage(I18nSupport.getInternationalisedString(
+                player.sendMessage(I18nSupport.getInternationalisedString(
                         "Repair functionality is disabled or WorldEdit was not detected"));
                 return;
             }
-            Craft pCraft = CraftManager.getInstance().getCraftByPlayer(event.getPlayer());
-            if (pCraft == null) {
-                event.getPlayer().sendMessage(I18nSupport.getInternationalisedString("You must be piloting a craft"));
+            if (craft == null) {
+                player.sendMessage(I18nSupport.getInternationalisedString("You must be piloting a craft"));
                 return;
             }
-            if (!event.getPlayer().hasPermission("movecraft." + pCraft.getType().getCraftName() + ".repair")) {
-                event.getPlayer()
+            if (!player.hasPermission("movecraft." + craft.getType().getCraftName() + ".repair")) {
+                player
                      .sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 return;
             }
@@ -196,11 +197,11 @@ public class WorldEditInteractListener implements Listener {
 
             String repairStateName = Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/RepairStates";
             repairStateName += "/";
-            repairStateName += event.getPlayer().getName();
+            repairStateName += player.getName();
             repairStateName += sign.getLine(1);
             File file = new File(repairStateName);
             if (!file.exists()) {
-                event.getPlayer()
+                player
                      .sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
                 return;
             }
@@ -209,12 +210,12 @@ public class WorldEditInteractListener implements Listener {
             try {
                 cc = sf.load(file);
             } catch (com.sk89q.worldedit.data.DataException e) {
-                event.getPlayer()
+                player
                      .sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
                 e.printStackTrace();
                 return;
             } catch (IOException e) {
-                event.getPlayer()
+                player
                      .sendMessage(I18nSupport.getInternationalisedString("REPAIR STATE NOT FOUND"));
                 e.printStackTrace();
                 return;
@@ -233,7 +234,7 @@ public class WorldEditInteractListener implements Listener {
                         worldLoc.setY(sign.getY() + cc.getOffset().getBlockY() + y);
                         worldLoc.setZ(sign.getZ() + cc.getOffset().getBlockZ() + z);
                         Boolean isImportant = true;
-                        if (!pCraft.getType().blockedByWater())
+                        if (!craft.getType().blockedByWater())
                             if (cc.getBlock(ccLoc).getId() == 8 || cc.getBlock(ccLoc).getId() == 9) isImportant = false;
                         if (cc.getBlock(ccLoc).getId() == 0) isImportant = false;
                         if (isImportant &&
@@ -297,7 +298,7 @@ public class WorldEditInteractListener implements Listener {
             // if this is the second click in the last 5 seconds, start the repair, otherwise give them the info on
             // the repair
             Boolean secondClick = false;
-            Long time = repairRightClickTimeMap.get(event.getPlayer());
+            Long time = repairRightClickTimeMap.get(player);
             if (time != null) {
                 long ticksElapsed = (System.currentTimeMillis() - time) / 50;
                 if (ticksElapsed < 100) {
@@ -313,8 +314,8 @@ public class WorldEditInteractListener implements Listener {
                     final int itemTypeId = entry.getKey();
                     ArrayList<InventoryHolder> chests = new ArrayList<>();
 
-                    for (MovecraftLocation loc : pCraft.getBlockList()) {
-                        Block b = pCraft.getW().getBlockAt(loc.x, loc.y, loc.z);
+                    for (MovecraftLocation loc : craft.getBlockList()) {
+                        Block b = craft.getW().getBlockAt(loc.x, loc.y, loc.z);
                         if ((b.getTypeId() == 54) || (b.getTypeId() == 146)) {
                             InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
                             if (inventoryHolder.getInventory().contains(itemTypeId) && remainingQty > 0) {
@@ -331,7 +332,7 @@ public class WorldEditInteractListener implements Listener {
                         }
                     }
                     if (remainingQty > 0) {
-                        event.getPlayer().sendMessage(String.format(
+                        player.sendMessage(String.format(
                                 I18nSupport.getInternationalisedString("Need more of material") + ": %s - %d",
                                 Material.getMaterial(itemTypeId).name().toLowerCase().replace("_", " "), remainingQty));
                         enoughMaterial = false;
@@ -341,10 +342,10 @@ public class WorldEditInteractListener implements Listener {
                 }
                 if (Movecraft.getInstance().getEconomy() != null && enoughMaterial) {
                     double moneyCost = numdiffblocks * Settings.RepairMoneyPerBlock;
-                    if (Movecraft.getInstance().getEconomy().has(event.getPlayer(), moneyCost)) {
-                        Movecraft.getInstance().getEconomy().withdrawPlayer(event.getPlayer(), moneyCost);
+                    if (Movecraft.getInstance().getEconomy().has(player, moneyCost)) {
+                        Movecraft.getInstance().getEconomy().withdrawPlayer(player, moneyCost);
                     } else {
-                        event.getPlayer().sendMessage(
+                        player.sendMessage(
                                 I18nSupport.getInternationalisedString("You do not have enough money"));
                         enoughMaterial = false;
                     }
@@ -383,22 +384,20 @@ public class WorldEditInteractListener implements Listener {
                                 sign.getY() + cc.getOffset().getBlockY() + ccloc.getBlockY(),
                                 sign.getZ() + cc.getOffset().getBlockZ() + ccloc.getBlockZ());
                         MapUpdateCommand updateCom = new MapUpdateCommand(moveloc, bb.getType(), (byte) bb.getData(),
-                                                                          bb, pCraft);
+                                                                          bb, craft);
                         updateCommands.add(updateCom);
                     }
                     if (!updateCommands.isEmpty()) {
-                        final Craft fpCraft = pCraft;
                         final MapUpdateCommand[] fUpdateCommands = updateCommands.toArray(new MapUpdateCommand[1]);
                         int durationInTicks = numdiffblocks * Settings.RepairTicksPerBlock;
 
                         // send out status updates every minute
                         for (int ticsFromStart = 0; ticsFromStart < durationInTicks; ticsFromStart += 1200) {
-                            final Player fp = event.getPlayer();
                             final int fTics = ticsFromStart / 20;
                             final int fDur = durationInTicks / 20;
                             BukkitTask statusTask = new BukkitRunnable() {
                                 @Override public void run() {
-                                    fp.sendMessage(String.format(
+                                    player.sendMessage(String.format(
                                             I18nSupport.getInternationalisedString("Repairs underway") + ": %d / %d",
                                             fTics, fDur));
                                 }
@@ -406,13 +405,11 @@ public class WorldEditInteractListener implements Listener {
                         }
 
                         // keep craft piloted during the repair process so player can not move it
-                        CraftManager.getInstance().removePlayerFromCraft(pCraft);
-                        final Craft releaseCraft = pCraft;
-                        final Player fp = event.getPlayer();
+                        craftManager.removePlayerFromCraft(craft);
                         BukkitTask releaseTask = new BukkitRunnable() {
                             @Override public void run() {
-                                CraftManager.getInstance().removeCraft(releaseCraft);
-                                fp.sendMessage(I18nSupport.getInternationalisedString(
+                                craftManager.removeCraft(craft);
+                                player.sendMessage(I18nSupport.getInternationalisedString(
                                         "Repairs complete. You may now pilot the craft"));
                             }
                         }.runTaskLater(Movecraft.getInstance(), (durationInTicks + 20));
@@ -421,7 +418,7 @@ public class WorldEditInteractListener implements Listener {
                         BukkitTask repairTask = new BukkitRunnable() {
                             @Override public void run() {
                                 MapUpdateManager.getInstance()
-                                                .addWorldUpdate(fpCraft.getW(), fUpdateCommands, null, null);
+                                                .addWorldUpdate(craft.getW(), fUpdateCommands, null, null);
                             }
                         }.runTaskLater(Movecraft.getInstance(), (durationInTicks));
                     }
@@ -429,38 +426,37 @@ public class WorldEditInteractListener implements Listener {
             } else {
                 // if this is the first time they have clicked the sign, show the summary of repair costs and
                 // requirements
-                event.getPlayer().sendMessage(
+                player.sendMessage(
                         String.format(I18nSupport.getInternationalisedString("Total damaged blocks") + ": %d",
                                       numdiffblocks));
-                float percent = (numdiffblocks * 100) / pCraft.getOrigBlockCount();
-                event.getPlayer().sendMessage(
+                float percent = (numdiffblocks * 100) / craft.getOrigBlockCount();
+                player.sendMessage(
                         String.format(I18nSupport.getInternationalisedString("Percentage of craft") + ": %.2f%%",
                                       percent));
                 if (percent > 50) {
-                    event.getPlayer().sendMessage(I18nSupport.getInternationalisedString(
+                    player.sendMessage(I18nSupport.getInternationalisedString(
                             "This craft is too damaged and can not be repaired"));
                     return;
                 }
                 if (numdiffblocks != 0) {
-                    event.getPlayer()
-                         .sendMessage(I18nSupport.getInternationalisedString("SUPPLIES NEEDED"));
+                    player.sendMessage(I18nSupport.getInternationalisedString("SUPPLIES NEEDED"));
                     for (Map.Entry<Integer, Integer> entry : numMissingItems.entrySet()) {
                         final Integer itemType = entry.getKey();
                         final Integer amount = entry.getValue();
-                        event.getPlayer().sendMessage(String.format("%s : %d",
+                        player.sendMessage(String.format("%s : %d",
                                                                     Material.getMaterial(itemType).name()
                                                                             .toLowerCase().replace("_", " "),
                                                                     amount));
                     }
                     int durationInSeconds = numdiffblocks * Settings.RepairTicksPerBlock / 20;
-                    event.getPlayer().sendMessage(
+                    player.sendMessage(
                             String.format(I18nSupport.getInternationalisedString("Seconds to complete repair") + ": %d",
                                           durationInSeconds));
                     int moneyCost = (int) (numdiffblocks * Settings.RepairMoneyPerBlock);
-                    event.getPlayer().sendMessage(
+                    player.sendMessage(
                             String.format(I18nSupport.getInternationalisedString("Money to complete repair") + ": %d",
                                           moneyCost));
-                    repairRightClickTimeMap.put(event.getPlayer(), System.currentTimeMillis());
+                    repairRightClickTimeMap.put(player, System.currentTimeMillis());
                 }
             }
         }

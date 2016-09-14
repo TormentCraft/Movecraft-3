@@ -134,16 +134,17 @@ public class CommandListener implements CommandExecutor {
 
         Player player = (Player) sender;
 
+        final CraftManager craftManager = CraftManager.getInstance();
+        final Craft playerCraft = craftManager.getCraftByPlayer(player);
+
         if (cmd.getName().equalsIgnoreCase("release")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.release")) {
                 player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
                 return true;
             }
 
-            final Craft pCraft = CraftManager.getInstance().getCraftByPlayerName(player.getName());
-
-            if (pCraft != null) {
-                CraftManager.getInstance().removeCraft(pCraft);
+            if (playerCraft != null) {
+                craftManager.removeCraft(playerCraft);
                 //e.getPlayer().sendMessage( String.format( I18nSupport.getInternationalisedString( "Player- Craft
                 // has been released" ) ) );
             } else {
@@ -165,11 +166,10 @@ public class CommandListener implements CommandExecutor {
                     MovecraftLocation startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
                     Craft c = new Craft(getCraftTypeFromString(args[0]), player.getWorld());
 
-                    if (CraftManager.getInstance().getCraftByPlayerName(player.getName()) == null) {
+                    if (playerCraft == null) {
                         c.detect(player, player, startPoint);
                     } else {
-                        Craft oldCraft = CraftManager.getInstance().getCraftByPlayerName(player.getName());
-                        CraftManager.getInstance().removeCraft(oldCraft);
+                        craftManager.removeCraft(playerCraft);
                         c.detect(player, player, startPoint);
                     }
                 } else {
@@ -185,13 +185,12 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
 
-            final Craft craft = CraftManager.getInstance().getCraftByPlayerName(player.getName());
-            if (craft == null) {
-            } else if (player.hasPermission("movecraft." + craft.getType().getCraftName() + ".rotate")) {
-                MovecraftLocation midPoint = getCraftMidPoint(craft);
+            if (playerCraft == null) {
+            } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
+                MovecraftLocation midPoint = getCraftMidPoint(playerCraft);
                 Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left")) ? Rotation.ANTICLOCKWISE
                                                                                           : Rotation.CLOCKWISE;
-                CraftManager.getInstance().getCraftByPlayerName(player.getName()).rotate(rotation, midPoint);
+                playerCraft.rotate(rotation, midPoint);
             } else {
                 player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
             }
@@ -205,11 +204,10 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
 
-            final Craft craft = CraftManager.getInstance().getCraftByPlayerName(player.getName());
-            if (craft == null) {
-            } else if (player.hasPermission("movecraft." + craft.getType().getCraftName() + ".rotate")) {
-                MovecraftLocation midPoint = getCraftMidPoint(craft);
-                CraftManager.getInstance().getCraftByPlayerName(player.getName())
+            if (playerCraft == null) {
+            } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
+                MovecraftLocation midPoint = getCraftMidPoint(playerCraft);
+                playerCraft
                             .rotate(Rotation.ANTICLOCKWISE, midPoint);
             } else {
                 player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
@@ -225,11 +223,10 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
 
-            final Craft craft = CraftManager.getInstance().getCraftByPlayerName(player.getName());
-            if (craft == null) {
-            } else if (player.hasPermission("movecraft." + craft.getType().getCraftName() + ".rotate")) {
-                MovecraftLocation midPoint = getCraftMidPoint(craft);
-                CraftManager.getInstance().getCraftByPlayerName(player.getName()).rotate(Rotation.CLOCKWISE, midPoint);
+            if (playerCraft == null) {
+            } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
+                MovecraftLocation midPoint = getCraftMidPoint(playerCraft);
+                playerCraft.rotate(Rotation.CLOCKWISE, midPoint);
             } else {
                 player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
             }
@@ -243,18 +240,17 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
 
-            final Craft craft = CraftManager.getInstance().getCraftByPlayerName(player.getName());
-            if (craft == null) {
-            } else if (player.hasPermission("movecraft." + craft.getType().getCraftName() + ".move")) {
-                if (craft.getType().getCanCruise()) {
+            if (playerCraft == null) {
+            } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".move")) {
+                if (playerCraft.getType().getCanCruise()) {
                     if (args.length == 0) {
                         Location loc = player.getLocation();
                         float yaw = loc.getYaw();
                         float pitch = loc.getPitch();
 
                         Direction dir = Direction.fromYawPitch(yaw, pitch);
-                        craft.setCruiseDirection(dir);
-                        craft.setCruising(dir != Direction.OFF);
+                        playerCraft.setCruiseDirection(dir);
+                        playerCraft.setCruising(dir != Direction.OFF);
                         return true;
                     } else {
                         Direction dir = Direction.OFF;
@@ -268,8 +264,8 @@ public class CommandListener implements CommandExecutor {
                             if (dir == Direction.OFF) break;
                         }
 
-                        craft.setCruiseDirection(dir);
-                        craft.setCruising(dir != Direction.OFF);
+                        playerCraft.setCruiseDirection(dir);
+                        playerCraft.setCruising(dir != Direction.OFF);
                     }
                 }
             } else {
@@ -280,9 +276,8 @@ public class CommandListener implements CommandExecutor {
         }
 
         if (cmd.getName().equalsIgnoreCase("cruiseoff")) {
-            final Craft craft = CraftManager.getInstance().getCraftByPlayerName(player.getName());
-            if (craft != null) {
-                craft.setCruising(false);
+            if (playerCraft != null) {
+                playerCraft.setCruising(false);
             }
             return true;
         }
@@ -295,8 +290,8 @@ public class CommandListener implements CommandExecutor {
             }
 
             boolean noCraftsFound = true;
-            if (CraftManager.getInstance().getCraftsInWorld(player.getWorld()) != null)
-                for (Craft craft : CraftManager.getInstance().getCraftsInWorld(player.getWorld())) {
+            if (craftManager.getCraftsInWorld(player.getWorld()) != null)
+                for (Craft craft : craftManager.getCraftsInWorld(player.getWorld())) {
                     if (craft != null) {
                         String output = new String();
                         if (craft.getNotificationPlayer() != null) {
@@ -318,13 +313,12 @@ public class CommandListener implements CommandExecutor {
         }
 
         if (cmd.getName().equalsIgnoreCase("contacts")) {
-            if (CraftManager.getInstance().getCraftByPlayer(player) != null) {
-                Craft ccraft = CraftManager.getInstance().getCraftByPlayer(player);
+            if (playerCraft != null) {
                 boolean foundContact = false;
-                for (Craft tcraft : CraftManager.getInstance().getCraftsInWorld(ccraft.getW())) {
-                    long cposx = ccraft.getMaxX() + ccraft.getMinX();
-                    long cposy = ccraft.getMaxY() + ccraft.getMinY();
-                    long cposz = ccraft.getMaxZ() + ccraft.getMinZ();
+                for (Craft tcraft : craftManager.getCraftsInWorld(playerCraft.getW())) {
+                    long cposx = playerCraft.getMaxX() + playerCraft.getMinX();
+                    long cposy = playerCraft.getMaxY() + playerCraft.getMinY();
+                    long cposz = playerCraft.getMaxZ() + playerCraft.getMinZ();
                     cposx = cposx >> 1;
                     cposy = cposy >> 1;
                     cposz = cposz >> 1;
@@ -349,7 +343,7 @@ public class CommandListener implements CommandExecutor {
                                                  tcraft.getType().getUnderwaterDetectionMultiplier());
                     }
                     if (distsquared < detectionRange * detectionRange &&
-                        tcraft.getNotificationPlayer() != ccraft.getNotificationPlayer()) {
+                        tcraft.getNotificationPlayer() != playerCraft.getNotificationPlayer()) {
                         // craft has been detected
                         foundContact = true;
                         String notification = "Contact: ";
@@ -366,7 +360,7 @@ public class CommandListener implements CommandExecutor {
                         else if (diffz < 0) notification += " south.";
                         else notification += " north.";
 
-                        ccraft.getNotificationPlayer().sendMessage(notification);
+                        playerCraft.getNotificationPlayer().sendMessage(notification);
                     }
                 }
                 if (!foundContact) player.sendMessage(
@@ -379,15 +373,14 @@ public class CommandListener implements CommandExecutor {
         }
 
         if (cmd.getName().equalsIgnoreCase("manOverBoard")) {
-            if (CraftManager.getInstance().getCraftByPlayerName(player.getName()) != null) {
-                Location telPoint = getCraftTeleportPoint(
-                        CraftManager.getInstance().getCraftByPlayerName(player.getName()),
-                        CraftManager.getInstance().getCraftByPlayerName(player.getName()).getW());
+            if (playerCraft != null) {
+                Location telPoint = getCraftTeleportPoint(playerCraft,
+                                                          playerCraft.getW());
                 player.teleport(telPoint);
             } else {
                 for (World w : Bukkit.getWorlds()) {
-                    if (CraftManager.getInstance().getCraftsInWorld(w) != null)
-                        for (Craft tcraft : CraftManager.getInstance().getCraftsInWorld(w)) {
+                    if (craftManager.getCraftsInWorld(w) != null)
+                        for (Craft tcraft : craftManager.getCraftsInWorld(w)) {
                             if (tcraft.getMovedPlayers().containsKey(player))
                                 if ((System.currentTimeMillis() - tcraft.getMovedPlayers().get(player)) / 1000 <
                                     Settings.ManOverBoardTimeout) {
