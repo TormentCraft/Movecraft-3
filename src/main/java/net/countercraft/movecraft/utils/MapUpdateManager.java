@@ -64,12 +64,9 @@ import java.util.Set;
 import java.util.logging.Level;
 
 public class MapUpdateManager extends BukkitRunnable {
-    private final HashMap<World, ArrayList<MapUpdateCommand>> updates = new HashMap<World,
-            ArrayList<MapUpdateCommand>>();
-    private final HashMap<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<World,
-            ArrayList<EntityUpdateCommand>>();
-    private final HashMap<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<World,
-            ArrayList<ItemDropUpdateCommand>>();
+    private final HashMap<World, ArrayList<MapUpdateCommand>> updates = new HashMap<>();
+    private final HashMap<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<>();
+    private final HashMap<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<>();
 
     private MapUpdateManager() {
     }
@@ -439,21 +436,19 @@ Changed for 1.8, and quite possibly wrong:
                 List<MapUpdateCommand> updatesInWorld = updates.get(w);
                 List<EntityUpdateCommand> entityUpdatesInWorld = entityUpdates.get(w);
                 List<ItemDropUpdateCommand> itemDropUpdatesInWorld = itemDropUpdates.get(w);
-                Map<MovecraftLocation, List<EntityUpdateCommand>> entityMap = new HashMap<MovecraftLocation,
-                        List<EntityUpdateCommand>>();
-                Map<MovecraftLocation, List<ItemDropUpdateCommand>> itemMap = new HashMap<MovecraftLocation,
-                        List<ItemDropUpdateCommand>>();
-                Map<MovecraftLocation, TransferData> dataMap = new HashMap<MovecraftLocation, TransferData>();
-                HashMap<MovecraftLocation, Byte> origLightMap = new HashMap<MovecraftLocation, Byte>();
+                Map<MovecraftLocation, List<EntityUpdateCommand>> entityMap = new HashMap<>();
+                Map<MovecraftLocation, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
+                Map<MovecraftLocation, TransferData> dataMap = new HashMap<>();
+                HashMap<MovecraftLocation, Byte> origLightMap = new HashMap<>();
                 Set<net.minecraft.server.v1_10_R1.Chunk> chunks = null;
                 Set<Chunk> cmChunks = null;
-                ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<MapUpdateCommand>();
-                ArrayList<Boolean> queuedPlaceDispensers = new ArrayList<Boolean>();
+                ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<>();
+                ArrayList<Boolean> queuedPlaceDispensers = new ArrayList<>();
 
                 if (Settings.CompatibilityMode) {
-                    cmChunks = new HashSet<Chunk>();
+                    cmChunks = new HashSet<>();
                 } else {
-                    chunks = new HashSet<net.minecraft.server.v1_10_R1.Chunk>();
+                    chunks = new HashSet<>();
                 }
 
                 // Preprocessing
@@ -514,7 +509,7 @@ Changed for 1.8, and quite possibly wrong:
                                                                                 i.getNewLocation().getBlockY() - 1,
                                                                                 i.getNewLocation().getBlockZ());
                             if (!entityMap.containsKey(entityLoc)) {
-                                List<EntityUpdateCommand> entUpdateList = new ArrayList<EntityUpdateCommand>();
+                                List<EntityUpdateCommand> entUpdateList = new ArrayList<>();
                                 entUpdateList.add(i);
                                 entityMap.put(entityLoc, entUpdateList);
                             } else {
@@ -800,12 +795,12 @@ Changed for 1.8, and quite possibly wrong:
         if (get != null) {
             updates.remove(w);
         } else {
-            get = new ArrayList<MapUpdateCommand>();
+            get = new ArrayList<>();
         }
 
         Integer minx = Integer.MAX_VALUE, miny = Integer.MAX_VALUE, minz = Integer.MAX_VALUE;
         Integer maxx = Integer.MIN_VALUE, maxy = Integer.MIN_VALUE, maxz = Integer.MIN_VALUE;
-        HashMap<MovecraftLocation, MapUpdateCommand> sortRef = new HashMap<MovecraftLocation, MapUpdateCommand>();
+        HashMap<MovecraftLocation, MapUpdateCommand> sortRef = new HashMap<>();
         if (mapUpdates != null) {
             for (MapUpdateCommand m : mapUpdates) {
                 if (setContainsConflict(get, m)) {
@@ -825,7 +820,7 @@ Changed for 1.8, and quite possibly wrong:
 
         ArrayList<MapUpdateCommand> tempSet = null;
         if (mapUpdates != null) {
-            tempSet = new ArrayList<MapUpdateCommand>();//(Arrays.asList(mapUpdates));
+            tempSet = new ArrayList<>();//(Arrays.asList(mapUpdates));
             // Sort the blocks from the bottom up to minimize lower altitude block updates
             for (int posy = maxy; posy >= miny; posy--) {
                 for (MapUpdateCommand test : mapUpdates) {
@@ -835,7 +830,7 @@ Changed for 1.8, and quite possibly wrong:
                 }
             }
         } else {
-            tempSet = new ArrayList<MapUpdateCommand>();
+            tempSet = new ArrayList<>();
         }
 
         get.addAll(tempSet);
@@ -847,10 +842,10 @@ Changed for 1.8, and quite possibly wrong:
             if (eGet != null) {
                 entityUpdates.remove(w);
             } else {
-                eGet = new ArrayList<EntityUpdateCommand>();
+                eGet = new ArrayList<>();
             }
 
-            ArrayList<EntityUpdateCommand> tempEUpdates = new ArrayList<EntityUpdateCommand>();
+            ArrayList<EntityUpdateCommand> tempEUpdates = new ArrayList<>();
             tempEUpdates.addAll(Arrays.asList(eUpdates));
             eGet.addAll(tempEUpdates);
             entityUpdates.put(w, eGet);
@@ -862,10 +857,10 @@ Changed for 1.8, and quite possibly wrong:
             if (iGet != null) {
                 entityUpdates.remove(w);
             } else {
-                iGet = new ArrayList<ItemDropUpdateCommand>();
+                iGet = new ArrayList<>();
             }
 
-            ArrayList<ItemDropUpdateCommand> tempIDUpdates = new ArrayList<ItemDropUpdateCommand>();
+            ArrayList<ItemDropUpdateCommand> tempIDUpdates = new ArrayList<>();
             tempIDUpdates.addAll(Arrays.asList(iUpdates));
             iGet.addAll(tempIDUpdates);
             itemDropUpdates.put(w, iGet);

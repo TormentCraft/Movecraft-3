@@ -44,9 +44,9 @@ import java.util.logging.Level;
 public class CraftManager {
     private static final CraftManager ourInstance = new CraftManager();
     private CraftType[] craftTypes;
-    private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<World, Set<Craft>>();
-    private final HashMap<Player, Craft> craftPlayerIndex = new HashMap<Player, Craft>();
-    private final HashMap<Player, BukkitTask> releaseEvents = new HashMap<Player, BukkitTask>();
+    private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<>();
+    private final HashMap<Player, Craft> craftPlayerIndex = new HashMap<>();
+    private final HashMap<Player, BukkitTask> releaseEvents = new HashMap<>();
 
     public static CraftManager getInstance() {
         return ourInstance;
@@ -77,7 +77,7 @@ public class CraftManager {
             Movecraft.getInstance().saveResource("types/Turret.craft", false);
         }
 
-        HashSet<CraftType> craftTypesSet = new HashSet<CraftType>();
+        HashSet<CraftType> craftTypesSet = new HashSet<>();
 
         boolean foundCraft = false;
         for (File file : craftsFile.listFiles()) {
@@ -162,7 +162,7 @@ public class CraftManager {
     private void destroySnowOnPilot(Player pilot, Craft craft) {
         if (pilot == null || !pilot.isOnline()) return;
 
-        HashSet<MovecraftLocation> craftBlocks = new HashSet<MovecraftLocation>(Arrays.asList(craft.getBlockList()));
+        HashSet<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
         for (MovecraftLocation block : craftBlocks) {
             MovecraftLocation test = new MovecraftLocation(block.x, block.y + 1, block.z);
             if (!craftBlocks.contains(test)) {
@@ -184,7 +184,7 @@ public class CraftManager {
             return;
         }
 
-        HashSet<MovecraftLocation> craftBlocks = new HashSet<MovecraftLocation>(Arrays.asList(craft.getBlockList()));
+        HashSet<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
         int blockedBroken = 0;
         for (MovecraftLocation block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {

@@ -189,7 +189,7 @@ public class TranslationTask extends AsyncTask {
 
             // now add all the air blocks found within the craft's hitbox immediately above the waterline and below
             // to the craft blocks so they will be translated
-            HashSet<MovecraftLocation> newHSBlockList = new HashSet<MovecraftLocation>(Arrays.asList(blocksList));
+            HashSet<MovecraftLocation> newHSBlockList = new HashSet<>(Arrays.asList(blocksList));
             int posY = waterLine + 1;
             for (int posX = minX; posX < maxX; posX++) {
                 for (int posZ = minZ; posZ < maxZ; posZ++) {
@@ -270,18 +270,18 @@ public class TranslationTask extends AsyncTask {
             }
         }
 
-        List<MovecraftLocation> tempBlockList = new ArrayList<MovecraftLocation>();
-        HashSet<MovecraftLocation> existingBlockSet = new HashSet<MovecraftLocation>(Arrays.asList(blocksList));
-        HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<EntityUpdateCommand>();
-        Set<MapUpdateCommand> updateSet = new HashSet<MapUpdateCommand>();
+        List<MovecraftLocation> tempBlockList = new ArrayList<>();
+        HashSet<MovecraftLocation> existingBlockSet = new HashSet<>(Arrays.asList(blocksList));
+        HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<>();
+        Set<MapUpdateCommand> updateSet = new HashSet<>();
 
         data.setCollisionExplosion(false);
-        Set<MapUpdateCommand> explosionSet = new HashSet<MapUpdateCommand>();
+        Set<MapUpdateCommand> explosionSet = new HashSet<>();
 
         List<Material> harvestBlocks = getCraft().getType().getHarvestBlocks();
-        List<MovecraftLocation> harvestedBlocks = new ArrayList<MovecraftLocation>();
-        List<MovecraftLocation> droppedBlocks = new ArrayList<MovecraftLocation>();
-        List<MovecraftLocation> destroyedBlocks = new ArrayList<MovecraftLocation>();
+        List<MovecraftLocation> harvestedBlocks = new ArrayList<>();
+        List<MovecraftLocation> droppedBlocks = new ArrayList<>();
+        List<MovecraftLocation> destroyedBlocks = new ArrayList<>();
         List<Material> harvesterBladeBlocks = getCraft().getType().getHarvesterBladeBlocks();
 
         int hoverOver = data.getDy();
@@ -297,7 +297,7 @@ public class TranslationTask extends AsyncTask {
         boolean validateTownyExplosion = false;
         String townName = "";
 
-        Set<TownBlock> townBlockSet = new HashSet<TownBlock>();
+        Set<TownBlock> townBlockSet = new HashSet<>();
         TownyWorld townyWorld = null;
         TownyWorldHeightLimits townyWorldHeightLimits = null;
 
@@ -1119,10 +1119,10 @@ public class TranslationTask extends AsyncTask {
             return;
         }
 
-        HashMap<Material, ArrayList<Block>> crates = new HashMap<Material, ArrayList<Block>>();
-        HashSet<ItemDropUpdateCommand> itemDropUpdateSet = new HashSet<ItemDropUpdateCommand>();
-        HashSet<Material> droppedSet = new HashSet<Material>();
-        HashMap<MovecraftLocation, ItemStack[]> droppedMap = new HashMap<MovecraftLocation, ItemStack[]>();
+        HashMap<Material, ArrayList<Block>> crates = new HashMap<>();
+        HashSet<ItemDropUpdateCommand> itemDropUpdateSet = new HashSet<>();
+        HashSet<Material> droppedSet = new HashSet<>();
+        HashMap<MovecraftLocation, ItemStack[]> droppedMap = new HashMap<>();
         harvestedBlocks.addAll(droppedBlocks);
 
         ItemStack retStack;
@@ -1148,7 +1148,7 @@ public class TranslationTask extends AsyncTask {
                 int amount = rand.nextInt(4);
                 if (amount > 0) {
                     ItemStack seeds = new ItemStack(Material.SEEDS, amount);
-                    HashSet<ItemStack> d = new HashSet<ItemStack>(Arrays.asList(drops));
+                    HashSet<ItemStack> d = new HashSet<>(Arrays.asList(drops));
                     d.add(seeds);
                     drops = d.toArray(new ItemStack[d.size()]);
                 }
@@ -1171,7 +1171,7 @@ public class TranslationTask extends AsyncTask {
                         if (stack.getAmount() < stack.getMaxStackSize() || inv.firstEmpty() > -1) {
                             ArrayList<Block> blocks = crates.get(mat);
                             if (blocks == null) {
-                                blocks = new ArrayList<Block>();
+                                blocks = new ArrayList<>();
                             }
                             if (blocks.contains(b)) {
                             } else {
@@ -1186,7 +1186,7 @@ public class TranslationTask extends AsyncTask {
                     Material mat = Material.AIR;
                     ArrayList<Block> blocks = crates.get(mat);
                     if (blocks == null) {
-                        blocks = new ArrayList<Block>();
+                        blocks = new ArrayList<>();
                     }
                     if (!blocks.contains(b)) {
                         blocks.add(b);
@@ -1239,7 +1239,7 @@ public class TranslationTask extends AsyncTask {
                 if (leftover != null) {
                     ArrayList<Block> blocks = chests.get(mat);
                     if (blocks == null) {
-                        blocks = new ArrayList<Block>();
+                        blocks = new ArrayList<>();
                     }
 
                     if (blocks.size() > 0) {
@@ -1271,7 +1271,7 @@ public class TranslationTask extends AsyncTask {
                     stack = null;
                     ArrayList<Block> blocks = chests.get(mat);
                     if (blocks == null) {
-                        blocks = new ArrayList<Block>();
+                        blocks = new ArrayList<>();
                     }
                     if (blocks.size() > 0) {
                         if (inv.firstEmpty() != -1) {
@@ -1291,7 +1291,7 @@ public class TranslationTask extends AsyncTask {
                         Material newMat = stack.getType();
                         ArrayList<Block> newBlocks = chests.get(newMat);
                         if (newBlocks == null) {
-                            newBlocks = new ArrayList<Block>();
+                            newBlocks = new ArrayList<>();
                         }
                         newBlocks.add(b);
                         chests.put(newMat, newBlocks);

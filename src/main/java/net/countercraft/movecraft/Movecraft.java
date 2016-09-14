@@ -70,10 +70,10 @@ public class Movecraft extends JavaPlugin {
     public static StateFlag FLAG_SINK = null; //new StateFlag("movecraft-sink", true);
     private Logger logger;
     private boolean shuttingDown;
-    public HashMap<MovecraftLocation, Long> blockFadeTimeMap = new HashMap<MovecraftLocation, Long>();
-    public HashMap<MovecraftLocation, Integer> blockFadeTypeMap = new HashMap<MovecraftLocation, Integer>();
-    public HashMap<MovecraftLocation, Boolean> blockFadeWaterMap = new HashMap<MovecraftLocation, Boolean>();
-    public HashMap<MovecraftLocation, World> blockFadeWorldMap = new HashMap<MovecraftLocation, World>();
+    public HashMap<MovecraftLocation, Long> blockFadeTimeMap = new HashMap<>();
+    public HashMap<MovecraftLocation, Integer> blockFadeTypeMap = new HashMap<>();
+    public HashMap<MovecraftLocation, Boolean> blockFadeWaterMap = new HashMap<>();
+    public HashMap<MovecraftLocation, World> blockFadeWorldMap = new HashMap<>();
     public boolean siegeInProgress = false;
     public String currentSiegeName = null;
     public String currentSiegePlayer = null;
@@ -142,16 +142,16 @@ public class Movecraft extends JavaPlugin {
             Map<String, Map> siegesMap = (Map<String, Map>) data.get("sieges");
             Settings.SiegeName = siegesMap.keySet();
 
-            Settings.SiegeRegion = new HashMap<String, String>();
-            Settings.SiegeCraftsToWin = new HashMap<String, ArrayList<String>>();
-            Settings.SiegeCost = new HashMap<String, Integer>();
-            Settings.SiegeDoubleCost = new HashMap<String, Boolean>();
-            Settings.SiegeIncome = new HashMap<String, Integer>();
-            Settings.SiegeScheduleStart = new HashMap<String, Integer>();
-            Settings.SiegeScheduleEnd = new HashMap<String, Integer>();
-            Settings.SiegeControlRegion = new HashMap<String, String>();
-            Settings.SiegeDelay = new HashMap<String, Integer>();
-            Settings.SiegeDuration = new HashMap<String, Integer>();
+            Settings.SiegeRegion = new HashMap<>();
+            Settings.SiegeCraftsToWin = new HashMap<>();
+            Settings.SiegeCost = new HashMap<>();
+            Settings.SiegeDoubleCost = new HashMap<>();
+            Settings.SiegeIncome = new HashMap<>();
+            Settings.SiegeScheduleStart = new HashMap<>();
+            Settings.SiegeScheduleEnd = new HashMap<>();
+            Settings.SiegeControlRegion = new HashMap<>();
+            Settings.SiegeDelay = new HashMap<>();
+            Settings.SiegeDuration = new HashMap<>();
             for (String siegeName : siegesMap.keySet()) {
                 Settings.SiegeRegion.put(siegeName, (String) siegesMap.get(siegeName).get("SiegeRegion"));
                 Settings.SiegeCraftsToWin

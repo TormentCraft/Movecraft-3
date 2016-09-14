@@ -54,7 +54,7 @@ public class Craft {
     private int origBlockCount;
     private double pilotLockedZ;
     private Player notificationPlayer;
-    private HashMap<Player, Long> movedPlayers = new HashMap<Player, Long>();
+    private HashMap<Player, Long> movedPlayers = new HashMap<>();
 
     public Craft(CraftType type, World world) {
         this.type = type;

@@ -41,8 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StorageChestItem {
-    private static final Map<World, Map<MovecraftLocation, Inventory>> crateInventories = new HashMap<World,
-            Map<MovecraftLocation, Inventory>>();
+    private static final Map<World, Map<MovecraftLocation, Inventory>> crateInventories = new HashMap<>();
     private final ItemStack itemStack;
 
     public StorageChestItem() {
@@ -83,7 +82,7 @@ public class StorageChestItem {
     }
 
     public static void saveToDisk() {
-        Map<String, CardboardBox[]> data = new HashMap<String, CardboardBox[]>();
+        Map<String, CardboardBox[]> data = new HashMap<>();
 
         for (World w : crateInventories.keySet()) {
             for (MovecraftLocation l : crateInventories.get(w).keySet()) {

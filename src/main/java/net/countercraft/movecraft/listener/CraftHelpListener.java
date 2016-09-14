@@ -23,7 +23,7 @@ public class CraftHelpListener implements CommandExecutor {
             return null;
         }
 
-        List<CraftType> found = new ArrayList<CraftType>();
+        List<CraftType> found = new ArrayList<>();
         String prefix = string.toLowerCase();
         for (CraftType tcraft : crafts) {
             if (tcraft.getCraftName().toLowerCase().startsWith(prefix)) {
@@ -85,7 +85,7 @@ public class CraftHelpListener implements CommandExecutor {
 
         sb.append("\n&6Allowed Blocks: &7");
         Integer[] blockIds = c.getAllowedBlocks();
-        Set<String> blockList = new HashSet<String>();
+        Set<String> blockList = new HashSet<>();
         for (int ix = 0; ix < blockIds.length; ix++) {
             BlockNames.itemNames(blockIds[ix], blockList);
         }

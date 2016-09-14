@@ -158,7 +158,7 @@ public class RotationTask extends AsyncTask {
 
             // now add all the air blocks found within the crafts borders below the waterline to the craft blocks so
             // they will be rotated
-            HashSet<MovecraftLocation> newHSBlockList = new HashSet<MovecraftLocation>(Arrays.asList(blockList));
+            HashSet<MovecraftLocation> newHSBlockList = new HashSet<>(Arrays.asList(blockList));
             for (int posY = waterLine; posY >= minY; posY--) {
                 for (int posX = getCraft().getMinX(); posX <= maxX; posX++) {
                     for (int posZ = getCraft().getMinZ(); posZ <= maxZ; posZ++) {
@@ -224,12 +224,12 @@ public class RotationTask extends AsyncTask {
         // Rotate the block set
         MovecraftLocation[] centeredBlockList = new MovecraftLocation[blockList.length];
         MovecraftLocation[] originalBlockList = blockList.clone();
-        HashSet<MovecraftLocation> existingBlockSet = new HashSet<MovecraftLocation>(Arrays.asList(originalBlockList));
-        Set<MapUpdateCommand> mapUpdates = new HashSet<MapUpdateCommand>();
-        HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<EntityUpdateCommand>();
+        HashSet<MovecraftLocation> existingBlockSet = new HashSet<>(Arrays.asList(originalBlockList));
+        Set<MapUpdateCommand> mapUpdates = new HashSet<>();
+        HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<>();
 
         boolean townyEnabled = Movecraft.getInstance().getTownyPlugin() != null;
-        Set<TownBlock> townBlockSet = new HashSet<TownBlock>();
+        Set<TownBlock> townBlockSet = new HashSet<>();
         TownyWorld townyWorld = null;
         TownyWorldHeightLimits townyWorldHeightLimits = null;
 

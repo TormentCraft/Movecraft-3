@@ -59,8 +59,8 @@ import java.util.Map;
 //import com.sk89q.worldedit.world.DataException;
 
 public class WorldEditInteractListener implements Listener {
-    private static final Map<Player, Long> timeMap = new HashMap<Player, Long>();
-    private static final Map<Player, Long> repairRightClickTimeMap = new HashMap<Player, Long>();
+    private static final Map<Player, Long> timeMap = new HashMap<>();
+    private static final Map<Player, Long> repairRightClickTimeMap = new HashMap<>();
 
     @EventHandler public void WEOnPlayerInteract(PlayerInteractEvent event) {
 
@@ -224,8 +224,8 @@ public class WorldEditInteractListener implements Listener {
             // calculate how many and where the blocks need to be replaced
             Location worldLoc = new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
             int numdiffblocks = 0;
-            HashMap<Integer, Integer> numMissingItems = new HashMap<Integer, Integer>(); // block type, number missing
-            HashSet<Vector> locMissingBlocks = new HashSet<Vector>();
+            HashMap<Integer, Integer> numMissingItems = new HashMap<>(); // block type, number missing
+            HashSet<Vector> locMissingBlocks = new HashSet<>();
             for (int x = 0; x < cc.getWidth(); x++) {
                 for (int y = 0; y < cc.getHeight(); y++) {
                     for (int z = 0; z < cc.getLength(); z++) {
@@ -307,12 +307,11 @@ public class WorldEditInteractListener implements Listener {
             }
             if (secondClick) {
                 // check all the chests for materials for the repair
-                HashMap<Integer, ArrayList<InventoryHolder>> chestsToTakeFrom = new HashMap<Integer,
-                        ArrayList<InventoryHolder>>(); // typeid, list of chest inventories
+                HashMap<Integer, ArrayList<InventoryHolder>> chestsToTakeFrom = new HashMap<>(); // typeid, list of chest inventories
                 boolean enoughMaterial = true;
                 for (Integer typeID : numMissingItems.keySet()) {
                     int remainingQty = numMissingItems.get(typeID);
-                    ArrayList<InventoryHolder> chests = new ArrayList<InventoryHolder>();
+                    ArrayList<InventoryHolder> chests = new ArrayList<>();
                     for (MovecraftLocation loc : pCraft.getBlockList()) {
                         Block b = pCraft.getW().getBlockAt(loc.x, loc.y, loc.z);
                         if ((b.getTypeId() == 54) || (b.getTypeId() == 146)) {
@@ -367,7 +366,7 @@ public class WorldEditInteractListener implements Listener {
                             }
                         }
                     }
-                    ArrayList<MapUpdateCommand> updateCommands = new ArrayList<MapUpdateCommand>();
+                    ArrayList<MapUpdateCommand> updateCommands = new ArrayList<>();
                     for (Vector ccloc : locMissingBlocks) {
                         com.sk89q.worldedit.blocks.BaseBlock bb = cc.getBlock(ccloc);
                         if (bb.getId() == 68 ||
