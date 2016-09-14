@@ -332,7 +332,7 @@ public class Craft {
         this.sinking = sinking;
     }
 
-    public void setLastCruisUpdate(long update) {
+    public void setLastCruiseUpdate(long update) {
         this.lastCruiseUpdate = update;
     }
 

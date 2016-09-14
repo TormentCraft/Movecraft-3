@@ -797,7 +797,7 @@ public class TranslationTask extends AsyncTask {
                 if (getCraft().getType().getSinkPercent() != 0.0) {
                     getCraft().setLastBlockCheck(0);
                 }
-                getCraft().setLastCruisUpdate(-1);
+                getCraft().setLastCruiseUpdate(-1);
             }
         }
 

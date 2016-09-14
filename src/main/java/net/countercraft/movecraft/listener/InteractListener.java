@@ -272,7 +272,7 @@ public class InteractListener implements Listener {
                 if (c.getType().getCruiseOnPilot()) {
                     c.detect(null, player, startPoint);
                     c.setCruiseDirection(Direction.fromSignDirection(sign));
-                    c.setLastCruisUpdate(System.currentTimeMillis());
+                    c.setLastCruiseUpdate(System.currentTimeMillis());
                     c.setCruising(true);
                     BukkitTask releaseTask = new BukkitRunnable() {
 
@@ -394,7 +394,7 @@ public class InteractListener implements Listener {
                     sign.update(true);
 
                     playerCraft.setCruiseDirection(Direction.fromSignDirection(sign));
-                    playerCraft.setLastCruisUpdate(System.currentTimeMillis());
+                    playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     playerCraft.setCruising(true);
 
                     if (!playerCraft.getType().getMoveEntities()) {
@@ -410,7 +410,7 @@ public class InteractListener implements Listener {
                     sign.update(true);
 
                     playerCraft.setCruiseDirection(Direction.UP);
-                    playerCraft.setLastCruisUpdate(System.currentTimeMillis());
+                    playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     playerCraft.setCruising(true);
 
                     if (!playerCraft.getType().getMoveEntities()) {
@@ -426,7 +426,7 @@ public class InteractListener implements Listener {
                     sign.update(true);
 
                     playerCraft.setCruiseDirection(Direction.DOWN);
-                    playerCraft.setLastCruisUpdate(System.currentTimeMillis());
+                    playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     playerCraft.setCruising(true);
 
                     if (!playerCraft.getType().getMoveEntities()) {
@@ -508,7 +508,7 @@ public class InteractListener implements Listener {
                     if (playerCraft.getType().getCanStaticMove()) {
                         playerCraft.translate(dx, dy, dz);
                         timeMap.put(player, System.currentTimeMillis());
-                        playerCraft.setLastCruisUpdate(System.currentTimeMillis());
+                        playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     }
                 } else {
                     player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
@@ -570,7 +570,7 @@ public class InteractListener implements Listener {
                     if (playerCraft.getType().getCanStaticMove()) {
                         playerCraft.translate(dx, dy, dz);
                         timeMap.put(player, System.currentTimeMillis());
-                        playerCraft.setLastCruisUpdate(System.currentTimeMillis());
+                        playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     }
                 } else {
                     player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
@@ -638,7 +638,7 @@ public class InteractListener implements Listener {
 
                             craft.translate(0, DY, 0);
                             timeMap.put(event.getPlayer(), System.currentTimeMillis());
-                            craft.setLastCruisUpdate(System.currentTimeMillis());
+                            craft.setLastCruiseUpdate(System.currentTimeMillis());
                         } else {
                             // Player is onboard craft and right clicking
                             float rotation = (float) Math.PI * event.getPlayer().getLocation().getYaw() / 180f;
@@ -675,7 +675,7 @@ public class InteractListener implements Listener {
 
                             craft.translate(dx, dy, dz);
                             timeMap.put(event.getPlayer(), System.currentTimeMillis());
-                            craft.setLastCruisUpdate(System.currentTimeMillis());
+                            craft.setLastCruiseUpdate(System.currentTimeMillis());
                         }
                     } else {
                         event.getPlayer()

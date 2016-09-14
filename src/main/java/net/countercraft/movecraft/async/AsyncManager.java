@@ -410,9 +410,9 @@ public final class AsyncManager extends BukkitRunnable {
                                 pcraft.setLastDX(dx);
                                 pcraft.setLastDZ(dz);
                                 if (pcraft.getLastCruiseUpdate() == -1) {
-                                    pcraft.setLastCruisUpdate(0);
+                                    pcraft.setLastCruiseUpdate(0);
                                 } else {
-                                    pcraft.setLastCruisUpdate(System.currentTimeMillis());
+                                    pcraft.setLastCruiseUpdate(System.currentTimeMillis());
                                 }
                             }
                         } else {
@@ -430,7 +430,7 @@ public final class AsyncManager extends BukkitRunnable {
                                             (System.currentTimeMillis() - pcraft.getLastCruiseUpdate()) / 50;
                                     if (Math.abs(ticksElapsed) >= pcraft.getType().getTickCooldown()) {
                                         pcraft.translate(pcraft.getLastDX(), pcraft.getLastDY(), pcraft.getLastDZ());
-                                        pcraft.setLastCruisUpdate(System.currentTimeMillis());
+                                        pcraft.setLastCruiseUpdate(System.currentTimeMillis());
                                     }
                                 }
                             }
@@ -468,7 +468,7 @@ public final class AsyncManager extends BukkitRunnable {
 
                                             if (Math.abs(ticksElapsed) >= pcraft.getType().getTickCooldown()) {
                                                 pcraft.translate(dX, 0, dZ);
-                                                pcraft.setLastCruisUpdate(System.currentTimeMillis());
+                                                pcraft.setLastCruiseUpdate(System.currentTimeMillis());
                                             }
                                             pcraft.setLastDX(dX);
                                             pcraft.setLastDY(0);
@@ -691,9 +691,9 @@ public final class AsyncManager extends BukkitRunnable {
                                 }
                                 pcraft.translate(dx, -1, dz);
                                 if (pcraft.getLastCruiseUpdate() == -1) {
-                                    pcraft.setLastCruisUpdate(0);
+                                    pcraft.setLastCruiseUpdate(0);
                                 } else {
-                                    pcraft.setLastCruisUpdate(System.currentTimeMillis());
+                                    pcraft.setLastCruiseUpdate(System.currentTimeMillis());
                                 }
                             }
                         }
