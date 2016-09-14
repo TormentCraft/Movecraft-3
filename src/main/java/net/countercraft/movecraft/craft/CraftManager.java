@@ -152,10 +152,7 @@ public class CraftManager {
         }
         BlockBreakEvent be = new BlockBreakEvent(block, pilot);
         Movecraft.getInstance().getServer().getPluginManager().callEvent(be);
-        if (be.isCancelled()) {
-            return false;
-        }
-        return true;
+        return !be.isCancelled();
     }
 
     private void destroySnowOnPilot(Player pilot, Craft craft) {

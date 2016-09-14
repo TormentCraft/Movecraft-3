@@ -1049,11 +1049,7 @@ public class TranslationTask extends AsyncTask {
             }
             if (blockObstructed && hoverCraft) {
                 // New block is not harvested block and is not part of the existing craft
-                if (harvestBlocks.contains(testMaterial) && !existingBlockSet.contains(newLoc)) {
-                    blockObstructed = false;
-                } else {
-                    blockObstructed = true;
-                }
+                blockObstructed = !(harvestBlocks.contains(testMaterial) && !existingBlockSet.contains(newLoc));
             }
 
             if (blockObstructed) {

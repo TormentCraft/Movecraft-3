@@ -501,10 +501,7 @@ public class AsyncManager extends BukkitRunnable {
         Location nativeLoc = new Location(w, loc.x, loc.y, loc.z);
         ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(w)
                                            .getApplicableRegions(nativeLoc);
-        if (!set.allows(DefaultFlag.PVP)) {
-            return true;
-        }
-        return false;
+        return !set.allows(DefaultFlag.PVP);
     }
 
     private boolean isRegionFlagSinkAllowed(MovecraftLocation loc, World w) {

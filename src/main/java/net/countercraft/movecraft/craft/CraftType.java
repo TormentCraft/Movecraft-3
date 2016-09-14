@@ -611,18 +611,12 @@ public class CraftType {
     }
 
     public boolean isAllowedBlock(int blockId, int data) {
-        if ((Arrays.binarySearch(this.allowedBlocks, blockId) >= 0) ||
-            (Arrays.binarySearch(this.allowedBlocks, (blockId << 4) + data + 10000) >= 0)) {
-            return true;
-        }
-        return false;
+        return (Arrays.binarySearch(this.allowedBlocks, blockId) >= 0) ||
+               (Arrays.binarySearch(this.allowedBlocks, (blockId << 4) + data + 10000) >= 0);
     }
 
     public boolean isForbiddenBlock(int blockId, int data) {
-        if ((Arrays.binarySearch(this.forbiddenBlocks, blockId) >= 0) ||
-            (Arrays.binarySearch(this.forbiddenBlocks, (blockId << 4) + data + 10000) >= 0)) {
-            return true;
-        }
-        return false;
+        return (Arrays.binarySearch(this.forbiddenBlocks, blockId) >= 0) ||
+               (Arrays.binarySearch(this.forbiddenBlocks, (blockId << 4) + data + 10000) >= 0);
     }
 }
