@@ -112,8 +112,7 @@ public class CraftType {
                 return typeIDFromString(str);
             }
         } else {
-            Integer typeID = (Integer) obj;
-            return typeID;
+            return (Integer) obj;
         }
     }
 

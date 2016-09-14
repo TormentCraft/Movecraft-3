@@ -88,8 +88,7 @@ public class CommandListener implements CommandExecutor {
         int telX = craft.getMinX() + (maxDX / 2);
         int telZ = craft.getMinZ() + (maxDZ / 2);
         int telY = maxY;
-        Location telPoint = new Location(w, telX, telY, telZ);
-        return telPoint;
+        return new Location(w, telX, telY, telZ);
     }
 
     private MovecraftLocation getCraftMidPoint(Craft craft) {
@@ -122,8 +121,7 @@ public class CommandListener implements CommandExecutor {
         int midX = craft.getMinX() + (maxDX / 2);
         int midY = (minY + maxY) / 2;
         int midZ = craft.getMinZ() + (maxDZ / 2);
-        MovecraftLocation midPoint = new MovecraftLocation(midX, midY, midZ);
-        return midPoint;
+        return new MovecraftLocation(midX, midY, midZ);
     }
 
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
