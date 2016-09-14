@@ -794,7 +794,7 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
-            MovecraftLocation[] newBlockList = (MovecraftLocation[]) existingBlockSet.toArray(new MovecraftLocation[0]);
+            MovecraftLocation[] newBlockList = existingBlockSet.toArray(new MovecraftLocation[0]);
             data.setBlockList(newBlockList);
             data.setUpdates(explosionSet.toArray(new MapUpdateCommand[1]));
 
@@ -808,7 +808,7 @@ public class TranslationTask extends AsyncTask {
         }
 
         if (!data.failed()) {
-            MovecraftLocation[] newBlockList = (MovecraftLocation[]) tempBlockList.toArray(new MovecraftLocation[0]);
+            MovecraftLocation[] newBlockList = tempBlockList.toArray(new MovecraftLocation[0]);
             data.setBlockList(newBlockList);
 
             //prevents torpedo and rocket pilots :)
@@ -1158,7 +1158,7 @@ public class TranslationTask extends AsyncTask {
                 for (Material mat : droppedSet) {
                     for (Entry<Integer, ? extends ItemStack> pair : ((HashMap<Integer, ? extends ItemStack>) inv
                             .all(mat)).entrySet()) {
-                        ItemStack stack = (ItemStack) pair.getValue();
+                        ItemStack stack = pair.getValue();
                         if (stack.getAmount() < stack.getMaxStackSize() || inv.firstEmpty() > -1) {
                             ArrayList<Block> blocks = crates.get(mat);
                             if (blocks == null) {

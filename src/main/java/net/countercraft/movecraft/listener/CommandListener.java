@@ -416,7 +416,7 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
             String foundSiegeName = null;
-            LocalPlayer lp = (LocalPlayer) Movecraft.getInstance().getWorldGuardPlugin().wrapPlayer(player);
+            LocalPlayer lp = Movecraft.getInstance().getWorldGuardPlugin().wrapPlayer(player);
             ApplicableRegionSet regions = Movecraft.getInstance().getWorldGuardPlugin()
                                                    .getRegionManager(player.getWorld())
                                                    .getApplicableRegions(player.getLocation());

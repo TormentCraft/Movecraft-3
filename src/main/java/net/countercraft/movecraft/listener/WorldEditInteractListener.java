@@ -141,7 +141,7 @@ public class WorldEditInteractListener implements Listener {
                             if (state instanceof Sign) {
                                 Sign s = (Sign) state;
                                 SignBlock sb = new SignBlock(b.getTypeId(), b.getData(), s.getLines());
-                                bb = (com.sk89q.worldedit.blocks.BaseBlock) sb;
+                                bb = sb;
                             } else {
                                 bb = new com.sk89q.worldedit.blocks.BaseBlock(b.getTypeId(), b.getData());
                             }
