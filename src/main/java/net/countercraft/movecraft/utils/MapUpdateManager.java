@@ -63,7 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
-public class MapUpdateManager extends BukkitRunnable {
+public final class MapUpdateManager extends BukkitRunnable {
     private final Map<World, ArrayList<MapUpdateCommand>> updates = new HashMap<>();
     private final Map<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<>();
     private final Map<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<>();

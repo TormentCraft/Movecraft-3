@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-public class CraftManager {
+public final class CraftManager {
     private static final CraftManager ourInstance = new CraftManager();
     private CraftType[] craftTypes;
     private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<>();

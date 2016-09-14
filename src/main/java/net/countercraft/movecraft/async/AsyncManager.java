@@ -67,7 +67,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
-public class AsyncManager extends BukkitRunnable {
+public final class AsyncManager extends BukkitRunnable {
     private static final AsyncManager instance = new AsyncManager();
     private final Map<AsyncTask, Craft> ownershipMap = new HashMap<>();
     private final HashMap<org.bukkit.entity.TNTPrimed, Double> TNTTracking = new HashMap<>();
