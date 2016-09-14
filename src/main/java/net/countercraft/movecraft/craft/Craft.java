@@ -36,9 +36,11 @@ public class Craft {
     private int[][][] hitBox;
     private final CraftType type;
     private MovecraftLocation[] blockList;
-    private World w;
-    private AtomicBoolean processing = new AtomicBoolean();
-    private int minX, minZ, maxHeightLimit;
+    private final World w;
+    private final AtomicBoolean processing = new AtomicBoolean();
+    private int minX;
+    private int minZ;
+    private final int maxHeightLimit;
     private boolean cruising;
     private boolean sinking;
     private Direction cruiseDirection;
@@ -54,7 +56,7 @@ public class Craft {
     private int origBlockCount;
     private double pilotLockedZ;
     private Player notificationPlayer;
-    private HashMap<Player, Long> movedPlayers = new HashMap<>();
+    private final HashMap<Player, Long> movedPlayers = new HashMap<>();
 
     public Craft(CraftType type, World world) {
         this.type = type;

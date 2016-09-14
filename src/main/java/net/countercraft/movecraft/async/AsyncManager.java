@@ -72,7 +72,7 @@ public class AsyncManager extends BukkitRunnable {
     private final Map<AsyncTask, Craft> ownershipMap = new HashMap<>();
     private final HashMap<org.bukkit.entity.TNTPrimed, Double> TNTTracking = new HashMap<>();
     private final Map<Craft, HashMap<Craft, Long>> recentContactTracking = new HashMap<>();
-    private HashMap<org.bukkit.entity.SmallFireball, Long> FireballTracking = new HashMap<>();
+    private final HashMap<org.bukkit.entity.SmallFireball, Long> FireballTracking = new HashMap<>();
     private final BlockingQueue<AsyncTask> finishedAlgorithms = new LinkedBlockingQueue<>();
     private final Set<Craft> clearanceSet = new HashSet<>();
     private long lastTracerUpdate = 0;

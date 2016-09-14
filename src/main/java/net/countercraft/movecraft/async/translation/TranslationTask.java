@@ -61,7 +61,7 @@ import java.util.Random;
 import java.util.Set;
 
 public class TranslationTask extends AsyncTask {
-    private TranslationTaskData data;
+    private final TranslationTaskData data;
 
     public TranslationTask(Craft c, TranslationTaskData data) {
         super(c);

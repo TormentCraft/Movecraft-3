@@ -30,8 +30,8 @@ public class MapUpdateCommand {
     private final byte dataID;
     private final Object worldEditBaseBlock;
     private final Rotation rotation;
-    private Craft craft;
-    private int smoke;
+    private final Craft craft;
+    private final int smoke;
 
     public MapUpdateCommand(MovecraftLocation blockLocation, MovecraftLocation newBlockLocation, int typeID,
                             byte dataID, Rotation rotation, Craft craft)

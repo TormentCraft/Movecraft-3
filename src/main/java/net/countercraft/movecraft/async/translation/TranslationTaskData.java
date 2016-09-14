@@ -23,9 +23,9 @@ import net.countercraft.movecraft.utils.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MovecraftLocation;
 
 public class TranslationTaskData {
-    private int dx;
+    private final int dx;
     private int dy;
-    private int dz;
+    private final int dz;
     private boolean failed = false;
     private String failMessage;
     private MovecraftLocation[] blockList;
@@ -34,7 +34,8 @@ public class TranslationTaskData {
     private ItemDropUpdateCommand[] itemDropUpdates;
     private int[][][] hitbox;
     private int minX, minZ;
-    private int maxHeight, minHeight;
+    private final int maxHeight;
+    private final int minHeight;
     private boolean collisionExplosion;
 
     public TranslationTaskData(int dx, int dz, int dy, MovecraftLocation[] blockList, int[][][] hitbox, int minZ,
