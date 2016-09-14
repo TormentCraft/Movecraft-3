@@ -262,7 +262,7 @@ public class RotationTask extends AsyncTask {
             Material testMaterial = w.getBlockAt(originalBlockList[i].x, originalBlockList[i].y, originalBlockList[i].z)
                                      .getType();
 
-            if (testMaterial.equals(Material.CHEST) || testMaterial.equals(Material.TRAPPED_CHEST)) {
+            if (testMaterial == Material.CHEST || testMaterial == Material.TRAPPED_CHEST) {
                 if (!checkChests(testMaterial, blockList[i], existingBlockSet)) {
                     //prevent chests collision
                     failed = true;
@@ -709,7 +709,7 @@ public class RotationTask extends AsyncTask {
 
         aroundNewLoc = newLoc.translate(1, 0, 0);
         testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
-        if (testMaterial.equals(mBlock)) {
+        if (testMaterial == mBlock) {
             if (!existingBlockSet.contains(aroundNewLoc)) {
                 return false;
             }
@@ -717,7 +717,7 @@ public class RotationTask extends AsyncTask {
 
         aroundNewLoc = newLoc.translate(-1, 0, 0);
         testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
-        if (testMaterial.equals(mBlock)) {
+        if (testMaterial == mBlock) {
             if (!existingBlockSet.contains(aroundNewLoc)) {
                 return false;
             }
@@ -725,7 +725,7 @@ public class RotationTask extends AsyncTask {
 
         aroundNewLoc = newLoc.translate(0, 0, 1);
         testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
-        if (testMaterial.equals(mBlock)) {
+        if (testMaterial == mBlock) {
             if (!existingBlockSet.contains(aroundNewLoc)) {
                 return false;
             }
@@ -733,7 +733,7 @@ public class RotationTask extends AsyncTask {
 
         aroundNewLoc = newLoc.translate(0, 0, -1);
         testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
-        if (testMaterial.equals(mBlock)) {
+        if (testMaterial == mBlock) {
             if (!existingBlockSet.contains(aroundNewLoc)) {
                 return false;
             }

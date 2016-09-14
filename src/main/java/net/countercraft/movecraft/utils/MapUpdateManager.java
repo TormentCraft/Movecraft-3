@@ -283,7 +283,7 @@ Changed for 1.8, and quite possibly wrong:
                             if (crewPlayer != null) {
                                 Location loc = sign.getLocation();
                                 loc = loc.subtract(0, 1, 0);
-                                if (w.getBlockAt(loc).getType().equals(Material.BED_BLOCK)) {
+                                if (w.getBlockAt(loc).getType() == Material.BED_BLOCK) {
                                     crewPlayer.setBedSpawnLocation(loc);
                                 }
                             }

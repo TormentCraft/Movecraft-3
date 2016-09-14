@@ -50,7 +50,7 @@ public class InteractListener implements Listener {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK) {
             Material m = event.getClickedBlock().getType();
-            if (m.equals(Material.SIGN_POST) || m.equals(Material.WALL_SIGN)) {
+            if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
                 Sign sign = (Sign) event.getClickedBlock().getState();
                 String signText = org.bukkit.ChatColor.stripColor(sign.getLine(0));
 
@@ -88,7 +88,7 @@ public class InteractListener implements Listener {
                     MovecraftLocation foundLoc = null;
                     for (MovecraftLocation tloc : foundCraft.getBlockList()) {
                         Block tb = event.getClickedBlock().getWorld().getBlockAt(tloc.x, tloc.y, tloc.z);
-                        if (tb.getType().equals(Material.SIGN_POST) || tb.getType().equals(Material.WALL_SIGN)) {
+                        if (tb.getType() == Material.SIGN_POST || tb.getType() == Material.WALL_SIGN) {
                             Sign ts = (Sign) tb.getState();
                             if (org.bukkit.ChatColor.stripColor(ts.getLine(0)) != null)
                                 if (org.bukkit.ChatColor.stripColor(ts.getLine(0)) != null)
@@ -129,12 +129,12 @@ public class InteractListener implements Listener {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Material m = event.getClickedBlock().getType();
-            if (m.equals(Material.SIGN_POST) || m.equals(Material.WALL_SIGN)) {
+            if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
                 onSignRightClick(event);
             }
         } else if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
             Material m = event.getClickedBlock().getType();
-            if (m.equals(Material.SIGN_POST) || m.equals(Material.WALL_SIGN)) {
+            if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
                 if (event.getClickedBlock() == null) {
                     return;
                 }

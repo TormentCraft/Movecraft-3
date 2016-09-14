@@ -67,7 +67,7 @@ public class WorldEditInteractListener implements Listener {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK) {
             Material m = event.getClickedBlock().getType();
-            if (m.equals(Material.SIGN_POST) || m.equals(Material.WALL_SIGN)) {
+            if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
                 Sign sign = (Sign) event.getClickedBlock().getState();
                 String signText = org.bukkit.ChatColor.stripColor(sign.getLine(0));
 
@@ -78,12 +78,12 @@ public class WorldEditInteractListener implements Listener {
         }
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Material m = event.getClickedBlock().getType();
-            if (m.equals(Material.SIGN_POST) || m.equals(Material.WALL_SIGN)) {
+            if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
                 WEOnSignRightClick(event);
             }
         } else if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
             Material m = event.getClickedBlock().getType();
-            if (m.equals(Material.SIGN_POST) || m.equals(Material.WALL_SIGN)) {
+            if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
                 if (event.getClickedBlock() == null) {
                     return;
                 }
