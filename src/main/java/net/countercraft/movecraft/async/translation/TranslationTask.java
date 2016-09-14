@@ -794,7 +794,7 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
-            MovecraftLocation[] newBlockList = existingBlockSet.toArray(new MovecraftLocation[0]);
+            MovecraftLocation[] newBlockList = existingBlockSet.toArray(new MovecraftLocation[existingBlockSet.size()]);
             data.setBlockList(newBlockList);
             data.setUpdates(explosionSet.toArray(new MapUpdateCommand[1]));
 
@@ -808,7 +808,7 @@ public class TranslationTask extends AsyncTask {
         }
 
         if (!data.failed()) {
-            MovecraftLocation[] newBlockList = tempBlockList.toArray(new MovecraftLocation[0]);
+            MovecraftLocation[] newBlockList = tempBlockList.toArray(new MovecraftLocation[tempBlockList.size()]);
             data.setBlockList(newBlockList);
 
             //prevents torpedo and rocket pilots :)
