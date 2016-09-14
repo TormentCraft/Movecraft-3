@@ -1109,7 +1109,7 @@ public class AsyncManager extends BukkitRunnable {
         }
     }
 
-    public void run() {
+    @Override public void run() {
         clearAll();
         processCruise();
         processSinking();

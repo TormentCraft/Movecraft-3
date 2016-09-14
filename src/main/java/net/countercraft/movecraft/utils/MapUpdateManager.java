@@ -421,7 +421,7 @@ Changed for 1.8, and quite possibly wrong:
         }
     }
 
-    public void run() {
+    @Override public void run() {
         if (updates.isEmpty()) return;
 
         long startTime = System.currentTimeMillis();

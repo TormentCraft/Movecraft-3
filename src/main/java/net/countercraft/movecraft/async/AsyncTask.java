@@ -31,7 +31,7 @@ public abstract class AsyncTask extends BukkitRunnable {
         craft = c;
     }
 
-    public void run() {
+    @Override public void run() {
         try {
             excecute();
             AsyncManager.getInstance().submitCompletedTask(this);
