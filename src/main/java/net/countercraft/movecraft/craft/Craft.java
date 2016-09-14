@@ -25,6 +25,7 @@ import net.countercraft.movecraft.async.translation.TranslationTaskData;
 import net.countercraft.movecraft.math.Direction;
 import net.countercraft.movecraft.utils.MovecraftLocation;
 import net.countercraft.movecraft.utils.Rotation;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -171,19 +172,19 @@ public class Craft {
     }
 
     public void resetSigns(boolean resetCruise, boolean resetAscend, boolean resetDescend) {
-        for (int i = 0; i < blockList.length; i++) {
-            int blockID = w.getBlockAt(blockList[i].x, blockList[i].y, blockList[i].z).getTypeId();
+        for (MovecraftLocation location : blockList) {
+            int blockID = w.getBlockAt(location.x, location.y, location.z).getTypeId();
             if (blockID == 63 || blockID == 68) {
-                Sign s = (Sign) w.getBlockAt(blockList[i].x, blockList[i].y, blockList[i].z).getState();
-                if (resetCruise) if (org.bukkit.ChatColor.stripColor(s.getLine(0)).equals("Cruise: ON")) {
+                Sign s = (Sign) w.getBlockAt(location.x, location.y, location.z).getState();
+                if (resetCruise) if (ChatColor.stripColor(s.getLine(0)).equals("Cruise: ON")) {
                     s.setLine(0, "Cruise: OFF");
                     s.update(true);
                 }
-                if (resetAscend) if (org.bukkit.ChatColor.stripColor(s.getLine(0)).equals("Ascend: ON")) {
+                if (resetAscend) if (ChatColor.stripColor(s.getLine(0)).equals("Ascend: ON")) {
                     s.setLine(0, "Ascend: OFF");
                     s.update(true);
                 }
-                if (resetDescend) if (org.bukkit.ChatColor.stripColor(s.getLine(0)).equals("Descend: ON")) {
+                if (resetDescend) if (ChatColor.stripColor(s.getLine(0)).equals("Descend: ON")) {
                     s.setLine(0, "Descend: OFF");
                     s.update(true);
                 }

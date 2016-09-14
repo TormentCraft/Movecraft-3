@@ -87,8 +87,8 @@ public class CraftHelpListener implements CommandExecutor {
         sb.append("\n&6Allowed Blocks: &7");
         Integer[] blockIds = c.getAllowedBlocks();
         Set<String> blockList = new HashSet<>();
-        for (int ix = 0; ix < blockIds.length; ix++) {
-            BlockNames.itemNames(blockIds[ix], blockList);
+        for (Integer blockId : blockIds) {
+            BlockNames.itemNames(blockId, blockList);
         }
         String[] names = blockList.toArray(new String[blockList.size()]);
         Arrays.sort(names);
