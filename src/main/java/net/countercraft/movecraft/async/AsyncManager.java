@@ -285,7 +285,10 @@ public class AsyncManager extends BukkitRunnable {
                     boolean failed = MapUpdateManager.getInstance()
                                                      .addWorldUpdate(c.getW(), updates, eUpdates, iUpdates);
 
-                    if (!failed) {
+                    if (failed) {
+                        Movecraft.getInstance().getLogger().log(Level.SEVERE, I18nSupport
+                                .getInternationalisedString("Translation - Craft collision"));
+                    } else {
                         sentMapUpdate = true;
                         c.setBlockList(task.getData().getBlockList());
                         c.setMinX(task.getData().getMinX());
@@ -299,10 +302,6 @@ public class AsyncManager extends BukkitRunnable {
                                                     task.getData().getDz()));
                             }
                         }
-                    } else {
-
-                        Movecraft.getInstance().getLogger().log(Level.SEVERE,
-                                                                I18nSupport.getInternationalisedString("Translation - Craft collision"));
                     }
                 }
             } else if (poll instanceof RotationTask) {
@@ -340,7 +339,10 @@ public class AsyncManager extends BukkitRunnable {
                         boolean failed = MapUpdateManager.getInstance()
                                                          .addWorldUpdate(c.getW(), updates, eUpdates, null);
 
-                        if (!failed) {
+                        if (failed) {
+                            Movecraft.getInstance().getLogger().log(Level.SEVERE, I18nSupport
+                                    .getInternationalisedString("Rotation - Craft Collision"));
+                        } else {
                             sentMapUpdate = true;
 
                             c.setBlockList(task.getBlockList());
@@ -359,10 +361,6 @@ public class AsyncManager extends BukkitRunnable {
                                         can.rotateLeft(tloc.toVector());
                                 }
                             }
-                        } else {
-
-                            Movecraft.getInstance().getLogger().log(Level.SEVERE,
-                                                                    I18nSupport.getInternationalisedString("Rotation - Craft Collision"));
                         }
                     }
                 }
@@ -412,10 +410,10 @@ public class AsyncManager extends BukkitRunnable {
                                 pcraft.translate(dx, dy, dz);
                                 pcraft.setLastDX(dx);
                                 pcraft.setLastDZ(dz);
-                                if (pcraft.getLastCruiseUpdate() != -1) {
-                                    pcraft.setLastCruisUpdate(System.currentTimeMillis());
-                                } else {
+                                if (pcraft.getLastCruiseUpdate() == -1) {
                                     pcraft.setLastCruisUpdate(0);
+                                } else {
+                                    pcraft.setLastCruisUpdate(System.currentTimeMillis());
                                 }
                             }
                         } else {
@@ -697,10 +695,10 @@ public class AsyncManager extends BukkitRunnable {
                                     dz = pcraft.getLastDZ();
                                 }
                                 pcraft.translate(dx, -1, dz);
-                                if (pcraft.getLastCruiseUpdate() != -1) {
-                                    pcraft.setLastCruisUpdate(System.currentTimeMillis());
-                                } else {
+                                if (pcraft.getLastCruiseUpdate() == -1) {
                                     pcraft.setLastCruisUpdate(0);
+                                } else {
+                                    pcraft.setLastCruisUpdate(System.currentTimeMillis());
                                 }
                             }
                         }

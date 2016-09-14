@@ -281,12 +281,12 @@ public class WorldEditInteractListener implements Listener {
                             }
 
                             if (itemToConsume != 0) {
-                                if (!numMissingItems.containsKey(itemToConsume)) {
-                                    numMissingItems.put(itemToConsume, qtyToConsume);
-                                } else {
+                                if (numMissingItems.containsKey(itemToConsume)) {
                                     Integer num = numMissingItems.get(itemToConsume);
                                     num += qtyToConsume;
                                     numMissingItems.put(itemToConsume, num);
+                                } else {
+                                    numMissingItems.put(itemToConsume, qtyToConsume);
                                 }
                             }
                             locMissingBlocks.add(ccLoc);

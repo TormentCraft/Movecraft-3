@@ -645,7 +645,9 @@ public class BlockUtils {
 
                 return data;
             case 106:
-                if (data != 0x0) {
+                if (data == 0x0) {
+                    return data;
+                } else {
                     if (rotation == Rotation.CLOCKWISE) {
                         data = (byte) (data << 1);
                     } else {
@@ -658,8 +660,6 @@ public class BlockUtils {
                         data = 8;
                     }
 
-                    return data;
-                } else {
                     return data;
                 }
 

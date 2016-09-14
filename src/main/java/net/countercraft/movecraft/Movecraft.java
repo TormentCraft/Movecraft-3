@@ -93,11 +93,11 @@ public class Movecraft extends JavaPlugin {
         Settings.Debug = getConfig().getBoolean("Debug", false);
         Settings.DisableSpillProtection = getConfig().getBoolean("DisableSpillProtection", false);
         // if the PilotTool is specified in the config.yml file, use it
-        if (getConfig().getInt("PilotTool") != 0) {
+        if (getConfig().getInt("PilotTool") == 0) {
+            logger.log(Level.INFO, "No PilotTool setting, using default of 280");
+        } else {
             logger.log(Level.INFO, "Recognized PilotTool setting of: " + getConfig().getInt("PilotTool"));
             Settings.PilotTool = getConfig().getInt("PilotTool");
-        } else {
-            logger.log(Level.INFO, "No PilotTool setting, using default of 280");
         }
         // if the CompatibilityMode is specified in the config.yml file, use it.
         // Otherwise set to false.

@@ -148,11 +148,7 @@ public class TranslationTask extends AsyncTask {
         // Find the waterline from the surrounding terrain or from the static level in the craft type
         int waterLine = 0;
         if (waterCraft) {
-            if (getCraft().getType().getStaticWaterLevel() != 0) {
-                if (waterLine <= maxY + 1) {
-                    waterLine = getCraft().getType().getStaticWaterLevel();
-                }
-            } else {
+            if (getCraft().getType().getStaticWaterLevel() == 0) {
                 // figure out the water level by examining blocks next to the outer boundaries of the craft
                 for (int posY = maxY + 1; (posY >= minY - 1) && (waterLine == 0); posY--) {
                     int numWater = 0;
@@ -186,6 +182,10 @@ public class TranslationTask extends AsyncTask {
                     if (numWater > numAir) {
                         waterLine = posY;
                     }
+                }
+            } else {
+                if (waterLine <= maxY + 1) {
+                    waterLine = getCraft().getType().getStaticWaterLevel();
                 }
             }
 
@@ -948,14 +948,7 @@ public class TranslationTask extends AsyncTask {
 
             for (MovecraftLocation l1 : airLocation) {
                 // for watercraft, fill blocks below the waterline with water
-                if (!waterCraft) {
-                    if (getCraft().getSinking()) {
-                        updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null,
-                                                           getCraft().getType().getSmokeOnSink()));
-                    } else {
-                        updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null));
-                    }
-                } else {
+                if (waterCraft) {
                     if (l1.y <= waterLine) {
                         // if there is air below the ship at the current position, don't fill in with water
                         MovecraftLocation testAir = new MovecraftLocation(l1.x, l1.y - 1, l1.z);
@@ -979,6 +972,13 @@ public class TranslationTask extends AsyncTask {
                         } else {
                             updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null));
                         }
+                    }
+                } else {
+                    if (getCraft().getSinking()) {
+                        updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null,
+                                                           getCraft().getType().getSmokeOnSink()));
+                    } else {
+                        updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null));
                     }
                 }
             }
@@ -1039,16 +1039,16 @@ public class TranslationTask extends AsyncTask {
             }
 
             boolean blockObstructed;
-            if (!waterCraft) {
-                // New block is not air or a piston head and is not part of the existing ship
-                blockObstructed =
-                        (!testMaterial.equals(Material.AIR) && !testMaterial.equals(Material.PISTON_EXTENSION)) &&
-                        !existingBlockSet.contains(newLoc);
-            } else {
+            if (waterCraft) {
                 // New block is not air or water or a piston head and is not part of the existing ship
                 blockObstructed =
                         (!testMaterial.equals(Material.AIR) && !testMaterial.equals(Material.STATIONARY_WATER) &&
                          !testMaterial.equals(Material.WATER) && !testMaterial.equals(Material.PISTON_EXTENSION)) &&
+                        !existingBlockSet.contains(newLoc);
+            } else {
+                // New block is not air or a piston head and is not part of the existing ship
+                blockObstructed =
+                        (!testMaterial.equals(Material.AIR) && !testMaterial.equals(Material.PISTON_EXTENSION)) &&
                         !existingBlockSet.contains(newLoc);
             }
             if (blockObstructed && hoverCraft) {
@@ -1195,10 +1195,10 @@ public class TranslationTask extends AsyncTask {
             if (droppedMap.containsKey(harvestedBlock)) {
                 ItemStack[] drops = droppedMap.get(harvestedBlock);
                 for (ItemStack drop : drops) {
-                    if (!droppedBlocks.contains(harvestedBlock)) {
-                        retStack = putInToChests(drop, crates);
-                    } else {
+                    if (droppedBlocks.contains(harvestedBlock)) {
                         retStack = drop;
+                    } else {
+                        retStack = putInToChests(drop, crates);
                     }
                     if (retStack != null) {
                         //drop items on position 

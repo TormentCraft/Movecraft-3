@@ -508,13 +508,13 @@ Changed for 1.8, and quite possibly wrong:
                             MovecraftLocation entityLoc = new MovecraftLocation(i.getNewLocation().getBlockX(),
                                                                                 i.getNewLocation().getBlockY() - 1,
                                                                                 i.getNewLocation().getBlockZ());
-                            if (!entityMap.containsKey(entityLoc)) {
+                            if (entityMap.containsKey(entityLoc)) {
+                                List<EntityUpdateCommand> entUpdateList = entityMap.get(entityLoc);
+                                entUpdateList.add(i);
+                            } else {
                                 List<EntityUpdateCommand> entUpdateList = new ArrayList<>();
                                 entUpdateList.add(i);
                                 entityMap.put(entityLoc, entUpdateList);
-                            } else {
-                                List<EntityUpdateCommand> entUpdateList = entityMap.get(entityLoc);
-                                entUpdateList.add(i);
                             }
                             if (i.getEntity() instanceof Player) {
                                 // send the blocks around the player first

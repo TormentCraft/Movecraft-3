@@ -363,8 +363,9 @@ public class RotationTask extends AsyncTask {
                 }
             }
 
-            if (!waterCraft) {
-                if ((typeID != 0 && typeID != 34) && !existingBlockSet.contains(blockList[i])) {
+            if (waterCraft) {
+                // allow watercraft to rotate through water
+                if ((typeID != 0 && typeID != 9 && typeID != 34) && !existingBlockSet.contains(blockList[i])) {
                     failed = true;
                     failMessage = String
                             .format(I18nSupport.getInternationalisedString("Rotation - Craft is obstructed") +
@@ -381,8 +382,7 @@ public class RotationTask extends AsyncTask {
                                                         getCraft()));
                 }
             } else {
-                // allow watercraft to rotate through water
-                if ((typeID != 0 && typeID != 9 && typeID != 34) && !existingBlockSet.contains(blockList[i])) {
+                if ((typeID != 0 && typeID != 34) && !existingBlockSet.contains(blockList[i])) {
                     failed = true;
                     failMessage = String
                             .format(I18nSupport.getInternationalisedString("Rotation - Craft is obstructed") +
@@ -419,7 +419,9 @@ public class RotationTask extends AsyncTask {
                 if (MathUtils.playerIsWithinBoundingPolygon(getCraft().getHitBox(), getCraft().getMinX(),
                                                             getCraft().getMinZ(),
                                                             MathUtils.bukkit2MovecraftLoc(pTest.getLocation()))) {
-                    if (pTest.getType() != EntityType.DROPPED_ITEM) {
+                    if (pTest.getType() == EntityType.DROPPED_ITEM) {
+                        //	pTest.remove();   removed to test cleaner fragile item removal
+                    } else {
                         // Player is onboard this craft
                         tOP.setX(tOP.getBlockX() + 0.5);
                         tOP.setZ(tOP.getBlockZ() + 0.5);
@@ -468,8 +470,6 @@ public class RotationTask extends AsyncTask {
                             getCraft().setPilotLockedY(newPLoc.getY());
                             getCraft().setPilotLockedZ(newPLoc.getZ());
                         }
-                    } else {
-                        //	pTest.remove();   removed to test cleaner fragile item removal
                     }
                 }
             }

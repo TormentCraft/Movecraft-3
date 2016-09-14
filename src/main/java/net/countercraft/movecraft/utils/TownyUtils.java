@@ -121,10 +121,10 @@ public class TownyUtils {
 
         if (cache.hasBlockErrMsg()) return false;
 
-        if (status != TownBlockStatus.WARZONE) {
-            return false;
-        } else {
+        if (status == TownBlockStatus.WARZONE) {
             return TownyWarConfig.isAllowingSwitchesInWarZone();
+        } else {
+            return false;
         }
     }
 
