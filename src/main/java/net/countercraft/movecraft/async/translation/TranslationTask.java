@@ -324,7 +324,8 @@ public class TranslationTask extends AsyncTask {
             if (newLoc.y > data.getMaxHeight() && newLoc.y > oldLoc.y) {
                 fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit height limit"));
                 break;
-            } else if (newLoc.y < data.getMinHeight() && newLoc.y < oldLoc.y && !getCraft().getSinking()) {
+            }
+            if (newLoc.y < data.getMinHeight() && newLoc.y < oldLoc.y && !getCraft().getSinking()) {
                 fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum height limit"));
                 break;
             }
@@ -1029,7 +1030,8 @@ public class TranslationTask extends AsyncTask {
                 //if ( newLoc.getY() >= data.getMaxHeight() && newLoc.getY() > oldLoc.getY()) {
                 isFree = false;
                 break;
-            } else if (newLoc.y <= data.getMinHeight() && newLoc.y < oldLoc.y) {
+            }
+            if (newLoc.y <= data.getMinHeight() && newLoc.y < oldLoc.y) {
                 isFree = false;
                 break;
             }
