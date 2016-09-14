@@ -35,7 +35,7 @@ public final class Direction {
         this.z = Math.min(Math.max(z, -1), 1);
     }
 
-    public final Direction combine(Direction that) {
+    public Direction combine(Direction that) {
         return new Direction(this.x + that.x, this.y + that.y, this.z + that.z);
     }
 

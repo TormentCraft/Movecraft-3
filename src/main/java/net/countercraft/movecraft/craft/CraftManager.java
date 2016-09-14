@@ -271,7 +271,7 @@ public final class CraftManager {
         return releaseEvents;
     }
 
-    public final void addReleaseTask(final Craft c) {
+    public void addReleaseTask(final Craft c) {
         Player p = getPlayerFromCraft(c);
         if (!getReleaseEvents().containsKey(p)) {
             p.sendMessage(I18nSupport.getInternationalisedString("Release - Player has left craft"));
@@ -284,7 +284,7 @@ public final class CraftManager {
         }
     }
 
-    public final void removeReleaseTask(final Craft c) {
+    public void removeReleaseTask(final Craft c) {
         Player p = getPlayerFromCraft(c);
         if (p != null) {
             if (releaseEvents.containsKey(p)) {
