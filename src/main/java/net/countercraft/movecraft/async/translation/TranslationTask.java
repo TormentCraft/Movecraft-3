@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
@@ -1012,7 +1013,7 @@ public class TranslationTask extends AsyncTask {
     }
 
     private boolean isFreeSpace(int x, int y, int z, MovecraftLocation[] blocksList,
-                                HashSet<MovecraftLocation> existingBlockSet, boolean waterCraft, boolean hoverCraft,
+                                Set<MovecraftLocation> existingBlockSet, boolean waterCraft, boolean hoverCraft,
                                 List<Material> harvestBlocks, boolean canHoverOverWater, boolean checkHover)
     {
         boolean isFree = true;
@@ -1069,7 +1070,7 @@ public class TranslationTask extends AsyncTask {
         return isFree;
     }
 
-    private boolean checkChests(Material mBlock, MovecraftLocation newLoc, HashSet<MovecraftLocation> existingBlockSet)
+    private boolean checkChests(Material mBlock, MovecraftLocation newLoc, Set<MovecraftLocation> existingBlockSet)
     {
         Material testMaterial;
         MovecraftLocation aroundNewLoc;
@@ -1117,7 +1118,7 @@ public class TranslationTask extends AsyncTask {
 
         HashMap<Material, ArrayList<Block>> crates = new HashMap<>();
         HashSet<ItemDropUpdateCommand> itemDropUpdateSet = new HashSet<>();
-        HashSet<Material> droppedSet = new HashSet<>();
+        Set<Material> droppedSet = new HashSet<>();
         HashMap<MovecraftLocation, ItemStack[]> droppedMap = new HashMap<>();
         harvestedBlocks.addAll(droppedBlocks);
 
@@ -1214,7 +1215,7 @@ public class TranslationTask extends AsyncTask {
         data.setItemDropUpdates(itemDropUpdateSet.toArray(new ItemDropUpdateCommand[1]));
     }
 
-    private ItemStack putInToChests(ItemStack stack, HashMap<Material, ArrayList<Block>> chests) {
+    private ItemStack putInToChests(ItemStack stack, Map<Material, ArrayList<Block>> chests) {
         if (stack == null) {
             return null;
         }
@@ -1231,7 +1232,7 @@ public class TranslationTask extends AsyncTask {
         if (chests.get(mat) != null) {
             for (Block b : chests.get(mat)) {
                 Inventory inv = ((InventoryHolder) b.getState()).getInventory();
-                HashMap<Integer, ItemStack> leftover = inv.addItem(stack); //try add stack to the chest inventory
+                Map<Integer, ItemStack> leftover = inv.addItem(stack); //try add stack to the chest inventory
                 if (leftover != null) {
                     ArrayList<Block> blocks = chests.get(mat);
                     if (blocks == null) {
@@ -1262,7 +1263,7 @@ public class TranslationTask extends AsyncTask {
         if (chests.get(mat) != null) {
             for (Block b : chests.get(mat)) {
                 Inventory inv = ((InventoryHolder) b.getState()).getInventory();
-                HashMap<Integer, ItemStack> leftover = inv.addItem(stack);
+                Map<Integer, ItemStack> leftover = inv.addItem(stack);
                 if (leftover != null && !leftover.isEmpty()) {
                     stack = null;
                     ArrayList<Block> blocks = chests.get(mat);

@@ -703,7 +703,7 @@ public class RotationTask extends AsyncTask {
         return isSubCraft;
     }
 
-    private boolean checkChests(Material mBlock, MovecraftLocation newLoc, HashSet<MovecraftLocation> existingBlockSet)
+    private boolean checkChests(Material mBlock, MovecraftLocation newLoc, Set<MovecraftLocation> existingBlockSet)
     {
         Material testMaterial;
         MovecraftLocation aroundNewLoc;

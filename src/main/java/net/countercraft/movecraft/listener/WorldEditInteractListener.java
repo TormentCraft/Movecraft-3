@@ -51,6 +51,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 //import com.sk89q.worldedit.blocks.BaseBlock;
 //import com.sk89q.worldedit.world.DataException;
@@ -224,7 +225,7 @@ public class WorldEditInteractListener implements Listener {
             Location worldLoc = new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
             int numdiffblocks = 0;
             HashMap<Integer, Integer> numMissingItems = new HashMap<>(); // block type, number missing
-            HashSet<Vector> locMissingBlocks = new HashSet<>();
+            Set<Vector> locMissingBlocks = new HashSet<>();
             for (int x = 0; x < cc.getWidth(); x++) {
                 for (int y = 0; y < cc.getHeight(); y++) {
                     for (int z = 0; z < cc.getLength(); z++) {
@@ -306,7 +307,7 @@ public class WorldEditInteractListener implements Listener {
             }
             if (secondClick) {
                 // check all the chests for materials for the repair
-                HashMap<Integer, ArrayList<InventoryHolder>> chestsToTakeFrom = new HashMap<>(); // typeid, list of chest inventories
+                Map<Integer, ArrayList<InventoryHolder>> chestsToTakeFrom = new HashMap<>(); // typeid, list of chest inventories
                 boolean enoughMaterial = true;
                 for (Integer typeID : numMissingItems.keySet()) {
                     int remainingQty = numMissingItems.get(typeID);
@@ -316,8 +317,8 @@ public class WorldEditInteractListener implements Listener {
                         if ((b.getTypeId() == 54) || (b.getTypeId() == 146)) {
                             InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
                             if (inventoryHolder.getInventory().contains(typeID) && remainingQty > 0) {
-                                HashMap<Integer, ? extends ItemStack> foundItems = inventoryHolder.getInventory()
-                                                                                                  .all(typeID);
+                                Map<Integer, ? extends ItemStack> foundItems = inventoryHolder.getInventory()
+                                                                                              .all(typeID);
                                 // count how many were in the chest
                                 int numfound = 0;
                                 for (ItemStack istack : foundItems.values()) {
@@ -352,8 +353,8 @@ public class WorldEditInteractListener implements Listener {
                     for (Integer typeID : numMissingItems.keySet()) {
                         int remainingQty = numMissingItems.get(typeID);
                         for (InventoryHolder inventoryHolder : chestsToTakeFrom.get(typeID)) {
-                            HashMap<Integer, ? extends ItemStack> foundItems = inventoryHolder.getInventory()
-                                                                                              .all(typeID);
+                            Map<Integer, ? extends ItemStack> foundItems = inventoryHolder.getInventory()
+                                                                                          .all(typeID);
                             for (ItemStack istack : foundItems.values()) {
                                 if (istack.getAmount() <= remainingQty) {
                                     remainingQty -= istack.getAmount();

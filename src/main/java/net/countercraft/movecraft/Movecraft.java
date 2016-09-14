@@ -73,7 +73,7 @@ public class Movecraft extends JavaPlugin {
     public HashMap<MovecraftLocation, Long> blockFadeTimeMap = new HashMap<>();
     public HashMap<MovecraftLocation, Integer> blockFadeTypeMap = new HashMap<>();
     public HashMap<MovecraftLocation, Boolean> blockFadeWaterMap = new HashMap<>();
-    public HashMap<MovecraftLocation, World> blockFadeWorldMap = new HashMap<>();
+    public Map<MovecraftLocation, World> blockFadeWorldMap = new HashMap<>();
     public boolean siegeInProgress = false;
     public String currentSiegeName = null;
     public String currentSiegePlayer = null;

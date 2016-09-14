@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -68,12 +69,12 @@ import java.util.logging.Level;
 
 public class AsyncManager extends BukkitRunnable {
     private static final AsyncManager instance = new AsyncManager();
-    private final HashMap<AsyncTask, Craft> ownershipMap = new HashMap<>();
+    private final Map<AsyncTask, Craft> ownershipMap = new HashMap<>();
     private final HashMap<org.bukkit.entity.TNTPrimed, Double> TNTTracking = new HashMap<>();
-    private final HashMap<Craft, HashMap<Craft, Long>> recentContactTracking = new HashMap<>();
+    private final Map<Craft, HashMap<Craft, Long>> recentContactTracking = new HashMap<>();
     private HashMap<org.bukkit.entity.SmallFireball, Long> FireballTracking = new HashMap<>();
     private final BlockingQueue<AsyncTask> finishedAlgorithms = new LinkedBlockingQueue<>();
-    private final HashSet<Craft> clearanceSet = new HashSet<>();
+    private final Set<Craft> clearanceSet = new HashSet<>();
     private long lastTracerUpdate = 0;
     private long lastFireballCheck = 0;
     private long lastTNTContactCheck = 0;
@@ -269,7 +270,7 @@ public class AsyncManager extends BukkitRunnable {
                     EntityUpdateCommand[] eUpdates = task.getData().getEntityUpdates();
                     ItemDropUpdateCommand[] iUpdates = task.getData().getItemDropUpdateCommands();
                     //get list of cannons before sending map updates, to avoid conflicts
-                    HashSet<Cannon> shipCannons = null;
+                    Iterable<Cannon> shipCannons = null;
                     if (Movecraft.getInstance().getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
                         // convert blocklist to location list
                         List<Location> shipLocations = new ArrayList<>();
@@ -323,7 +324,7 @@ public class AsyncManager extends BukkitRunnable {
                         EntityUpdateCommand[] eUpdates = task.getEntityUpdates();
 
                         //get list of cannons before sending map updates, to avoid conflicts
-                        HashSet<Cannon> shipCannons = null;
+                        Iterable<Cannon> shipCannons = null;
                         if (Movecraft.getInstance().getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
                             // convert blocklist to location list
                             List<Location> shipLocations = new ArrayList<>();

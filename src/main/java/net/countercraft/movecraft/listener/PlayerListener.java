@@ -38,11 +38,12 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 public class PlayerListener implements Listener {
 
     private String checkCraftBorders(Craft craft) {
-        HashSet<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        Set<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
         for (MovecraftLocation block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {

@@ -64,9 +64,9 @@ import java.util.Set;
 import java.util.logging.Level;
 
 public class MapUpdateManager extends BukkitRunnable {
-    private final HashMap<World, ArrayList<MapUpdateCommand>> updates = new HashMap<>();
-    private final HashMap<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<>();
-    private final HashMap<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<>();
+    private final Map<World, ArrayList<MapUpdateCommand>> updates = new HashMap<>();
+    private final Map<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<>();
+    private final Map<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<>();
 
     private MapUpdateManager() {
     }
@@ -800,7 +800,7 @@ Changed for 1.8, and quite possibly wrong:
 
         Integer minx = Integer.MAX_VALUE, miny = Integer.MAX_VALUE, minz = Integer.MAX_VALUE;
         Integer maxx = Integer.MIN_VALUE, maxy = Integer.MIN_VALUE, maxz = Integer.MIN_VALUE;
-        HashMap<MovecraftLocation, MapUpdateCommand> sortRef = new HashMap<>();
+        Map<MovecraftLocation, MapUpdateCommand> sortRef = new HashMap<>();
         if (mapUpdates != null) {
             for (MapUpdateCommand m : mapUpdates) {
                 if (setContainsConflict(get, m)) {
@@ -818,7 +818,7 @@ Changed for 1.8, and quite possibly wrong:
             }
         }
 
-        ArrayList<MapUpdateCommand> tempSet = null;
+        List<MapUpdateCommand> tempSet = null;
         if (mapUpdates != null) {
             tempSet = new ArrayList<>();//(Arrays.asList(mapUpdates));
             // Sort the blocks from the bottom up to minimize lower altitude block updates
@@ -845,7 +845,7 @@ Changed for 1.8, and quite possibly wrong:
                 eGet = new ArrayList<>();
             }
 
-            ArrayList<EntityUpdateCommand> tempEUpdates = new ArrayList<>();
+            List<EntityUpdateCommand> tempEUpdates = new ArrayList<>();
             tempEUpdates.addAll(Arrays.asList(eUpdates));
             eGet.addAll(tempEUpdates);
             entityUpdates.put(w, eGet);
@@ -860,7 +860,7 @@ Changed for 1.8, and quite possibly wrong:
                 iGet = new ArrayList<>();
             }
 
-            ArrayList<ItemDropUpdateCommand> tempIDUpdates = new ArrayList<>();
+            List<ItemDropUpdateCommand> tempIDUpdates = new ArrayList<>();
             tempIDUpdates.addAll(Arrays.asList(iUpdates));
             iGet.addAll(tempIDUpdates);
             itemDropUpdates.put(w, iGet);
@@ -869,7 +869,7 @@ Changed for 1.8, and quite possibly wrong:
         return false;
     }
 
-    private boolean setContainsConflict(ArrayList<MapUpdateCommand> set, MapUpdateCommand c) {
+    private boolean setContainsConflict(Iterable<MapUpdateCommand> set, MapUpdateCommand c) {
         for (MapUpdateCommand command : set) {
             if (command != null && c != null) if (command.getNewBlockLocation().equals(c.getNewBlockLocation())) {
                 return true;

@@ -42,6 +42,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -57,7 +58,7 @@ public class DetectionTask extends AsyncTask {
     private final HashSet<MovecraftLocation> blockList = new HashSet<>();
     private final HashSet<MovecraftLocation> visited = new HashSet<>();
     private final HashMap<ArrayList<Integer>, Integer> blockTypeCount = new HashMap<>();
-    private HashMap<ArrayList<Integer>, ArrayList<Double>> dFlyBlocks;
+    private Map<ArrayList<Integer>, ArrayList<Double>> dFlyBlocks;
     private final DetectionTaskData data;
 
     private int craftMinY = 0;
@@ -325,7 +326,7 @@ public class DetectionTask extends AsyncTask {
         return data;
     }
 
-    private boolean notVisited(MovecraftLocation l, HashSet<MovecraftLocation> locations) {
+    private boolean notVisited(MovecraftLocation l, Set<MovecraftLocation> locations) {
         if (locations.contains(l)) {
             return false;
         } else {
@@ -409,7 +410,7 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private MovecraftLocation[] finaliseBlockList(HashSet<MovecraftLocation> blockSet) {
+    private MovecraftLocation[] finaliseBlockList(Set<MovecraftLocation> blockSet) {
         //MovecraftLocation[] finalList=blockSet.toArray( new MovecraftLocation[1] );
         ArrayList<MovecraftLocation> finalList = new ArrayList<>();
 
@@ -425,8 +426,8 @@ public class DetectionTask extends AsyncTask {
         return finalList.toArray(new MovecraftLocation[1]);
     }
 
-    private boolean confirmStructureRequirements(HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks,
-                                                 HashMap<ArrayList<Integer>, Integer> countData)
+    private boolean confirmStructureRequirements(Map<ArrayList<Integer>, ArrayList<Double>> flyBlocks,
+                                                 Map<ArrayList<Integer>, Integer> countData)
     {
         if (getCraft().getType().getRequireWaterContact() == true) {
             if (data.getWaterContact() == false) {

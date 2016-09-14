@@ -45,7 +45,7 @@ public class CraftManager {
     private static final CraftManager ourInstance = new CraftManager();
     private CraftType[] craftTypes;
     private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<>();
-    private final HashMap<Player, Craft> craftPlayerIndex = new HashMap<>();
+    private final Map<Player, Craft> craftPlayerIndex = new HashMap<>();
     private final HashMap<Player, BukkitTask> releaseEvents = new HashMap<>();
 
     public static CraftManager getInstance() {
@@ -161,7 +161,7 @@ public class CraftManager {
     private void destroySnowOnPilot(Player pilot, Craft craft) {
         if (pilot == null || !pilot.isOnline()) return;
 
-        HashSet<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        Set<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
         for (MovecraftLocation block : craftBlocks) {
             MovecraftLocation test = new MovecraftLocation(block.x, block.y + 1, block.z);
             if (!craftBlocks.contains(test)) {
@@ -183,7 +183,7 @@ public class CraftManager {
             return;
         }
 
-        HashSet<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        Set<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
         int blockedBroken = 0;
         for (MovecraftLocation block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
@@ -270,7 +270,7 @@ public class CraftManager {
         }
     }
 
-    public HashMap<Player, BukkitTask> getReleaseEvents() {
+    public Map<Player, BukkitTask> getReleaseEvents() {
         return releaseEvents;
     }
 

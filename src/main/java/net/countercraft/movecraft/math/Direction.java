@@ -41,7 +41,7 @@ public final class Direction {
 
     public static Map<String, Direction> getNameMap() {
         if (_nameMap == null) {
-            HashMap<String, Direction> result = new HashMap<>();
+            Map<String, Direction> result = new HashMap<>();
             result.put("n", NORTH);
             result.put("north", NORTH);
 

@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class CraftHelpListener implements CommandExecutor {
@@ -98,7 +99,7 @@ public class CraftHelpListener implements CommandExecutor {
     }
 
     private void appendFlyBlocks(StringBuilder sbReq, StringBuilder sbLimit,
-                                 HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks)
+                                 Map<ArrayList<Integer>, ArrayList<Double>> flyBlocks)
     {
         for (ArrayList<Integer> i : flyBlocks.keySet()) {
             String blockName = BlockNames.itemName(i.get(0));
