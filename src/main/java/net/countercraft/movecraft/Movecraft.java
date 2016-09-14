@@ -70,9 +70,9 @@ public class Movecraft extends JavaPlugin {
     public static StateFlag FLAG_SINK = null; //new StateFlag("movecraft-sink", true);
     private Logger logger;
     private boolean shuttingDown;
-    public HashMap<MovecraftLocation, Long> blockFadeTimeMap = new HashMap<>();
-    public HashMap<MovecraftLocation, Integer> blockFadeTypeMap = new HashMap<>();
-    public HashMap<MovecraftLocation, Boolean> blockFadeWaterMap = new HashMap<>();
+    public Map<MovecraftLocation, Long> blockFadeTimeMap = new HashMap<>();
+    public Map<MovecraftLocation, Integer> blockFadeTypeMap = new HashMap<>();
+    public Map<MovecraftLocation, Boolean> blockFadeWaterMap = new HashMap<>();
     public Map<MovecraftLocation, World> blockFadeWorldMap = new HashMap<>();
     public boolean siegeInProgress = false;
     public String currentSiegeName = null;

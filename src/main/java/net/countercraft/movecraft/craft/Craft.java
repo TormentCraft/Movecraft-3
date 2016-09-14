@@ -31,6 +31,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Craft {
@@ -57,7 +58,7 @@ public class Craft {
     private int origBlockCount;
     private double pilotLockedZ;
     private Player notificationPlayer;
-    private final HashMap<Player, Long> movedPlayers = new HashMap<>();
+    private final Map<Player, Long> movedPlayers = new HashMap<>();
 
     public Craft(CraftType type, World world) {
         this.type = type;
@@ -391,7 +392,7 @@ public class Craft {
         return pilotLocked;
     }
 
-    public HashMap<Player, Long> getMovedPlayers() {
+    public Map<Player, Long> getMovedPlayers() {
         return movedPlayers;
     }
 

@@ -60,7 +60,7 @@ public class CraftType {
     private float explodeOnCrash;
     private float collisionExplosion;
     private int tickCooldown;
-    private HashMap<ArrayList<Integer>, ArrayList<Double>> flyBlocks = new HashMap<>();
+    private Map<List<Integer>, List<Double>> flyBlocks = new HashMap<>();
     private int hoverLimit;
     private List<Material> harvestBlocks;
     private List<Material> harvesterBladeBlocks;
@@ -125,10 +125,10 @@ public class CraftType {
         return returnList.toArray(new Integer[1]);
     }
 
-    private HashMap<ArrayList<Integer>, ArrayList<Double>> blockIDMapListFromObject(Object obj) {
+    private Map<List<Integer>, List<Double>> blockIDMapListFromObject(Object obj) {
         //flyBlocks = ( HashMap<Integer, ArrayList<Double>> ) data.get( "flyblocks" );
 
-        HashMap<ArrayList<Integer>, ArrayList<Double>> returnMap = new HashMap<>();
+        Map<List<Integer>, List<Double>> returnMap = new HashMap<>();
         HashMap<Object, Object> objMap = (HashMap<Object, Object>) obj;
         for (Map.Entry<Object, Object> entry : objMap.entrySet()) {
             ArrayList<Integer> rowList = new ArrayList<>();
@@ -557,7 +557,7 @@ public class CraftType {
         return tryNudge;
     }
 
-    public HashMap<ArrayList<Integer>, ArrayList<Double>> getFlyBlocks() {
+    public Map<List<Integer>, List<Double>> getFlyBlocks() {
         return flyBlocks;
     }
 

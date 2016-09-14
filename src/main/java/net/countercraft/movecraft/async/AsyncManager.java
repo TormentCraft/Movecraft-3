@@ -70,9 +70,9 @@ import java.util.logging.Level;
 public final class AsyncManager extends BukkitRunnable {
     private static final AsyncManager instance = new AsyncManager();
     private final Map<AsyncTask, Craft> ownershipMap = new HashMap<>();
-    private final HashMap<org.bukkit.entity.TNTPrimed, Double> TNTTracking = new HashMap<>();
+    private final Map<org.bukkit.entity.TNTPrimed, Double> TNTTracking = new HashMap<>();
     private final Map<Craft, HashMap<Craft, Long>> recentContactTracking = new HashMap<>();
-    private final HashMap<org.bukkit.entity.SmallFireball, Long> FireballTracking = new HashMap<>();
+    private final Map<org.bukkit.entity.SmallFireball, Long> FireballTracking = new HashMap<>();
     private final BlockingQueue<AsyncTask> finishedAlgorithms = new LinkedBlockingQueue<>();
     private final Set<Craft> clearanceSet = new HashSet<>();
     private long lastTracerUpdate = 0;
@@ -549,7 +549,7 @@ public final class AsyncManager extends BukkitRunnable {
                             if (ticksElapsed > Settings.SinkCheckTicks) {
                                 int totalNonAirBlocks = 0;
                                 int totalNonAirWaterBlocks = 0;
-                                HashMap<ArrayList<Integer>, Integer> foundFlyBlocks = new HashMap<>();
+                                Map<List<Integer>, Integer> foundFlyBlocks = new HashMap<>();
                                 boolean regionPVPBlocked = false;
                                 boolean sinkingForbiddenByFlag = false;
                                 boolean sinkingForbiddenByTowny = false;
@@ -568,7 +568,7 @@ public final class AsyncManager extends BukkitRunnable {
                                     Integer blockID = w.getBlockAt(l.x, l.y, l.z).getTypeId();
                                     Integer dataID = (int) w.getBlockAt(l.x, l.y, l.z).getData();
                                     Integer shiftedID = (blockID << 4) + dataID + 10000;
-                                    for (ArrayList<Integer> flyBlockDef : pcraft.getType().getFlyBlocks().keySet()) {
+                                    for (List<Integer> flyBlockDef : pcraft.getType().getFlyBlocks().keySet()) {
                                         if (flyBlockDef.contains(blockID) || flyBlockDef.contains(shiftedID)) {
                                             Integer count = foundFlyBlocks.get(flyBlockDef);
                                             if (count == null) {
@@ -590,7 +590,7 @@ public final class AsyncManager extends BukkitRunnable {
                                 // now see if any of the resulting percentages are below the threshold specified in
                                 // SinkPercent
                                 boolean isSinking = false;
-                                for (ArrayList<Integer> i : pcraft.getType().getFlyBlocks().keySet()) {
+                                for (List<Integer> i : pcraft.getType().getFlyBlocks().keySet()) {
                                     int numfound = 0;
                                     if (foundFlyBlocks.get(i) != null) {
                                         numfound = foundFlyBlocks.get(i);
