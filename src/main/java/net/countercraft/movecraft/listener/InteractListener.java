@@ -197,8 +197,8 @@ public class InteractListener implements Listener {
                     // rotate subcraft
                     String craftTypeStr = org.bukkit.ChatColor.stripColor(sign.getLine(1));
                     if (getCraftTypeFromString(craftTypeStr) != null) {
-                        if (org.bukkit.ChatColor.stripColor(sign.getLine(2)).equals("") &&
-                            org.bukkit.ChatColor.stripColor(sign.getLine(3)).equals("")) {
+                        if (ChatColor.stripColor(sign.getLine(2)).isEmpty() &&
+                            ChatColor.stripColor(sign.getLine(3)).isEmpty()) {
                             sign.setLine(2, "_\\ /_");
                             sign.setLine(3, "/ \\");
                             sign.update();
@@ -345,7 +345,7 @@ public class InteractListener implements Listener {
             // rotate subcraft
             String craftTypeStr = org.bukkit.ChatColor.stripColor(sign.getLine(1));
             if (getCraftTypeFromString(craftTypeStr) != null) {
-                if (org.bukkit.ChatColor.stripColor(sign.getLine(2)).equals("") && sign.getLine(3).equals("")) {
+                if (ChatColor.stripColor(sign.getLine(2)).isEmpty() && sign.getLine(3).isEmpty()) {
                     sign.setLine(2, "_\\ /_");
                     sign.setLine(3, "/ \\");
                     sign.update();
