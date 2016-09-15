@@ -17,64 +17,58 @@
 
 package net.countercraft.movecraft.utils;
 
-public class BoundingBoxUtils {
+public final class BoundingBoxUtils {
 
-	public static int[][][] formBoundingBox( MovecraftLocation[] blockList, Integer minX, Integer maxX, Integer minZ, Integer maxZ ) {
-		int sizeX = ( maxX - minX ) + 1;
-		int sizeZ = ( maxZ - minZ ) + 1;
+    public static int[][][] formBoundingBox(MovecraftLocation[] blockList, Integer minX, Integer maxX, Integer minZ,
+                                            Integer maxZ)
+    {
+        int sizeX = (maxX - minX) + 1;
+        int sizeZ = (maxZ - minZ) + 1;
 
-		int[][][] polygonalBox = new int[sizeX][][];
+        int[][][] polygonalBox = new int[sizeX][][];
 
-		for ( MovecraftLocation l : blockList ) {
-			if ( polygonalBox[l.x - minX] == null ) {
-				polygonalBox[l.x - minX] = new int[sizeZ][];
-			}
+        for (MovecraftLocation l : blockList) {
+            if (polygonalBox[l.x - minX] == null) {
+                polygonalBox[l.x - minX] = new int[sizeZ][];
+            }
 
-			int minY, maxY;
+            if (polygonalBox[l.x - minX][l.z - minZ] == null) {
 
-			if ( polygonalBox[l.x - minX][l.z - minZ] == null ) {
+                polygonalBox[l.x - minX][l.z - minZ] = new int[2];
+                polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
+                polygonalBox[l.x - minX][l.z - minZ][1] = l.y;
+            } else {
+                int minY = polygonalBox[l.x - minX][l.z - minZ][0];
+                int maxY = polygonalBox[l.x - minX][l.z - minZ][1];
 
-				polygonalBox[l.x - minX][l.z - minZ] = new int[2];
-				polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
-				polygonalBox[l.x - minX][l.z - minZ][1] = l.y;
+                if (l.y < minY) {
+                    polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
+                }
+                if (l.y > maxY) {
+                    polygonalBox[l.x - minX][l.z - minZ][1] = l.y;
+                }
+            }
+        }
 
-			} else {
-				minY = polygonalBox[l.x - minX][l.z - minZ][0];
-				maxY = polygonalBox[l.x - minX][l.z - minZ][1];
+        return polygonalBox;
+    }
 
-				if ( l.y < minY ) {
-					polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
-				}
-				if ( l.y > maxY ) {
-					polygonalBox[l.x - minX][l.z - minZ][1] = l.y;
-				}
+    public static int[][][] translateBoundingBoxVertically(int[][][] hitbox, int dy) {
+        int[][][] newHitbox = new int[hitbox.length][][];
 
-			}
-		}
+        for (int x = 0; x < hitbox.length; x++) {
+            newHitbox[x] = new int[hitbox[x].length][];
 
-		return polygonalBox;
-	}
+            for (int z = 0; z < hitbox[x].length; z++) {
 
-	public static int[][][] translateBoundingBoxVertically( int[][][] hitbox, int dy ) {
-		int[][][] newHitbox = new int[hitbox.length][][];
+                if (hitbox[x][z] != null) {
+                    newHitbox[x][z] = new int[2];
+                    newHitbox[x][z][0] = hitbox[x][z][0] + dy;
+                    newHitbox[x][z][1] = hitbox[x][z][1] + dy;
+                }
+            }
+        }
 
-		for ( int x = 0; x < hitbox.length; x++ ) {
-			newHitbox[x] = new int[hitbox[x].length][];
-
-			for ( int z = 0; z < hitbox[x].length; z++ ) {
-
-				if(hitbox[x][z]!=null) {
-					newHitbox[x][z] = new int[2];
-					newHitbox[x][z][0] = hitbox[x][z][0] + dy;
-					newHitbox[x][z][1] = hitbox[x][z][1] + dy;
-				}
-
-			}
-
-		}
-
-
-		return newHitbox;
-	}
-
+        return newHitbox;
+    }
 }

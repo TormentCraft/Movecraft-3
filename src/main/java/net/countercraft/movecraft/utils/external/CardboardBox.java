@@ -1,7 +1,7 @@
 /*
  * This code is not part of the Movecraft project but belongs to NuclearW
  *
- *  Attribtuion : http://forums.bukkit.org/threads/cardboard-serializable-itemstack-with-enchantments.75768/
+ *  Attribution : http://forums.bukkit.org/threads/cardboard-serializable-itemstack-with-enchantments.75768/
  */
 
 package net.countercraft.movecraft.utils.external;
@@ -17,42 +17,42 @@ import java.util.Map;
  * A serializable ItemStack
  */
 public class CardboardBox implements Serializable {
-	private static final long serialVersionUID = 729890133797629668L;
+    private static final long serialVersionUID = 729890133797629668L;
 
-	private final int type, amount;
-	private final short damage;
-	private final byte data;
+    private final int type, amount;
+    private final short damage;
+    private final byte data;
 
-	private final HashMap<CardboardEnchantment, Integer> enchants;
+    private final Map<CardboardEnchantment, Integer> enchants;
 
-	public CardboardBox(ItemStack item) {
-		this.type = item.getTypeId();
-		this.amount = item.getAmount();
-		this.damage = item.getDurability();
-		this.data = item.getData().getData();
+    public CardboardBox(ItemStack item) {
+        this.type = item.getTypeId();
+        this.amount = item.getAmount();
+        this.damage = item.getDurability();
+        this.data = item.getData().getData();
 
-		HashMap<CardboardEnchantment, Integer> map = new HashMap<CardboardEnchantment, Integer>();
+        Map<CardboardEnchantment, Integer> map = new HashMap<>();
 
-		Map<Enchantment, Integer> enchantments = item.getEnchantments();
+        Map<Enchantment, Integer> enchantments = item.getEnchantments();
 
-		for(Enchantment enchantment : enchantments.keySet()) {
-			map.put(new CardboardEnchantment(enchantment), enchantments.get(enchantment));
-		}
+        for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
+            map.put(new CardboardEnchantment(entry.getKey()), entry.getValue());
+        }
 
-		this.enchants = map;
-	}
+        this.enchants = map;
+    }
 
-	public ItemStack unbox() {
-		ItemStack item = new ItemStack(type, amount, damage, data);
+    public ItemStack unbox() {
+        ItemStack item = new ItemStack(type, amount, damage, data);
 
-		HashMap<Enchantment, Integer> map = new HashMap<Enchantment, Integer>();
+        Map<Enchantment, Integer> map = new HashMap<>();
 
-		for(CardboardEnchantment cEnchantment : enchants.keySet()) {
-			map.put(cEnchantment.unbox(), enchants.get(cEnchantment));
-		}
+        for (Map.Entry<CardboardEnchantment, Integer> entry : enchants.entrySet()) {
+            map.put(entry.getKey().unbox(), entry.getValue());
+        }
 
-		item.addUnsafeEnchantments(map);
+        item.addUnsafeEnchantments(map);
 
-		return item;
-	}
+        return item;
+    }
 }

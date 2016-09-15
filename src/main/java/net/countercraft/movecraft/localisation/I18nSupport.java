@@ -20,52 +20,55 @@ package net.countercraft.movecraft.localisation;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.config.Settings;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 
-public class I18nSupport {
-	private static Properties languageFile;
+public final class I18nSupport {
+    private static Properties languageFile;
 
-	public static void init() {
-		languageFile = new Properties();
+    public static void init() {
+        languageFile = new Properties();
 
-		File localisationDirectory = new File( Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/localisation" );
+        File localisationDirectory = new File(
+                Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/localisation");
 
-		if ( !localisationDirectory.exists() ) {
-			localisationDirectory.mkdirs();
-		}
+        if (!localisationDirectory.exists()) {
+            localisationDirectory.mkdirs();
+        }
 
-		InputStream is = null;
-		try {
-			is = new FileInputStream( localisationDirectory.getAbsolutePath() + "/movecraftlang" + "_" + Settings.LOCALE + ".properties" );
-		} catch ( FileNotFoundException e ) {
-			e.printStackTrace();
-		}
+        InputStream is = null;
+        try {
+            is = new FileInputStream(
+                    localisationDirectory.getAbsolutePath() + "/movecraftlang" + "_" + Settings.LOCALE + ".properties");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-		if ( is == null ) {
-			Movecraft.getInstance().getLogger().log( Level.SEVERE, "Critical Error in Localisation System" );
-			Movecraft.getInstance().getServer().shutdown();
-			return;
-		}
+        if (is == null) {
+            Movecraft.getInstance().getLogger().log(Level.SEVERE, "Critical Error in Localisation System");
+            Movecraft.getInstance().getServer().shutdown();
+            return;
+        }
 
-		try {
-			languageFile.load( is );
-			is.close();
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}
+        try {
+            languageFile.load(is);
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-
-	}
-
-	public static String getInternationalisedString( String key ) {
-		String ret=languageFile.getProperty( key );
-		if(ret!=null) {
-			return ret;			
-		} else {
-			return key;
-		}
-	}
-
+    public static String getInternationalisedString(String key) {
+        String ret = languageFile.getProperty(key);
+        if (ret != null) {
+            return ret;
+        } else {
+            return key;
+        }
+    }
 }

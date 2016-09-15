@@ -22,7 +22,6 @@ import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.MovecraftLocation;
 import net.countercraft.movecraft.utils.external.CardboardBox;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -31,143 +30,150 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class StorageChestItem {
-	private static final Map<World, Map<MovecraftLocation, Inventory>> crateInventories = new HashMap<World, Map<MovecraftLocation, Inventory>>();
-	private final ItemStack itemStack;
+    private static final Map<World, Map<MovecraftLocation, Inventory>> crateInventories = new HashMap<>();
+    private final ItemStack itemStack;
 
-	public StorageChestItem() {
-		this.itemStack = new ItemStack( 54, 1 );
-		ItemMeta itemMeta = itemStack.getItemMeta();
-		itemMeta.setDisplayName( String.format( I18nSupport.getInternationalisedString( "Item - Storage Crate name" ) ) );
-		itemStack.setItemMeta( itemMeta );
-	}
+    public StorageChestItem() {
+        this.itemStack = new ItemStack(54, 1);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(I18nSupport.getInternationalisedString("Item - Storage Crate name"));
+        itemStack.setItemMeta(itemMeta);
+    }
 
-	public ItemStack getItemStack() {
-		return itemStack;
-	}
+    public ItemStack getItemStack() {
+        return itemStack;
+    }
 
-	public static Inventory getInventoryOfCrateAtLocation( MovecraftLocation location, World w ) {
-		if(Settings.DisableCrates==true)
-			return null;
-		return crateInventories.get( w ).get( location );
-	}
+    public static Inventory getInventoryOfCrateAtLocation(MovecraftLocation location, World w) {
+        if (Settings.DisableCrates) return null;
+        return crateInventories.get(w).get(location);
+    }
 
-	public static void setInventoryOfCrateAtLocation( Inventory i, MovecraftLocation l, World w ) {
-		crateInventories.get( w ).put( l, i );
-	}
+    public static void setInventoryOfCrateAtLocation(Inventory i, MovecraftLocation l, World w) {
+        crateInventories.get(w).put(l, i);
+    }
 
-	public static void removeInventoryAtLocation( World w, MovecraftLocation l ) {
-		crateInventories.get( w ).remove( l );
-	}
+    public static void removeInventoryAtLocation(World w, MovecraftLocation l) {
+        crateInventories.get(w).remove(l);
+    }
 
-	public static void createNewInventory( MovecraftLocation l, World w ) {
-		crateInventories.get( w ).put( l, Bukkit.createInventory( null, 27, String.format( I18nSupport.getInternationalisedString( "Item - Storage Crate name" ) ) ) );
-	}
+    public static void createNewInventory(MovecraftLocation l, World w) {
+        crateInventories.get(w).put(l, Bukkit.createInventory(null, 27, I18nSupport
+                .getInternationalisedString("Item - Storage Crate name")));
+    }
 
-	public static void addRecipie() {
-		ShapedRecipe storageCrateRecipie = new ShapedRecipe( new StorageChestItem().getItemStack() );
-		storageCrateRecipie.shape( "WWW", "WCW", "WWW" );
-		storageCrateRecipie.setIngredient( 'C', Material.CHEST );
-		storageCrateRecipie.setIngredient( 'W', Material.WOOD );
-		Movecraft.getInstance().getServer().addRecipe( storageCrateRecipie );
-	}
+    public static void addRecipe() {
+        ShapedRecipe storageCrateRecipe = new ShapedRecipe(new StorageChestItem().getItemStack());
+        storageCrateRecipe.shape("WWW", "WCW", "WWW");
+        storageCrateRecipe.setIngredient('C', Material.CHEST);
+        storageCrateRecipe.setIngredient('W', Material.WOOD);
+        Movecraft.getInstance().getServer().addRecipe(storageCrateRecipe);
+    }
 
-	public static void saveToDisk() {
-		Map<String, CardboardBox[]> data = new HashMap<String, CardboardBox[]>();
+    public static void saveToDisk() {
+        Map<String, CardboardBox[]> data = new HashMap<>();
 
-		for ( World w : crateInventories.keySet() ) {
-			for ( MovecraftLocation l : crateInventories.get( w ).keySet() ) {
-				Inventory inventory = crateInventories.get( w ).get( l );
-				ItemStack[] is = inventory.getContents();
-				CardboardBox[] cardboardBoxes = new CardboardBox[is.length];
+        for (Map.Entry<World, Map<MovecraftLocation, Inventory>> entry : crateInventories.entrySet()) {
+            final Map<MovecraftLocation, Inventory> inventoryMap = entry.getValue();
+            for (Map.Entry<MovecraftLocation, Inventory> containerEntry : inventoryMap.entrySet()) {
+                Inventory inventory = containerEntry.getValue();
+                ItemStack[] is = inventory.getContents();
+                CardboardBox[] cardboardBoxes = new CardboardBox[is.length];
 
-				for ( int i = 0; i < is.length; i++ ) {
-					if ( is[i] != null ) {
-						cardboardBoxes[i] = new CardboardBox( is[i] );
-					} else {
-						cardboardBoxes[i] = null;
-					}
-				}
+                for (int i = 0; i < is.length; i++) {
+                    if (is[i] != null) {
+                        cardboardBoxes[i] = new CardboardBox(is[i]);
+                    } else {
+                        cardboardBoxes[i] = null;
+                    }
+                }
 
-				String key = w.getName() + " " + l.x + " " + l.y + " " + l.z;
-				data.put( key, cardboardBoxes );
-			}
-		}
+                final World world = entry.getKey();
+                final MovecraftLocation location = containerEntry.getKey();
+                String key = world.getName() + " " + location.x + " " + location.y + " " + location.z;
+                data.put(key, cardboardBoxes);
+            }
+        }
 
-		try {
-			File f = new File( Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/crates" );
+        try {
+            File f = new File(Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/crates");
 
-			if ( !f.exists() ) {
-				f.mkdirs();
-			}
+            if (!f.exists()) {
+                f.mkdirs();
+            }
 
+            FileOutputStream fileOut = new FileOutputStream(
+                    new File(Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/crates/inventories.txt"));
 
-			FileOutputStream fileOut = new FileOutputStream( new File( Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/crates/inventories.txt" ) );
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(data);
+            out.close();
+            fileOut.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-			ObjectOutputStream out = new ObjectOutputStream( fileOut );
-			out.writeObject( data );
-			out.close();
-			fileOut.close();
+    public static void readFromDisk() {
+        // Initialise a List for every world
+        for (World w : Movecraft.getInstance().getServer().getWorlds()) {
+            crateInventories.put(w, new HashMap<MovecraftLocation, Inventory>());
+        }
 
-		} catch ( FileNotFoundException e ) {
-			e.printStackTrace();
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}
-	}
+        try {
 
-	public static void readFromDisk() {
-		// Initialise a List for every world
-		for ( World w : Movecraft.getInstance().getServer().getWorlds() ) {
-			crateInventories.put( w, new HashMap<MovecraftLocation, Inventory>() );
-		}
+            File f = new File(Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/crates/inventories.txt");
+            FileInputStream input = new FileInputStream(f);
+            ObjectInputStream in = new ObjectInputStream(input);
+            Map<String, CardboardBox[]> data = (Map<String, CardboardBox[]>) in.readObject();
 
-		try {
+            for (Map.Entry<String, CardboardBox[]> entry : data.entrySet()) {
+                CardboardBox[] cardboardBoxes = entry.getValue();
+                ItemStack[] is = new ItemStack[cardboardBoxes.length];
 
-			File f = new File( Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/crates/inventories.txt" );
-			FileInputStream input = new FileInputStream( f );
-			ObjectInputStream in = new ObjectInputStream( input );
-			Map<String, CardboardBox[]> data = ( Map<String, CardboardBox[]> ) in.readObject();
+                for (int i = 0; i < is.length; i++) {
+                    if (cardboardBoxes[i] != null) {
+                        is[i] = cardboardBoxes[i].unbox();
+                    } else {
+                        is[i] = null;
+                    }
+                }
 
-			for ( String s : data.keySet() ) {
-				CardboardBox[] cardboardBoxes = data.get( s );
-				ItemStack[] is = new ItemStack[cardboardBoxes.length];
+                Inventory inv = Bukkit
+                        .createInventory(null, 27, I18nSupport.getInternationalisedString("Item - Storage Crate name"));
+                inv.setContents(is);
+                String[] split = entry.getKey().split(" ");
+                World w = Movecraft.getInstance().getServer().getWorld(split[0]);
+                if (w != null) {
 
-				for ( int i = 0; i < is.length; i++ ) {
-					if ( cardboardBoxes[i] != null ) {
-						is[i] = cardboardBoxes[i].unbox();
-					} else {
-						is[i] = null;
-					}
-				}
+                    int x = Integer.parseInt(split[1]);
+                    int y = Integer.parseInt(split[2]);
+                    int z = Integer.parseInt(split[3]);
+                    MovecraftLocation l = new MovecraftLocation(x, y, z);
 
-				Inventory inv = Bukkit.createInventory( null, 27, String.format( I18nSupport.getInternationalisedString( "Item - Storage Crate name" ) ) );
-				inv.setContents( is );
-				String[] split = s.split( " " );
-				World w = Movecraft.getInstance().getServer().getWorld( split[0] );
-				if ( w != null ) {
-
-					int x = Integer.parseInt( split[1] );
-					int y = Integer.parseInt( split[2] );
-					int z = Integer.parseInt( split[3] );
-					MovecraftLocation l = new MovecraftLocation( x, y, z );
-
-					crateInventories.get( w ).put( l, inv );
-
-				}
-			}
-			in.close();
-			input.close();
-
-		} catch ( FileNotFoundException ignored ) {
-		} catch ( ClassNotFoundException e ) {
-			e.printStackTrace();
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}
-	}
+                    crateInventories.get(w).put(l, inv);
+                }
+            }
+            in.close();
+            input.close();
+        } catch (FileNotFoundException ignored) {
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
