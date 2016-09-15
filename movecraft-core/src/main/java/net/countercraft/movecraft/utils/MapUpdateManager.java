@@ -22,6 +22,8 @@ import com.sk89q.worldedit.blocks.SignBlock;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.MovecraftLocation;
+import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;

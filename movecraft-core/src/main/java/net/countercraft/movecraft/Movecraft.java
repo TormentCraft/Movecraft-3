@@ -36,7 +36,7 @@ import net.countercraft.movecraft.listener.WorldEditInteractListener;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.metrics.MovecraftMetrics;
 import net.countercraft.movecraft.utils.MapUpdateManager;
-import net.countercraft.movecraft.utils.MovecraftLocation;
+import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import net.milkbowl.vault.economy.Economy;

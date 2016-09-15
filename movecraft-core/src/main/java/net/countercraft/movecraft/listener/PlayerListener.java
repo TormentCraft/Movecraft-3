@@ -24,7 +24,7 @@ import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.utils.MovecraftLocation;
+import net.countercraft.movecraft.api.MovecraftLocation;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;

@@ -25,6 +25,7 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.async.detection.DetectionTask;
 import net.countercraft.movecraft.async.detection.DetectionTaskData;
 import net.countercraft.movecraft.async.rotation.RotationTask;
@@ -33,14 +34,14 @@ import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.math.Direction;
+import net.countercraft.movecraft.api.Direction;
 import net.countercraft.movecraft.utils.BlockUtils;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateManager;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.utils.MovecraftLocation;
+import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.apache.commons.collections.ListUtils;
@@ -354,9 +355,9 @@ public final class AsyncManager extends BukkitRunnable {
                                 Location tloc = new Location(task.getCraft().getW(), task.getOriginPoint().x,
                                                              task.getOriginPoint().y, task.getOriginPoint().z);
                                 for (Cannon can : shipCannons) {
-                                    if (task.getRotation() == net.countercraft.movecraft.utils.Rotation.CLOCKWISE)
+                                    if (task.getRotation() == Rotation.CLOCKWISE)
                                         can.rotateRight(tloc.toVector());
-                                    if (task.getRotation() == net.countercraft.movecraft.utils.Rotation.ANTICLOCKWISE)
+                                    if (task.getRotation() == Rotation.ANTICLOCKWISE)
                                         can.rotateLeft(tloc.toVector());
                                 }
                             }

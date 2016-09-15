@@ -29,7 +29,7 @@ import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.BoundingBoxUtils;
-import net.countercraft.movecraft.utils.MovecraftLocation;
+import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.TownyWorldHeightLimits;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;

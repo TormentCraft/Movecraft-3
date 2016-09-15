@@ -17,6 +17,8 @@
 
 package net.countercraft.movecraft.utils;
 
+import net.countercraft.movecraft.api.MovecraftLocation;
+import net.countercraft.movecraft.api.Rotation;
 import org.bukkit.Location;
 
 public final class MathUtils {

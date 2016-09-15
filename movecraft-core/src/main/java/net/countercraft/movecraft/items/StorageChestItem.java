@@ -20,7 +20,7 @@ package net.countercraft.movecraft.items;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.utils.MovecraftLocation;
+import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.utils.external.CardboardBox;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

@@ -19,7 +19,7 @@ package net.countercraft.movecraft.craft;
 
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.utils.MovecraftLocation;
+import net.countercraft.movecraft.api.MovecraftLocation;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;

@@ -1,4 +1,4 @@
-package net.countercraft.movecraft.math;
+package net.countercraft.movecraft.api;
 
 import com.google.common.base.Optional;
 import org.bukkit.block.Sign;
