@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ This file is part of Movecraft.
+  ~
+  ~     Movecraft is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     Movecraft is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with Movecraft.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>movecraft-core</artifactId>
+    <version>3.0</version>
+    <name>Movecraft Core</name>
+
+    <parent>
+        <groupId>net.countercraft</groupId>
+        <artifactId>movecraft-all</artifactId>
+        <version>3.0</version>
+    </parent>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.bukkit:craftbukkit</exclude>
+                                    <exclude>org.spigotmc:spigot-api</exclude>
+                                    <exclude>org.yaml:snakeyaml</exclude>
+                                    <exclude>com.sk89q:worldguard</exclude>
+                                    <exclude>com.sk89q:worldedit</exclude>
+                                    <exclude>at.pavlov:Cannons</exclude>
+                                    <exclude>com.sk89q:jchronic</exclude>
+                                    <exclude>com.sk89q:commandbook</exclude>
+                                    <exclude>com.nijikokun:iconomy</exclude>
+                                    <exclude>org.bukkit:bukkit</exclude>
+                                    <exclude>rhino:js</exclude>
+                                    <exclude>junit:junit</exclude>
+                                    <exclude>de.schlichtherle:truezip</exclude>
+                                    <exclude>net.sf.opencsv</exclude>
+                                    <exclude>com.google.guava</exclude>
+                                    <exclude>com.google.code.findbugs:jsr305</exclude>
+                                    <exclude>net.ess3:Essentials</exclude>
+                                    <exclude>com.palmergames:Towny</exclude>
+                                    <exclude>net.milkbowl.vault:VaultAPI</exclude>
+                                    <exclude>com.mewin:WGCustomFlags</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <minimizeJar>true</minimizeJar>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.countercraft</groupId>
+            <artifactId>movecraft-api</artifactId>
+            <version>3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>worldguard</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.palmergames</groupId>
+            <artifactId>Towny</artifactId>
+            <version>LATEST</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../libs/Towny.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.mewin</groupId>
+            <artifactId>WGCustomFlags</artifactId>
+            <version>LATEST</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../libs/WGCustomFlags.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>worldedit</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
+            <groupId>at.pavlov</groupId>
+            <artifactId>Cannons</artifactId>
+            <version>LATEST</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>dummypermscompat</artifactId>
+                    <groupId>com.sk89q</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>worldedit-bukkit</artifactId>
+                    <groupId>com.sk89q.worldedit</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.10.2-R0.1-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>craftbukkit</artifactId>
+            <version>1.10.2-R0.1-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.milkbowl.vault</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ess3</groupId>
+            <artifactId>Essentials</artifactId>
+            <version>LATEST</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../libs/EssentialsX-2.0.1.jar</systemPath>
+        </dependency>
+    </dependencies>
+</project>
