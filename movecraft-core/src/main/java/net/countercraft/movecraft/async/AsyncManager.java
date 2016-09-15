@@ -24,8 +24,10 @@ import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import net.countercraft.movecraft.Events;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.Rotation;
+import net.countercraft.movecraft.api.events.SinkingStartedEvent;
 import net.countercraft.movecraft.async.detection.DetectionTask;
 import net.countercraft.movecraft.async.detection.DetectionTaskData;
 import net.countercraft.movecraft.async.rotation.RotationTask;
@@ -69,6 +71,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
 public final class AsyncManager extends BukkitRunnable {
+    private final Events events = new Events(Bukkit.getPluginManager());
+
     private static final AsyncManager instance = new AsyncManager();
     private final Map<AsyncTask, Craft> ownershipMap = new HashMap<>();
     private final Map<org.bukkit.entity.TNTPrimed, Double> TNTTracking = new HashMap<>();
@@ -617,29 +621,36 @@ public final class AsyncManager extends BukkitRunnable {
                                     isSinking = true;
                                 }
 
+                                boolean cancelled = events.sinkingStarted();
+
                                 if (isSinking &&
                                     (regionPVPBlocked || sinkingForbiddenByFlag || sinkingForbiddenByTowny) &&
-                                    pcraft.isNotProcessing()) {
+                                    pcraft.isNotProcessing() || cancelled) {
                                     Player p = CraftManager.getInstance().getPlayerFromCraft(pcraft);
                                     Player notifyP = pcraft.getNotificationPlayer();
-                                    if (notifyP != null) if (regionPVPBlocked) {
-                                        notifyP.sendMessage(I18nSupport.getInternationalisedString(
-                                                "Player- Craft should sink but PVP is not allowed in this WorldGuard " +
-                                                "region"));
-                                    } else if (sinkingForbiddenByFlag) {
-                                        notifyP.sendMessage(I18nSupport.getInternationalisedString(
-                                                "WGCustomFlags - Sinking a craft is not allowed in this WorldGuard " +
-                                                "region"));
-                                    } else {
-                                        if (townyLoc != null) {
-                                            notifyP.sendMessage(String.format(I18nSupport.getInternationalisedString(
-                                                    "Towny - Sinking a craft is not allowed in this town plot") +
-                                                                              " @ %d,%d,%d", townyLoc.getBlockX(),
-                                                                              townyLoc.getBlockY(),
-                                                                              townyLoc.getBlockZ()));
+                                    if (notifyP != null) {
+                                        if (regionPVPBlocked) {
+                                            notifyP.sendMessage(I18nSupport.getInternationalisedString(
+                                                    "Player- Craft should sink but PVP is not allowed in this WorldGuard " +
+                                                    "region"));
+                                        } else if (sinkingForbiddenByFlag) {
+                                            notifyP.sendMessage(I18nSupport.getInternationalisedString(
+                                                    "WGCustomFlags - Sinking a craft is not allowed in this WorldGuard " +
+                                                    "region"));
+                                        } else if (sinkingForbiddenByTowny) {
+                                            if (townyLoc != null) {
+                                                notifyP.sendMessage(String.format(I18nSupport.getInternationalisedString(
+                                                        "Towny - Sinking a craft is not allowed in this town plot") +
+                                                                                  " @ %d,%d,%d", townyLoc.getBlockX(),
+                                                                                  townyLoc.getBlockY(),
+                                                                                  townyLoc.getBlockZ()));
+                                            } else {
+                                                notifyP.sendMessage(I18nSupport.getInternationalisedString(
+                                                        "Towny - Sinking a craft is not allowed in this town plot"));
+                                            }
                                         } else {
                                             notifyP.sendMessage(I18nSupport.getInternationalisedString(
-                                                    "Towny - Sinking a craft is not allowed in this town plot"));
+                                                    "Sinking a craft is not allowed."));
                                         }
                                     }
                                     pcraft.setCruising(false);

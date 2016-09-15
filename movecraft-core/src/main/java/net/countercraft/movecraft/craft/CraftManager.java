@@ -32,16 +32,19 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-public final class CraftManager {
+public final class CraftManager implements net.countercraft.movecraft.api.CraftManager {
     private static final CraftManager ourInstance = new CraftManager();
     private CraftType[] craftTypes;
     private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<>();
@@ -214,6 +217,14 @@ public final class CraftManager {
         if (blockedBroken > 0 && pilot != null && pilot.isOnline()) {
             pilot.sendMessage(ChatColor.RED + "WARNING: Some of your craft has been destroyed.");
         }
+    }
+
+    public List<net.countercraft.movecraft.api.Craft> getCrafts() {
+        List<net.countercraft.movecraft.api.Craft> result = new ArrayList<>();
+        for (Map.Entry<World, Set<Craft>> entry : craftList.entrySet()) {
+            result.addAll(entry.getValue());
+        }
+        return Collections.unmodifiableList(result);
     }
 
     public Craft[] getCraftsInWorld(World w) {

@@ -23,6 +23,7 @@ import com.palmergames.bukkit.towny.Towny;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.StateFlag;
+import net.countercraft.movecraft.api.MovecraftPlugin;
 import net.countercraft.movecraft.async.AsyncManager;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -56,7 +57,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Movecraft extends JavaPlugin {
+public class Movecraft extends JavaPlugin implements MovecraftPlugin {
     private static Movecraft instance;
     private static WorldGuardPlugin worldGuardPlugin;
     private static WorldEditPlugin worldEditPlugin;
@@ -358,6 +359,10 @@ public class Movecraft extends JavaPlugin {
 
     public Towny getTownyPlugin() {
         return townyPlugin;
+    }
+
+    @Override public net.countercraft.movecraft.api.CraftManager getCraftManager() {
+        return CraftManager.getInstance();
     }
 }
 

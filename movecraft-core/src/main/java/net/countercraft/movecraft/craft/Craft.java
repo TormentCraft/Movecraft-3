@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Craft {
+public class Craft implements net.countercraft.movecraft.api.Craft {
     private int[][][] hitBox;
     private final CraftType type;
     private MovecraftLocation[] blockList;
