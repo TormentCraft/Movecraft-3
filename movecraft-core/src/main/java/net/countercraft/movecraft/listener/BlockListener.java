@@ -44,7 +44,6 @@ import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -101,7 +100,7 @@ public class BlockListener implements Listener {
                     }
                 }
             if (blockInCraft) {
-                e.getPlayer().sendMessage(i18n.getInternationalisedString("BLOCK IS PART OF A PILOTED CRAFT"));
+                e.getPlayer().sendMessage(i18n.get("BLOCK IS PART OF A PILOTED CRAFT"));
                 e.setCancelled(true);
             }
         }
@@ -191,20 +190,20 @@ public class BlockListener implements Listener {
                 return;
             }
             if (!p.hasPermission("movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create")) {
-                p.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                p.sendMessage(i18n.get("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Cruise: OFF") || signText.equalsIgnoreCase("Cruise: ON")) {
             if (!p.hasPermission("movecraft.cruisesign") && settings.RequireCreatePerm) {
-                p.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                p.sendMessage(i18n.get("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Crew:")) {
             String crewName = org.bukkit.ChatColor.stripColor(event.getLine(1));
             if (!p.getName().equalsIgnoreCase(crewName)) {
-                p.sendMessage(i18n.getInternationalisedString("You can only create a Crew: sign for yourself"));
+                p.sendMessage(i18n.get("You can only create a Crew: sign for yourself"));
                 event.setLine(1, p.getName());
 //				event.setCancelled(true);
             }

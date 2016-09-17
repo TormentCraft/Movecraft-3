@@ -52,6 +52,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,7 +70,7 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
     public StateFlag FLAG_SINK = null; //new StateFlag("movecraft-sink", true);
 
     private final Settings settings = new Settings();
-    private final I18nSupport i18nSupport = new I18nSupport();
+    private final I18nSupport i18nSupport = I18nSupport.read(this, new Locale("en"));
     private AsyncManager asyncManager;
     private CraftManager craftManager;
     private MapUpdateManager mapUpdateManager;
@@ -283,11 +284,10 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
             }
         }
 
-        i18nSupport.init(this, settings.LOCALE);
         if (shuttingDown && settings.IGNORE_RESET) {
-            logger.log(Level.SEVERE, i18nSupport.getInternationalisedString("Startup - Error - Reload error"));
+            logger.log(Level.SEVERE, i18nSupport.get("Startup - Error - Reload error"));
             logger.log(Level.INFO,
-                       i18nSupport.getInternationalisedString("Startup - Error - Disable warning for reload"));
+                       i18nSupport.get("Startup - Error - Disable warning for reload"));
             getPluginLoader().disablePlugin(this);
         } else {
             craftManager = new CraftManager(settings, i18nSupport, this);
@@ -331,7 +331,7 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
 
             new MovecraftMetrics(craftManager.getCraftTypes().length);
 
-            logger.log(Level.INFO, String.format(i18nSupport.getInternationalisedString("Startup - Enabled message"),
+            logger.log(Level.INFO, String.format(i18nSupport.get("Startup - Enabled message"),
                                                  getDescription().getVersion()));
         }
     }

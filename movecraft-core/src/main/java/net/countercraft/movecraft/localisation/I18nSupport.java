@@ -24,49 +24,35 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.Properties;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 
 public final class I18nSupport {
-    private Properties languageFile;
+    private final ResourceBundle bundle;
 
-    public void init(Plugin plugin, String locale) {
-        languageFile = new Properties();
+    public I18nSupport(ResourceBundle bundle) {
+        this.bundle = bundle;
+    }
 
-        File localisationDirectory = new File(plugin.getDataFolder().getAbsolutePath() + "/localisation");
+    public static I18nSupport read(Plugin plugin, Locale locale) {
+        return new I18nSupport(ResourceBundle.getBundle("localisation.movecraftlang", locale));
+    }
 
-        if (!localisationDirectory.exists()) {
-            localisationDirectory.mkdirs();
-        }
-
-        InputStream is = null;
+    public String get(String key) {
         try {
-            is = new FileInputStream(
-                    localisationDirectory.getAbsolutePath() + "/movecraftlang" + "_" + locale + ".properties");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        if (is == null) {
-            plugin.getLogger().log(Level.SEVERE, "Critical Error in Localisation System");
-            plugin.getServer().shutdown();
-            return;
-        }
-
-        try {
-            languageFile.load(is);
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            return bundle.getString(key);
+        } catch (MissingResourceException ignored) {
+            return key;
         }
     }
 
-    public String getInternationalisedString(String key) {
-        String ret = languageFile.getProperty(key);
-        if (ret != null) {
-            return ret;
-        } else {
-            return key;
-        }
+    public String format(String fmt, Object... args) {
+        return String.format(get(fmt), args);
     }
 }

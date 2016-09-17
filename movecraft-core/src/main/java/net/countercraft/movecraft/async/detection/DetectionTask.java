@@ -136,7 +136,7 @@ public class DetectionTask extends AsyncTask {
                 testData = data.getWorld().getBlockAt(x, y, z).getData();
                 testID = data.getWorld().getBlockTypeIdAt(x, y, z);
             } catch (Exception e) {
-                fail(String.format(i18n.getInternationalisedString("Detection - Craft too large"), maxSize));
+                fail(String.format(i18n.get("Detection - Craft too large"), maxSize));
             }
 
             if ((testID == 8) || (testID == 9)) {
@@ -154,14 +154,14 @@ public class DetectionTask extends AsyncTask {
                             foundPilot = true;
                         }
                         if (!foundPilot && (!data.getPlayer().hasPermission("movecraft.bypasslock"))) {
-                            fail(i18n.getInternationalisedString("Not one of the registered pilots on this craft"));
+                            fail(i18n.get("Not one of the registered pilots on this craft"));
                         }
                     }
                 }
             }
 
             if (isForbiddenBlock(testID, testData)) {
-                fail(i18n.getInternationalisedString("Detection - Forbidden block found") +
+                fail(i18n.get("Detection - Forbidden block found") +
                      String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(testID, testData, true),
                                    x, y, z));
             } else if (isAllowedBlock(testID, testData)) {
@@ -181,7 +181,7 @@ public class DetectionTask extends AsyncTask {
                         foundDoubleChest = true;
                     }
                     if (foundDoubleChest) {
-                        fail(i18n.getInternationalisedString("Detection - ERROR: Double chest found"));
+                        fail(i18n.get("Detection - ERROR: Double chest found"));
                     }
                 }
                 //check for double trapped chests
@@ -200,7 +200,7 @@ public class DetectionTask extends AsyncTask {
                         foundDoubleChest = true;
                     }
                     if (foundDoubleChest) {
-                        fail(i18n.getInternationalisedString("Detection - ERROR: Double chest found"));
+                        fail(i18n.get("Detection - ERROR: Double chest found"));
                     }
                 }
 
@@ -219,7 +219,7 @@ public class DetectionTask extends AsyncTask {
                         if (!WGCustomFlagsUtils
                                 .validateFlag(plugin.getWorldGuardPlugin(), loc, plugin.FLAG_PILOT, lp)) {
                             fail(String.format(
-                                    i18n.getInternationalisedString("WGCustomFlags - Detection Failed") + " @ %d,%d,%d",
+                                    i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d",
                                     x, y, z));
                         }
                     }
@@ -271,7 +271,7 @@ public class DetectionTask extends AsyncTask {
                                         }
                                         if (failed) {
                                             fail(String.format(
-                                                    i18n.getInternationalisedString("Towny - Detection Failed") +
+                                                    i18n.get("Towny - Detection Failed") +
                                                     " %s @ %d,%d,%d", town.getName(), x, y, z));
                                         }
                                     }
@@ -401,11 +401,11 @@ public class DetectionTask extends AsyncTask {
 
     private boolean isWithinLimit(int size, int min, int max, boolean continueOver) {
         if (size < min) {
-            fail(String.format(i18n.getInternationalisedString("Detection - Craft too small"), min) +
+            fail(String.format(i18n.get("Detection - Craft too small"), min) +
                  String.format("\nBlocks found: %d", size));
             return false;
         } else if ((!continueOver && size > max) || (continueOver && size > (max + 1000))) {
-            fail(String.format(i18n.getInternationalisedString("Detection - Craft too large"), max) +
+            fail(String.format(i18n.get("Detection - Craft too large"), max) +
                  String.format("\nBlocks found: %d", size));
             return false;
         } else {
@@ -434,7 +434,7 @@ public class DetectionTask extends AsyncTask {
     {
         if (getCraft().getType().getRequireWaterContact()) {
             if (!data.getWaterContact()) {
-                fail(i18n.getInternationalisedString("Detection - Failed - Water contact required but not found"));
+                fail(i18n.get("Detection - Failed - Water contact required but not found"));
                 return false;
             }
         }
@@ -452,26 +452,26 @@ public class DetectionTask extends AsyncTask {
 
             if (minPercentage < 10000.0) {
                 if (blockPercentage < minPercentage) {
-                    fail(String.format(i18n.getInternationalisedString("Not enough flyblock") + ": %s %.2f%% < %.2f%%",
+                    fail(String.format(i18n.get("Not enough flyblock") + ": %s %.2f%% < %.2f%%",
                                        blockName, blockPercentage, minPercentage));
                     return false;
                 }
             } else {
                 if (numberOfBlocks < entry.getValue().get(0) - 10000.0) {
-                    fail(String.format(i18n.getInternationalisedString("Not enough flyblock") + ": %s %d < %d",
+                    fail(String.format(i18n.get("Not enough flyblock") + ": %s %d < %d",
                                        blockName, numberOfBlocks, entry.getValue().get(0).intValue() - 10000));
                     return false;
                 }
             }
             if (maxPercentage < 10000.0) {
                 if (blockPercentage > maxPercentage) {
-                    fail(String.format(i18n.getInternationalisedString("Too much flyblock") + ": %s %.2f%% > %.2f%%",
+                    fail(String.format(i18n.get("Too much flyblock") + ": %s %.2f%% > %.2f%%",
                                        blockName, blockPercentage, maxPercentage));
                     return false;
                 }
             } else {
                 if (numberOfBlocks > entry.getValue().get(1) - 10000.0) {
-                    fail(String.format(i18n.getInternationalisedString("Too much flyblock") + ": %s %d > %d", blockName,
+                    fail(String.format(i18n.get("Too much flyblock") + ": %s %d > %d", blockName,
                                        numberOfBlocks, entry.getValue().get(1).intValue() - 10000));
                     return false;
                 }

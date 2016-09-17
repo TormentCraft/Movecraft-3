@@ -87,14 +87,14 @@ public class InteractListener implements Listener {
                         }
 
                     if (foundCraft == null) {
-                        event.getPlayer().sendMessage(i18n.getInternationalisedString(
+                        event.getPlayer().sendMessage(i18n.get(
                                 "ERROR: Remote Sign must be a part of a piloted craft!"));
                         return;
                     }
 
                     if (!foundCraft.getType().allowRemoteSign()) {
                         event.getPlayer().sendMessage(
-                                i18n.getInternationalisedString("ERROR: Remote Signs not allowed on this craft!"));
+                                i18n.get("ERROR: Remote Signs not allowed on this craft!"));
                         return;
                     }
 
@@ -126,7 +126,7 @@ public class InteractListener implements Listener {
                     }
                     if (foundLoc == null) {
                         event.getPlayer()
-                             .sendMessage(i18n.getInternationalisedString("ERROR: Could not find target sign!"));
+                             .sendMessage(i18n.get("ERROR: Could not find target sign!"));
                         return;
                     }
 
@@ -201,7 +201,7 @@ public class InteractListener implements Listener {
                                 event.setCancelled(true);
                             }
                         } else {
-                            event.getPlayer().sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                            event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
                         }
                     }
                 }
@@ -248,7 +248,7 @@ public class InteractListener implements Listener {
                             timeMap.put(event.getPlayer(), System.currentTimeMillis());
                             event.setCancelled(true);
                         } else {
-                            event.getPlayer().sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                            event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
                         }
                     }
                 }
@@ -305,7 +305,7 @@ public class InteractListener implements Listener {
 
                 event.setCancelled(true);
             } else {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
             }
         } else if (firstLine.equalsIgnoreCase("[helm]")) {
             sign.setLine(0, "\\  ||  /");
@@ -350,7 +350,7 @@ public class InteractListener implements Listener {
                         event.setCancelled(true);
                     }
                 } else {
-                    player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
                 }
             }
         } else if (firstLine.equalsIgnoreCase("Subcraft Rotate")) {
@@ -394,7 +394,7 @@ public class InteractListener implements Listener {
                     timeMap.put(player, System.currentTimeMillis());
                     event.setCancelled(true);
                 } else {
-                    player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
                 }
             }
         } else if (firstLine.equalsIgnoreCase("Cruise: OFF")) {
@@ -480,7 +480,7 @@ public class InteractListener implements Listener {
                         ;
                     }
                 } else {
-                    player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
                 }
             }
         } else if (firstLine.equalsIgnoreCase("Release")) {
@@ -522,7 +522,7 @@ public class InteractListener implements Listener {
                         playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     }
                 } else {
-                    player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
                 }
             }
         } else if (firstLine.equalsIgnoreCase("RMove:")) {
@@ -584,7 +584,7 @@ public class InteractListener implements Listener {
                         playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     }
                 } else {
-                    player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
                 }
             }
         }
@@ -688,7 +688,7 @@ public class InteractListener implements Listener {
                             craft.setLastCruiseUpdate(System.currentTimeMillis());
                         }
                     } else {
-                        event.getPlayer().sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                        event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
                     }
                 }
             }
@@ -697,7 +697,7 @@ public class InteractListener implements Listener {
             if (event.getItem() != null && event.getItem().getTypeId() == settings.PilotTool) {
                 if (craft.getPilotLocked()) {
                     craft.setPilotLocked(false);
-                    event.getPlayer().sendMessage(i18n.getInternationalisedString("Leaving Direct Control Mode"));
+                    event.getPlayer().sendMessage(i18n.get("Leaving Direct Control Mode"));
                     event.setCancelled(true);
                     return;
                 } else {
@@ -707,11 +707,11 @@ public class InteractListener implements Listener {
                         craft.setPilotLockedX(event.getPlayer().getLocation().getBlockX() + 0.5);
                         craft.setPilotLockedY(event.getPlayer().getLocation().getY());
                         craft.setPilotLockedZ(event.getPlayer().getLocation().getBlockZ() + 0.5);
-                        event.getPlayer().sendMessage(i18n.getInternationalisedString("Entering Direct Control Mode"));
+                        event.getPlayer().sendMessage(i18n.get("Entering Direct Control Mode"));
                         event.setCancelled(true);
                         return;
                     } else {
-                        event.getPlayer().sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                        event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
                     }
                 }
             }

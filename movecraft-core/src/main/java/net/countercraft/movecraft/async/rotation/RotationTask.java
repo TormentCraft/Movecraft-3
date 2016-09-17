@@ -201,7 +201,7 @@ public class RotationTask extends AsyncTask {
                 }
                 if (fuelHolder == null) {
                     failed = true;
-                    failMessage = i18n.getInternationalisedString("Translation - Failed Craft out of fuel");
+                    failMessage = i18n.get("Translation - Failed Craft out of fuel");
                 } else {
                     InventoryHolder inventoryHolder = (InventoryHolder) fuelHolder.getState();
                     if (inventoryHolder.getInventory().contains(263)) {
@@ -277,7 +277,7 @@ public class RotationTask extends AsyncTask {
                     //prevent chests collision
                     failed = true;
                     failMessage = String
-                            .format(i18n.getInternationalisedString("Rotation - Craft is obstructed") + " @ %d,%d,%d",
+                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d",
                                     blockList[i].x, blockList[i].y, blockList[i].z);
                     break;
                 }
@@ -288,7 +288,7 @@ public class RotationTask extends AsyncTask {
                 if (plugin.getWorldGuardPlugin() != null && settings.WorldGuardBlockMoveOnBuildPerm) {
                     if (!plugin.getWorldGuardPlugin().canBuild(craftPilot, plugLoc)) {
                         failed = true;
-                        failMessage = String.format(i18n.getInternationalisedString(
+                        failMessage = String.format(i18n.get(
                                 "Rotation - Player is not permitted to build in this WorldGuard region") +
                                                     " @ %d,%d,%d", blockList[i].x, blockList[i].y, blockList[i].z);
                         break;
@@ -309,7 +309,7 @@ public class RotationTask extends AsyncTask {
                     if (!WGCustomFlagsUtils
                             .validateFlag(plugin.getWorldGuardPlugin(), plugLoc, plugin.FLAG_ROTATE, lp)) {
                         failed = true;
-                        failMessage = String.format(i18n.getInternationalisedString("WGCustomFlags - Rotation Failed") +
+                        failMessage = String.format(i18n.get("WGCustomFlags - Rotation Failed") +
                                                     " @ %d,%d,%d", blockList[i].x, blockList[i].y, blockList[i].z);
                         break;
                     }
@@ -361,7 +361,7 @@ public class RotationTask extends AsyncTask {
                                     }
                                     if (failed) {
                                         failMessage = String
-                                                .format(i18n.getInternationalisedString("Towny - Rotation Failed") +
+                                                .format(i18n.get("Towny - Rotation Failed") +
                                                         " %s @ %d,%d,%d", town.getName(), blockList[i].x,
                                                         blockList[i].y, blockList[i].z);
                                         break;
@@ -378,7 +378,7 @@ public class RotationTask extends AsyncTask {
                 if ((typeID != 0 && typeID != 9 && typeID != 34) && !existingBlockSet.contains(blockList[i])) {
                     failed = true;
                     failMessage = String
-                            .format(i18n.getInternationalisedString("Rotation - Craft is obstructed") + " @ %d,%d,%d",
+                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d",
                                     blockList[i].x, blockList[i].y, blockList[i].z);
                     break;
                 } else {
@@ -395,7 +395,7 @@ public class RotationTask extends AsyncTask {
                 if ((typeID != 0 && typeID != 34) && !existingBlockSet.contains(blockList[i])) {
                     failed = true;
                     failMessage = String
-                            .format(i18n.getInternationalisedString("Rotation - Craft is obstructed") + " @ %d,%d,%d",
+                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d",
                                     blockList[i].x, blockList[i].y, blockList[i].z);
                     break;
                 } else {
@@ -605,7 +605,7 @@ public class RotationTask extends AsyncTask {
                         // found a parent craft
                         if (!craft.isNotProcessing()) {
                             failed = true;
-                            failMessage = i18n.getInternationalisedString("Parent Craft is busy");
+                            failMessage = i18n.get("Parent Craft is busy");
                             return;
                         }
 

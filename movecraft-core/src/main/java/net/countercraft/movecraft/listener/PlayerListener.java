@@ -115,19 +115,19 @@ public class PlayerListener implements Listener {
 
                 if (!craftManager.getReleaseEvents().containsKey(player) && craft.getType().getMoveEntities()) {
                     if (settings.ManOverBoardTimeout == 0)
-                        player.sendMessage(i18n.getInternationalisedString("Release - Player has left craft"));
-                    else player.sendMessage(i18n.getInternationalisedString(
+                        player.sendMessage(i18n.get("Release - Player has left craft"));
+                    else player.sendMessage(i18n.get(
                             "You have left your craft. You may return to your craft by typing /manoverboard any time " +
                             "before the timeout expires"));
                     if (craft.getBlockList().length > 11000) {
-                        player.sendMessage(i18n.getInternationalisedString(
+                        player.sendMessage(i18n.get(
                                 "Craft is too big to check its borders. Make sure this area is safe to release your " +
                                 "craft in."));
                     } else {
                         String ret = checkCraftBorders(craft);
                         if (ret != null) {
                             player.sendMessage(ChatColor.RED +
-                                               i18n.getInternationalisedString(
+                                               i18n.get(
                                                        "WARNING! There are blocks near your craft, part of" +
                                                        " your craft may be damaged!") +
                                                ChatColor.RESET + "\n" + ret);

@@ -154,17 +154,17 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("release")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.release")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return true;
             }
 
             if (playerCraft != null) {
                 craftManager.removeCraft(playerCraft);
-                //e.getPlayer().sendMessage( String.format( i18n.getInternationalisedString( "Player- Craft
+                //e.getPlayer().sendMessage( String.format( i18n.get( "Player- Craft
                 // has been released" ) ) );
             } else {
                 player.sendMessage(
-                        i18n.getInternationalisedString("Player- Error - You do not have a craft to release!"));
+                        i18n.get("Player- Error - You do not have a craft to release!"));
             }
 
             return true;
@@ -172,7 +172,7 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("pilot")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.pilot")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return true;
             }
 
@@ -188,7 +188,7 @@ public class CommandListener implements CommandExecutor {
                         asyncManager.detect(c, player, player, startPoint);
                     }
                 } else {
-                    player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
                 }
                 return true;
             }
@@ -196,7 +196,7 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("rotate")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.rotate")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return true;
             }
 
@@ -207,7 +207,7 @@ public class CommandListener implements CommandExecutor {
                                                                                           : Rotation.CLOCKWISE;
                 asyncManager.rotate(playerCraft, rotation, midPoint);
             } else {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
             }
 
             return true;
@@ -215,7 +215,7 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("rotateleft")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.rotateleft")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return true;
             }
 
@@ -224,7 +224,7 @@ public class CommandListener implements CommandExecutor {
                 BlockPosition midPoint = getCraftMidPoint(playerCraft);
                 asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
             } else {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
             }
 
             return true;
@@ -233,7 +233,7 @@ public class CommandListener implements CommandExecutor {
         if (cmd.getName().equalsIgnoreCase("rotateright")) {
             if (!player.hasPermission("movecraft.commands") &&
                 !player.hasPermission("movecraft.commands.rotateright")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return true;
             }
 
@@ -242,7 +242,7 @@ public class CommandListener implements CommandExecutor {
                 BlockPosition midPoint = getCraftMidPoint(playerCraft);
                 asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
             } else {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
             }
 
             return true;
@@ -250,7 +250,7 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("cruise")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.cruise")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return true;
             }
 
@@ -283,7 +283,7 @@ public class CommandListener implements CommandExecutor {
                     }
                 }
             } else {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
             }
 
             return true;
@@ -299,7 +299,7 @@ public class CommandListener implements CommandExecutor {
         if (cmd.getName().equalsIgnoreCase("craftreport")) {
             if (!player.hasPermission("movecraft.commands") &&
                 !player.hasPermission("movecraft.commands.craftreport")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return true;
             }
 
@@ -377,10 +377,10 @@ public class CommandListener implements CommandExecutor {
                         playerCraft.getNotificationPlayer().sendMessage(notification);
                     }
                 }
-                if (!foundContact) player.sendMessage(i18n.getInternationalisedString("No contacts within range"));
+                if (!foundContact) player.sendMessage(i18n.get("No contacts within range"));
                 return true;
             } else {
-                player.sendMessage(i18n.getInternationalisedString("You must be piloting a craft"));
+                player.sendMessage(i18n.get("You must be piloting a craft"));
                 return true;
             }
         }
@@ -407,15 +407,15 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("siege")) {
             if (!player.hasPermission("movecraft.siege")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return true;
             }
             if (settings.SiegeName == null) {
-                player.sendMessage(i18n.getInternationalisedString("Siege is not configured on this server"));
+                player.sendMessage(i18n.get("Siege is not configured on this server"));
                 return true;
             }
             if (plugin.siegeInProgress) {
-                player.sendMessage(i18n.getInternationalisedString("A Siege is already taking place"));
+                player.sendMessage(i18n.get("A Siege is already taking place"));
                 return true;
             }
             String foundSiegeName = null;
@@ -515,7 +515,7 @@ public class CommandListener implements CommandExecutor {
                         plugin.siegeInProgress = true;
                     } else {
                         player.sendMessage(
-                                i18n.getInternationalisedString("The time is not during the Siege schedule"));
+                                i18n.get("The time is not during the Siege schedule"));
                         return true;
                     }
                 } else {
@@ -523,7 +523,7 @@ public class CommandListener implements CommandExecutor {
                     return true;
                 }
             } else {
-                player.sendMessage(i18n.getInternationalisedString(
+                player.sendMessage(i18n.get(
                         "Could not find a siege configuration for the region you are in"));
                 return true;
             }

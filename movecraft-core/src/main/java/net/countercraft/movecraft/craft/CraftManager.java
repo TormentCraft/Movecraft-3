@@ -101,7 +101,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
                     foundCraft = true;
                 } catch (Exception e) {
                     plugin.getLogger().log(Level.SEVERE, String.format(
-                            i18nSupport.getInternationalisedString("Startup - Error parsing CraftType file"),
+                            i18nSupport.get("Startup - Error parsing CraftType file"),
                             file.getAbsolutePath()));
                     e.printStackTrace();
                 }
@@ -112,7 +112,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         }
         craftTypes = craftTypesSet.toArray(new CraftType[1]);
         plugin.getLogger().log(Level.INFO, String.format(
-                i18nSupport.getInternationalisedString("Startup - Number of craft files loaded"), craftTypes.length));
+                i18nSupport.get("Startup - Number of craft files loaded"), craftTypes.length));
     }
 
     public void addCraft(Craft c, Player p) {
@@ -142,13 +142,13 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         craftList.get(c.getW()).remove(c);
         Player pilot = getPlayerFromCraft(c);
         if (pilot != null) {
-            pilot.sendMessage(i18nSupport.getInternationalisedString("Release - Craft has been released message"));
+            pilot.sendMessage(i18nSupport.get("Release - Craft has been released message"));
             plugin.getLogger().log(Level.INFO, String.format(
-                    i18nSupport.getInternationalisedString("Release - Player has released a craft console"),
+                    i18nSupport.get("Release - Player has released a craft console"),
                     c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,
                     c.getMinX(), c.getMinZ()));
         } else {
-            plugin.getLogger().log(Level.INFO, String.format(i18nSupport.getInternationalisedString(
+            plugin.getLogger().log(Level.INFO, String.format(i18nSupport.get(
                     "NULL Player has released a craft of type %s with size %d at coordinates : %d x , %d z"),
                                                              c.getType().getCraftName(), c.getBlockList().length,
                                                              c.getMinX(), c.getMinZ()));
@@ -275,9 +275,9 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         if (getPlayerFromCraft(c) != null) {
             removeReleaseTask(c);
             getPlayerFromCraft(c)
-                    .sendMessage(i18nSupport.getInternationalisedString("Release - Craft has been released message"));
+                    .sendMessage(i18nSupport.get("Release - Craft has been released message"));
             plugin.getLogger().log(Level.INFO, String.format(
-                    i18nSupport.getInternationalisedString("Release - Player has released a craft console"),
+                    i18nSupport.get("Release - Player has released a craft console"),
                     c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,
                     c.getMinX(), c.getMinZ()));
             Player p = getPlayerFromCraft(c);
@@ -293,7 +293,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     public void addReleaseTask(final Craft c) {
         Player p = getPlayerFromCraft(c);
         if (!getReleaseEvents().containsKey(p)) {
-            p.sendMessage(i18nSupport.getInternationalisedString("Release - Player has left craft"));
+            p.sendMessage(i18nSupport.get("Release - Player has left craft"));
             BukkitTask releaseTask = new BukkitRunnable() {
                 @Override public void run() {
                     removeCraft(c);

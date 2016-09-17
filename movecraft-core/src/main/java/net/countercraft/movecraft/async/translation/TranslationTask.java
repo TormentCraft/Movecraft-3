@@ -249,7 +249,7 @@ public class TranslationTask extends AsyncTask {
                     }
                 }
                 if (fuelHolder == null) {
-                    fail(i18n.getInternationalisedString("Translation - Failed Craft out of fuel"));
+                    fail(i18n.get("Translation - Failed Craft out of fuel"));
                 } else {
                     InventoryHolder inventoryHolder = (InventoryHolder) fuelHolder.getState();
                     if (inventoryHolder.getInventory().contains(263)) {
@@ -330,11 +330,11 @@ public class TranslationTask extends AsyncTask {
             BlockPosition newLoc = oldLoc.translate(data.getDx(), data.getDy(), data.getDz());
 
             if (newLoc.y > data.getMaxHeight() && newLoc.y > oldLoc.y) {
-                fail(i18n.getInternationalisedString("Translation - Failed Craft hit height limit"));
+                fail(i18n.get("Translation - Failed Craft hit height limit"));
                 break;
             }
             if (newLoc.y < data.getMinHeight() && newLoc.y < oldLoc.y && !getCraft().getSinking()) {
-                fail(i18n.getInternationalisedString("Translation - Failed Craft hit minimum height limit"));
+                fail(i18n.get("Translation - Failed Craft hit minimum height limit"));
                 break;
             }
 
@@ -343,7 +343,7 @@ public class TranslationTask extends AsyncTask {
                 // See if they are permitted to build in the area, if WorldGuard integration is turned on
                 if (plugin.getWorldGuardPlugin() != null && settings.WorldGuardBlockMoveOnBuildPerm) {
                     if (!plugin.getWorldGuardPlugin().canBuild(craftPilot, plugLoc)) {
-                        fail(String.format(i18n.getInternationalisedString(
+                        fail(String.format(i18n.get(
                                 "Translation - Failed Player is not permitted to build in this WorldGuard region") +
                                            " @ %d,%d,%d", oldLoc.x, oldLoc.y, oldLoc.z));
                         break;
@@ -362,7 +362,7 @@ public class TranslationTask extends AsyncTask {
                     LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
                     if (!WGCustomFlagsUtils.validateFlag(plugin.getWorldGuardPlugin(), plugLoc, plugin.FLAG_MOVE, lp)) {
                         fail(String.format(
-                                i18n.getInternationalisedString("WGCustomFlags - Translation Failed") + " @ %d,%d,%d",
+                                i18n.get("WGCustomFlags - Translation Failed") + " @ %d,%d,%d",
                                 oldLoc.x, oldLoc.y, oldLoc.z));
                         break;
                     }
@@ -435,7 +435,7 @@ public class TranslationTask extends AsyncTask {
             if (testMaterial == Material.CHEST || testMaterial == Material.TRAPPED_CHEST) {
                 if (!checkChests(testMaterial, newLoc, existingBlockSet)) {
                     //prevent chests collision
-                    fail(String.format(i18n.getInternationalisedString("Translation - Failed Craft is obstructed") +
+                    fail(String.format(i18n.get("Translation - Failed Craft is obstructed") +
                                        " @ %d,%d,%d,%s", newLoc.x, newLoc.y, newLoc.z,
                                        getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
                                                  .toString()));
@@ -576,11 +576,11 @@ public class TranslationTask extends AsyncTask {
                         // ramming collisions
                         if (getCraft().getType().getCollisionExplosion() == 0.0F) {
                             if (moveBlockedByTowny) {
-                                fail(String.format(i18n.getInternationalisedString("Towny - Translation Failed") +
+                                fail(String.format(i18n.get("Towny - Translation Failed") +
                                                    " %s @ %d,%d,%d", townName, oldLoc.x, oldLoc.y, oldLoc.z));
                             } else {
                                 fail(String.format(
-                                        i18n.getInternationalisedString("Translation - Failed Craft is obstructed") +
+                                        i18n.get("Translation - Failed Craft is obstructed") +
                                         " @ %d,%d,%d,%s", oldLoc.x, oldLoc.y, oldLoc.z,
                                         getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
                                                   .toString()));
@@ -656,10 +656,10 @@ public class TranslationTask extends AsyncTask {
                             }
                             if (iFreeSpace > hoverLimit) {
                                 if (bladeOK) {
-                                    fail(i18n.getInternationalisedString(
+                                    fail(i18n.get(
                                             "Translation - Failed Craft hit height limit"));
                                 } else {
-                                    fail(String.format(i18n.getInternationalisedString(
+                                    fail(String.format(i18n.get(
                                             "Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s", oldLoc.x,
                                                        oldLoc.y, oldLoc.z,
                                                        getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z)
@@ -799,7 +799,7 @@ public class TranslationTask extends AsyncTask {
             data.setBlockList(newBlockList);
             data.setUpdates(explosionSet.toArray(new MapUpdateCommand[1]));
 
-            fail(i18n.getInternationalisedString("Translation - Failed Craft is obstructed"));
+            fail(i18n.get("Translation - Failed Craft is obstructed"));
             if (getCraft().getSinking()) {
                 if (getCraft().getType().getSinkPercent() != 0.0) {
                     getCraft().setLastBlockCheck(0);
@@ -1020,7 +1020,7 @@ public class TranslationTask extends AsyncTask {
             Material testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
             if (!canHoverOverWater) {
                 if (testMaterial == Material.STATIONARY_WATER || testMaterial == Material.WATER) {
-                    fail(i18n.getInternationalisedString("Translation - Failed Craft over water"));
+                    fail(i18n.get("Translation - Failed Craft over water"));
                 }
             }
 

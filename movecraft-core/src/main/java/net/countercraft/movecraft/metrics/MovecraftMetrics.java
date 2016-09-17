@@ -35,7 +35,7 @@ public class MovecraftMetrics {
 
 			if ( metrics.isOptOut() ) {
 				Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport
-				.getInternationalisedString( "MCStats - :( - Admin has opted out" ) ) );
+				.get( "MCStats - :( - Admin has opted out" ) ) );
 			}
 
 			Metrics.Graph langaugeGraph = metrics.createGraph( "Language Used" );
@@ -56,11 +56,11 @@ public class MovecraftMetrics {
 
 			} );
 			metrics.start();
-			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.getInternationalisedString
+			Movecraft.getInstance().getLogger().log( Level.INFO, String.format( I18nSupport.get
 			( "MCStats - Thank you message" ) ) );
 		} catch ( IOException e ) {
 			Movecraft.getInstance().getLogger().log( Level.WARNING, String.format( I18nSupport
-			.getInternationalisedString( "MCStats - Error - Unable to upload stats" ) ) );
+			.get( "MCStats - Error - Unable to upload stats" ) ) );
 		}
 	}*/
 }

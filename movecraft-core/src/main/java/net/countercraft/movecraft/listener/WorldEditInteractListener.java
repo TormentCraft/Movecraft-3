@@ -113,13 +113,13 @@ public class WorldEditInteractListener implements Listener {
                         "Repair:")) { // left click the Repair sign, and it saves the state
                     final Player player = event.getPlayer();
                     if (settings.RepairTicksPerBlock == 0) {
-                        player.sendMessage(i18n.getInternationalisedString(
+                        player.sendMessage(i18n.get(
                                 "Repair functionality is disabled or WorldEdit was not detected"));
                         return;
                     }
                     Craft pCraft = craftManager.getCraftByPlayer(player);
                     if (pCraft == null) {
-                        player.sendMessage(i18n.getInternationalisedString("You must be piloting a craft"));
+                        player.sendMessage(i18n.get("You must be piloting a craft"));
                         return;
                     }
 
@@ -164,11 +164,11 @@ public class WorldEditInteractListener implements Listener {
                     try {
                         cc.saveSchematic(file);
                     } catch (Exception e) {
-                        player.sendMessage(i18n.getInternationalisedString("Could not save file"));
+                        player.sendMessage(i18n.get("Could not save file"));
                         e.printStackTrace();
                         return;
                     }
-                    player.sendMessage(i18n.getInternationalisedString("State saved"));
+                    player.sendMessage(i18n.get("State saved"));
                     event.setCancelled(true);
                 }
             }
@@ -192,16 +192,16 @@ public class WorldEditInteractListener implements Listener {
 
         if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Repair:")) {
             if (settings.RepairTicksPerBlock == 0) {
-                player.sendMessage(i18n.getInternationalisedString(
+                player.sendMessage(i18n.get(
                         "Repair functionality is disabled or WorldEdit was not detected"));
                 return;
             }
             if (craft == null) {
-                player.sendMessage(i18n.getInternationalisedString("You must be piloting a craft"));
+                player.sendMessage(i18n.get("You must be piloting a craft"));
                 return;
             }
             if (!player.hasPermission("movecraft." + craft.getType().getCraftName() + ".repair")) {
-                player.sendMessage(i18n.getInternationalisedString("Insufficient Permissions"));
+                player.sendMessage(i18n.get("Insufficient Permissions"));
                 return;
             }
             // load up the repair state
@@ -212,7 +212,7 @@ public class WorldEditInteractListener implements Listener {
             repairStateName += sign.getLine(1);
             File file = new File(repairStateName);
             if (!file.exists()) {
-                player.sendMessage(i18n.getInternationalisedString("REPAIR STATE NOT FOUND"));
+                player.sendMessage(i18n.get("REPAIR STATE NOT FOUND"));
                 return;
             }
             SchematicFormat sf = SchematicFormat.getFormat(file);
@@ -220,11 +220,11 @@ public class WorldEditInteractListener implements Listener {
             try {
                 cc = sf.load(file);
             } catch (com.sk89q.worldedit.data.DataException e) {
-                player.sendMessage(i18n.getInternationalisedString("REPAIR STATE NOT FOUND"));
+                player.sendMessage(i18n.get("REPAIR STATE NOT FOUND"));
                 e.printStackTrace();
                 return;
             } catch (IOException e) {
-                player.sendMessage(i18n.getInternationalisedString("REPAIR STATE NOT FOUND"));
+                player.sendMessage(i18n.get("REPAIR STATE NOT FOUND"));
                 e.printStackTrace();
                 return;
             }
@@ -342,7 +342,7 @@ public class WorldEditInteractListener implements Listener {
                     }
                     if (remainingQty > 0) {
                         player.sendMessage(
-                                String.format(i18n.getInternationalisedString("Need more of material") + ": %s - %d",
+                                String.format(i18n.get("Need more of material") + ": %s - %d",
                                               Material.getMaterial(itemTypeId).name().toLowerCase().replace("_", " "),
                                               remainingQty));
                         enoughMaterial = false;
@@ -355,7 +355,7 @@ public class WorldEditInteractListener implements Listener {
                     if (plugin.getEconomy().has(player, moneyCost)) {
                         plugin.getEconomy().withdrawPlayer(player, moneyCost);
                     } else {
-                        player.sendMessage(i18n.getInternationalisedString("You do not have enough money"));
+                        player.sendMessage(i18n.get("You do not have enough money"));
                         enoughMaterial = false;
                     }
                 }
@@ -406,7 +406,7 @@ public class WorldEditInteractListener implements Listener {
                             BukkitTask statusTask = new BukkitRunnable() {
                                 @Override public void run() {
                                     player.sendMessage(String.format(
-                                            i18n.getInternationalisedString("Repairs underway") + ": %d / %d", fTics,
+                                            i18n.get("Repairs underway") + ": %d / %d", fTics,
                                             fDur));
                                 }
                             }.runTaskLater(plugin, (ticsFromStart));
@@ -417,7 +417,7 @@ public class WorldEditInteractListener implements Listener {
                         BukkitTask releaseTask = new BukkitRunnable() {
                             @Override public void run() {
                                 craftManager.removeCraft(craft);
-                                player.sendMessage(i18n.getInternationalisedString(
+                                player.sendMessage(i18n.get(
                                         "Repairs complete. You may now pilot the craft"));
                             }
                         }.runTaskLater(plugin, (durationInTicks + 20));
@@ -434,17 +434,17 @@ public class WorldEditInteractListener implements Listener {
                 // if this is the first time they have clicked the sign, show the summary of repair costs and
                 // requirements
                 player.sendMessage(
-                        String.format(i18n.getInternationalisedString("Total damaged blocks") + ": %d", numdiffblocks));
+                        String.format(i18n.get("Total damaged blocks") + ": %d", numdiffblocks));
                 float percent = (numdiffblocks * 100) / craft.getOrigBlockCount();
                 player.sendMessage(
-                        String.format(i18n.getInternationalisedString("Percentage of craft") + ": %.2f%%", percent));
+                        String.format(i18n.get("Percentage of craft") + ": %.2f%%", percent));
                 if (percent > 50) {
                     player.sendMessage(
-                            i18n.getInternationalisedString("This craft is too damaged and can not be repaired"));
+                            i18n.get("This craft is too damaged and can not be repaired"));
                     return;
                 }
                 if (numdiffblocks != 0) {
-                    player.sendMessage(i18n.getInternationalisedString("SUPPLIES NEEDED"));
+                    player.sendMessage(i18n.get("SUPPLIES NEEDED"));
                     for (Map.Entry<Integer, Integer> entry : numMissingItems.entrySet()) {
                         final Integer itemType = entry.getKey();
                         final Integer amount = entry.getValue();
@@ -453,11 +453,11 @@ public class WorldEditInteractListener implements Listener {
                     }
                     int durationInSeconds = numdiffblocks * settings.RepairTicksPerBlock / 20;
                     player.sendMessage(
-                            String.format(i18n.getInternationalisedString("Seconds to complete repair") + ": %d",
+                            String.format(i18n.get("Seconds to complete repair") + ": %d",
                                           durationInSeconds));
                     int moneyCost = (int) (numdiffblocks * settings.RepairMoneyPerBlock);
                     player.sendMessage(
-                            String.format(i18n.getInternationalisedString("Money to complete repair") + ": %d",
+                            String.format(i18n.get("Money to complete repair") + ": %d",
                                           moneyCost));
                     repairRightClickTimeMap.put(player, System.currentTimeMillis());
                 }
