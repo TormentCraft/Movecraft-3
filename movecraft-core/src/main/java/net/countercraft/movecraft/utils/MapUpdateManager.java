@@ -22,7 +22,7 @@ import com.sk89q.worldedit.blocks.SignBlock;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.MovecraftLocation;
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -34,7 +34,6 @@ import net.countercraft.movecraft.utils.datastructures.InventoryTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.SignTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.StorageCrateTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.TransferData;
-import net.minecraft.server.v1_10_R1.BlockPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
@@ -81,11 +80,11 @@ public final class MapUpdateManager extends BukkitRunnable {
         private static final MapUpdateManager INSTANCE = new MapUpdateManager();
     }
 
-    private void updateBlock(MapUpdateCommand m, World w, Map<MovecraftLocation, TransferData> dataMap,
+    private void updateBlock(MapUpdateCommand m, World w, Map<BlockPosition, TransferData> dataMap,
                              Set<net.minecraft.server.v1_10_R1.Chunk> chunks, Set<Chunk> cmChunks,
-                             HashMap<MovecraftLocation, Byte> origLightMap, boolean placeDispensers)
+                             HashMap<BlockPosition, Byte> origLightMap, boolean placeDispensers)
     {
-        MovecraftLocation workingL = m.getNewBlockLocation();
+        BlockPosition workingL = m.getNewBlockLocation();
         final int[] blocksToBlankOut = new int[]{54, 61, 62, 63, 68, 116, 117, 146, 149, 150, 154, 158, 145};
 
         int x = workingL.x;
@@ -164,7 +163,7 @@ public final class MapUpdateManager extends BukkitRunnable {
                 cmChunks.add(cmC);
             }
         } else {
-            BlockPosition position = new BlockPosition(x, y, z);
+            net.minecraft.server.v1_10_R1.BlockPosition position = new net.minecraft.server.v1_10_R1.BlockPosition(x, y, z);
 
             boolean success = false;
             if ((origType == 149 || origType == 150) &&
@@ -263,9 +262,9 @@ Changed for 1.8, and quite possibly wrong:
         }
     }
 
-    private void updateData(Map<MovecraftLocation, TransferData> dataMap, World w) {
+    private void updateData(Map<BlockPosition, TransferData> dataMap, World w) {
         // Restore block specific information
-        for (Map.Entry<MovecraftLocation, TransferData> entry : dataMap.entrySet()) {
+        for (Map.Entry<BlockPosition, TransferData> entry : dataMap.entrySet()) {
             try {
                 TransferData transferData = entry.getValue();
 
@@ -333,10 +332,10 @@ Changed for 1.8, and quite possibly wrong:
     private void runQueue(final ArrayList<MapUpdateCommand> queuedMapUpdateCommands,
                           final ArrayList<Boolean> queuedPlaceDispensers, final World w,
                           final Set<net.minecraft.server.v1_10_R1.Chunk> chunks, final Set<Chunk> cmChunks,
-                          final HashMap<MovecraftLocation, Byte> origLightMap,
-                          final Map<MovecraftLocation, TransferData> dataMap,
+                          final HashMap<BlockPosition, Byte> origLightMap,
+                          final Map<BlockPosition, TransferData> dataMap,
                           final List<MapUpdateCommand> updatesInWorld,
-                          final Map<MovecraftLocation, List<EntityUpdateCommand>> entityMap)
+                          final Map<BlockPosition, List<EntityUpdateCommand>> entityMap)
     {
         int numToRun = queuedMapUpdateCommands.size();
         if (numToRun > Settings.BlockQueueChunkSize) numToRun = Settings.BlockQueueChunkSize;
@@ -396,7 +395,7 @@ Changed for 1.8, and quite possibly wrong:
 //				for ( net.minecraft.server.v1_8_R3.Chunk c : chunks ) {
 //					c.initLighting();
 //				}
-/*				for(MovecraftLocation mloc : origLightMap.keySet()) {
+/*				for(BlockPosition mloc : origLightMap.keySet()) {
                     Location loc=new Location(w, mloc.getX(), mloc.getY(), mloc.getZ());
 					for ( Player p : w.getPlayers() ) {
 						Chunk c=p.getLocation().getChunk();
@@ -438,10 +437,10 @@ Changed for 1.8, and quite possibly wrong:
                 List<MapUpdateCommand> updatesInWorld = entry.getValue();
                 List<EntityUpdateCommand> entityUpdatesInWorld = entityUpdates.get(entry.getKey());
                 List<ItemDropUpdateCommand> itemDropUpdatesInWorld = itemDropUpdates.get(entry.getKey());
-                Map<MovecraftLocation, List<EntityUpdateCommand>> entityMap = new HashMap<>();
-                Map<MovecraftLocation, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
-                Map<MovecraftLocation, TransferData> dataMap = new HashMap<>();
-                HashMap<MovecraftLocation, Byte> origLightMap = new HashMap<>();
+                Map<BlockPosition, List<EntityUpdateCommand>> entityMap = new HashMap<>();
+                Map<BlockPosition, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
+                Map<BlockPosition, TransferData> dataMap = new HashMap<>();
+                HashMap<BlockPosition, Byte> origLightMap = new HashMap<>();
                 Set<net.minecraft.server.v1_10_R1.Chunk> chunks = null;
                 Set<Chunk> cmChunks = null;
                 ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<>();
@@ -455,7 +454,7 @@ Changed for 1.8, and quite possibly wrong:
 
                 // Preprocessing
                 for (MapUpdateCommand c : updatesInWorld) {
-                    MovecraftLocation l;
+                    BlockPosition l;
                     if (c != null) l = c.getOldBlockLocation();
                     else l = null;
 
@@ -507,9 +506,9 @@ Changed for 1.8, and quite possibly wrong:
                 if (entityUpdatesInWorld != null) {
                     for (EntityUpdateCommand i : entityUpdatesInWorld) {
                         if (i != null) {
-                            MovecraftLocation entityLoc = new MovecraftLocation(i.getNewLocation().getBlockX(),
+                            BlockPosition entityLoc = new BlockPosition(i.getNewLocation().getBlockX(),
                                                                                 i.getNewLocation().getBlockY() - 1,
-                                                                                i.getNewLocation().getBlockZ());
+                                                                        i.getNewLocation().getBlockZ());
                             if (entityMap.containsKey(entityLoc)) {
                                 List<EntityUpdateCommand> entUpdateList = entityMap.get(entityLoc);
                                 entUpdateList.add(i);
@@ -681,7 +680,7 @@ Changed for 1.8, and quite possibly wrong:
 				
 /*				// move entities again
 				if(!Settings.CompatibilityMode)
-					for(MovecraftLocation i : entityMap.keySet()) {
+					for(BlockPosition i : entityMap.keySet()) {
 						List<EntityUpdateCommand> mapUpdateList=entityMap.get(i);
 							for(EntityUpdateCommand entityUpdate : mapUpdateList) {
 								Entity entity=entityUpdate.getEntity();
@@ -803,7 +802,7 @@ Changed for 1.8, and quite possibly wrong:
 
         Integer minx = Integer.MAX_VALUE, miny = Integer.MAX_VALUE, minz = Integer.MAX_VALUE;
         Integer maxx = Integer.MIN_VALUE, maxy = Integer.MIN_VALUE, maxz = Integer.MIN_VALUE;
-        Map<MovecraftLocation, MapUpdateCommand> sortRef = new HashMap<>();
+        Map<BlockPosition, MapUpdateCommand> sortRef = new HashMap<>();
         if (mapUpdates != null) {
             for (MapUpdateCommand m : mapUpdates) {
                 if (setContainsConflict(get, m)) {
@@ -928,7 +927,7 @@ Changed for 1.8, and quite possibly wrong:
                 return new SignTransferHolder(data, ((Sign) s).getLines());
 
             case 33:
-                MovecraftLocation l = MathUtils.bukkit2MovecraftLoc(s.getLocation());
+                BlockPosition l = MathUtils.bukkit2MovecraftLoc(s.getLocation());
                 Inventory i = StorageChestItem.getInventoryOfCrateAtLocation(l, s.getWorld());
                 if (i != null) {
                     StorageChestItem.removeInventoryAtLocation(s.getWorld(), l);

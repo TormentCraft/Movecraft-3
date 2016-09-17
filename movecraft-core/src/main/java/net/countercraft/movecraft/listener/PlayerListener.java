@@ -18,13 +18,13 @@
 package net.countercraft.movecraft.listener;
 
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -43,15 +43,15 @@ import java.util.Set;
 public class PlayerListener implements Listener {
 
     private String checkCraftBorders(Craft craft) {
-        Set<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
-        for (MovecraftLocation block : craftBlocks) {
+        Set<BlockPosition> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        for (BlockPosition block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
                         //No diagonals
                         if ((z != 0 && x != 0) || (x == 0 && y == 0 && z == 0)) continue;
 
-                        MovecraftLocation test = new MovecraftLocation(block.x + x, block.y + y, block.z + z);
+                        BlockPosition test = new BlockPosition(block.x + x, block.y + y, block.z + z);
                         if (!craftBlocks.contains(test)) {
                             Block testBlock = craft.getW().getBlockAt(block.x + x, block.y + y, block.z + z);
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||

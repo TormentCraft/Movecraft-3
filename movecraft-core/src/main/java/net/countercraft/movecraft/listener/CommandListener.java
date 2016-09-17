@@ -21,6 +21,7 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -28,7 +29,6 @@ import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.api.Direction;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.api.Rotation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -91,7 +91,7 @@ public class CommandListener implements CommandExecutor {
         return new Location(w, telX, telY, telZ);
     }
 
-    private MovecraftLocation getCraftMidPoint(Craft craft) {
+    private BlockPosition getCraftMidPoint(Craft craft) {
         int maxDX = 0;
         int maxDZ = 0;
         int maxY = 0;
@@ -121,7 +121,7 @@ public class CommandListener implements CommandExecutor {
         int midX = craft.getMinX() + (maxDX / 2);
         int midY = (minY + maxY) / 2;
         int midZ = craft.getMinZ() + (maxDZ / 2);
-        return new MovecraftLocation(midX, midY, midZ);
+        return new BlockPosition(midX, midY, midZ);
     }
 
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -163,7 +163,7 @@ public class CommandListener implements CommandExecutor {
 
             if (args.length > 0) {
                 if (player.hasPermission("movecraft." + args[0] + ".pilot")) {
-                    MovecraftLocation startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
+                    BlockPosition startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
                     Craft c = new Craft(getCraftTypeFromString(args[0]), player.getWorld());
 
                     if (playerCraft == null) {
@@ -187,7 +187,7 @@ public class CommandListener implements CommandExecutor {
 
             if (playerCraft == null) {
             } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                MovecraftLocation midPoint = getCraftMidPoint(playerCraft);
+                BlockPosition midPoint = getCraftMidPoint(playerCraft);
                 Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left")) ? Rotation.ANTICLOCKWISE
                                                                                           : Rotation.CLOCKWISE;
                 playerCraft.rotate(rotation, midPoint);
@@ -206,7 +206,7 @@ public class CommandListener implements CommandExecutor {
 
             if (playerCraft == null) {
             } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                MovecraftLocation midPoint = getCraftMidPoint(playerCraft);
+                BlockPosition midPoint = getCraftMidPoint(playerCraft);
                 playerCraft.rotate(Rotation.ANTICLOCKWISE, midPoint);
             } else {
                 player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
@@ -224,7 +224,7 @@ public class CommandListener implements CommandExecutor {
 
             if (playerCraft == null) {
             } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                MovecraftLocation midPoint = getCraftMidPoint(playerCraft);
+                BlockPosition midPoint = getCraftMidPoint(playerCraft);
                 playerCraft.rotate(Rotation.CLOCKWISE, midPoint);
             } else {
                 player.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));

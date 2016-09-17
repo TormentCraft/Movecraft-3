@@ -17,10 +17,10 @@
 
 package net.countercraft.movecraft.async.translation;
 
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
-import net.countercraft.movecraft.api.MovecraftLocation;
 
 public class TranslationTaskData {
     private final int dx;
@@ -28,7 +28,7 @@ public class TranslationTaskData {
     private final int dz;
     private boolean failed = false;
     private String failMessage;
-    private MovecraftLocation[] blockList;
+    private BlockPosition[] blockList;
     private MapUpdateCommand[] updates;
     private EntityUpdateCommand[] entityUpdates;
     private ItemDropUpdateCommand[] itemDropUpdates;
@@ -38,7 +38,7 @@ public class TranslationTaskData {
     private final int minHeight;
     private boolean collisionExplosion;
 
-    public TranslationTaskData(int dx, int dz, int dy, MovecraftLocation[] blockList, int[][][] hitbox, int minZ,
+    public TranslationTaskData(int dx, int dz, int dy, BlockPosition[] blockList, int[][][] hitbox, int minZ,
                                int minX, int maxHeight, int minHeight)
     {
         this.dx = dx;
@@ -93,11 +93,11 @@ public class TranslationTaskData {
         this.failMessage = failMessage;
     }
 
-    public MovecraftLocation[] getBlockList() {
+    public BlockPosition[] getBlockList() {
         return blockList;
     }
 
-    public void setBlockList(MovecraftLocation[] blockList) {
+    public void setBlockList(BlockPosition[] blockList) {
         this.blockList = blockList;
     }
 

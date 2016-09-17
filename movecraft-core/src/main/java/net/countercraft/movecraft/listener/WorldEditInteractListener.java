@@ -28,7 +28,7 @@ import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateManager;
-import net.countercraft.movecraft.api.MovecraftLocation;
+import net.countercraft.movecraft.api.BlockPosition;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -130,7 +130,7 @@ public class WorldEditInteractListener implements Listener {
                             26, 34, 64, 71, 140, 144, 176, 177, 193, 194, 195, 196,
                             197};  // BLOCKS THAT CAN'T BE PARTIALLY RECONSTRUCTED
 
-                    for (MovecraftLocation loc : pCraft.getBlockList()) {
+                    for (BlockPosition loc : pCraft.getBlockList()) {
                         Vector ccpos = new Vector(loc.x - pCraft.getMinX(), loc.y - pCraft.getMinY(),
                                                   loc.z - pCraft.getMinZ());
                         Block b = sign.getWorld().getBlockAt(loc.x, loc.y, loc.z);
@@ -310,7 +310,7 @@ public class WorldEditInteractListener implements Listener {
                     final int itemTypeId = entry.getKey();
                     ArrayList<InventoryHolder> chests = new ArrayList<>();
 
-                    for (MovecraftLocation loc : craft.getBlockList()) {
+                    for (BlockPosition loc : craft.getBlockList()) {
                         Block b = craft.getW().getBlockAt(loc.x, loc.y, loc.z);
                         if ((b.getTypeId() == 54) || (b.getTypeId() == 146)) {
                             InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
@@ -373,7 +373,7 @@ public class WorldEditInteractListener implements Listener {
                             sb.setNbtData(bb.getNbtData());
                             bb = sb;
                         }
-                        MovecraftLocation moveloc = new MovecraftLocation(
+                        BlockPosition moveloc = new BlockPosition(
                                 sign.getX() + cc.getOffset().getBlockX() + ccloc.getBlockX(),
                                 sign.getY() + cc.getOffset().getBlockY() + ccloc.getBlockY(),
                                 sign.getZ() + cc.getOffset().getBlockZ() + ccloc.getBlockZ());

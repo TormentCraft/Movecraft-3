@@ -17,33 +17,33 @@
 
 package net.countercraft.movecraft.api;
 
-public final class MovecraftLocation {
+public final class BlockPosition {
     public final int x, y, z;
 
-    public MovecraftLocation(int x, int y, int z) {
+    public BlockPosition(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
     /**
-     * Returns a MovecraftLocation that has undergone the given translation.
+     * Returns a BlockPosition that has undergone the given translation.
      * <p>
-     * This does not change the MovecraftLocation that it is called upon and that should be accounted for in terms of
+     * This does not change the BlockPosition that it is called upon and that should be accounted for in terms of
      * Garbage Collection.
      *
      * @param dx - X translation
      * @param dy - Y translation
      * @param dz - Z translation
-     * @return New MovecraftLocation shifted by specified amount
+     * @return New BlockPosition shifted by specified amount
      */
-    public MovecraftLocation translate(int dx, int dy, int dz) {
-        return new MovecraftLocation(x + dx, y + dy, z + dz);
+    public BlockPosition translate(int dx, int dy, int dz) {
+        return new BlockPosition(x + dx, y + dy, z + dz);
     }
 
     @Override public boolean equals(Object o) {
-        if (o instanceof MovecraftLocation) {
-            MovecraftLocation location = (MovecraftLocation) o;
+        if (o instanceof BlockPosition) {
+            BlockPosition location = (BlockPosition) o;
             if (location.x == x && location.y == y && location.z == z) {
                 return true;
             }
@@ -56,11 +56,11 @@ public final class MovecraftLocation {
         return Integer.valueOf(x).hashCode() >> 13 ^ Integer.valueOf(y).hashCode() >> 7 ^ Integer.valueOf(z).hashCode();
     }
 
-    public MovecraftLocation add(MovecraftLocation l) {
-        return new MovecraftLocation(x + l.x, y + l.y, z + l.z);
+    public BlockPosition add(BlockPosition l) {
+        return new BlockPosition(x + l.x, y + l.y, z + l.z);
     }
 
-    public MovecraftLocation subtract(MovecraftLocation l) {
-        return new MovecraftLocation(x - l.x, y - l.y, z - l.z);
+    public BlockPosition subtract(BlockPosition l) {
+        return new BlockPosition(x - l.x, y - l.y, z - l.z);
     }
 }

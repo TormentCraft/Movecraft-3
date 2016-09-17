@@ -18,8 +18,8 @@
 package net.countercraft.movecraft.craft;
 
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -161,9 +161,9 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     private void destroySnowOnPilot(Player pilot, Craft craft) {
         if (pilot == null || !pilot.isOnline()) return;
 
-        Set<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
-        for (MovecraftLocation block : craftBlocks) {
-            MovecraftLocation test = new MovecraftLocation(block.x, block.y + 1, block.z);
+        Set<BlockPosition> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        for (BlockPosition block : craftBlocks) {
+            BlockPosition test = new BlockPosition(block.x, block.y + 1, block.z);
             if (!craftBlocks.contains(test)) {
                 Block testBlock = craft.getW().getBlockAt(test.x, test.y, test.z);
 
@@ -183,16 +183,16 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
             return;
         }
 
-        Set<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        Set<BlockPosition> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
         int blockedBroken = 0;
-        for (MovecraftLocation block : craftBlocks) {
+        for (BlockPosition block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
                         //No diagonals
                         if ((z != 0 && x != 0) || (x == 0 && y == 0 && z == 0)) continue;
 
-                        MovecraftLocation test = new MovecraftLocation(block.x + x, block.y + y, block.z + z);
+                        BlockPosition test = new BlockPosition(block.x + x, block.y + y, block.z + z);
                         if (!craftBlocks.contains(test)) {
                             Block testBlock = craft.getW().getBlockAt(test.x, test.y, test.z);
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||

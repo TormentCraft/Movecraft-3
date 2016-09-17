@@ -18,9 +18,9 @@
 package net.countercraft.movecraft.items;
 
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.utils.external.CardboardBox;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StorageChestItem {
-    private static final Map<World, Map<MovecraftLocation, Inventory>> crateInventories = new HashMap<>();
+    private static final Map<World, Map<BlockPosition, Inventory>> crateInventories = new HashMap<>();
     private final ItemStack itemStack;
 
     public StorageChestItem() {
@@ -55,20 +55,20 @@ public class StorageChestItem {
         return itemStack;
     }
 
-    public static Inventory getInventoryOfCrateAtLocation(MovecraftLocation location, World w) {
+    public static Inventory getInventoryOfCrateAtLocation(BlockPosition location, World w) {
         if (Settings.DisableCrates) return null;
         return crateInventories.get(w).get(location);
     }
 
-    public static void setInventoryOfCrateAtLocation(Inventory i, MovecraftLocation l, World w) {
+    public static void setInventoryOfCrateAtLocation(Inventory i, BlockPosition l, World w) {
         crateInventories.get(w).put(l, i);
     }
 
-    public static void removeInventoryAtLocation(World w, MovecraftLocation l) {
+    public static void removeInventoryAtLocation(World w, BlockPosition l) {
         crateInventories.get(w).remove(l);
     }
 
-    public static void createNewInventory(MovecraftLocation l, World w) {
+    public static void createNewInventory(BlockPosition l, World w) {
         crateInventories.get(w).put(l, Bukkit.createInventory(null, 27, I18nSupport
                 .getInternationalisedString("Item - Storage Crate name")));
     }
@@ -84,9 +84,9 @@ public class StorageChestItem {
     public static void saveToDisk() {
         Map<String, CardboardBox[]> data = new HashMap<>();
 
-        for (Map.Entry<World, Map<MovecraftLocation, Inventory>> entry : crateInventories.entrySet()) {
-            final Map<MovecraftLocation, Inventory> inventoryMap = entry.getValue();
-            for (Map.Entry<MovecraftLocation, Inventory> containerEntry : inventoryMap.entrySet()) {
+        for (Map.Entry<World, Map<BlockPosition, Inventory>> entry : crateInventories.entrySet()) {
+            final Map<BlockPosition, Inventory> inventoryMap = entry.getValue();
+            for (Map.Entry<BlockPosition, Inventory> containerEntry : inventoryMap.entrySet()) {
                 Inventory inventory = containerEntry.getValue();
                 ItemStack[] is = inventory.getContents();
                 CardboardBox[] cardboardBoxes = new CardboardBox[is.length];
@@ -100,7 +100,7 @@ public class StorageChestItem {
                 }
 
                 final World world = entry.getKey();
-                final MovecraftLocation location = containerEntry.getKey();
+                final BlockPosition location = containerEntry.getKey();
                 String key = world.getName() + " " + location.x + " " + location.y + " " + location.z;
                 data.put(key, cardboardBoxes);
             }
@@ -130,7 +130,7 @@ public class StorageChestItem {
     public static void readFromDisk() {
         // Initialise a List for every world
         for (World w : Movecraft.getInstance().getServer().getWorlds()) {
-            crateInventories.put(w, new HashMap<MovecraftLocation, Inventory>());
+            crateInventories.put(w, new HashMap<BlockPosition, Inventory>());
         }
 
         try {
@@ -162,7 +162,7 @@ public class StorageChestItem {
                     int x = Integer.parseInt(split[1]);
                     int y = Integer.parseInt(split[2]);
                     int z = Integer.parseInt(split[3]);
-                    MovecraftLocation l = new MovecraftLocation(x, y, z);
+                    BlockPosition l = new BlockPosition(x, y, z);
 
                     crateInventories.get(w).put(l, inv);
                 }

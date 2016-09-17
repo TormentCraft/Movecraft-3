@@ -18,6 +18,7 @@
 package net.countercraft.movecraft.listener;
 
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -25,7 +26,6 @@ import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.api.Direction;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.api.Rotation;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -61,7 +61,7 @@ public class InteractListener implements Listener {
                 }
 
                 if (firstLine.equalsIgnoreCase("Remote Sign")) {
-                    MovecraftLocation sourceLocation = MathUtils
+                    BlockPosition sourceLocation = MathUtils
                             .bukkit2MovecraftLoc(event.getClickedBlock().getLocation());
                     Craft foundCraft = null;
                     if (craftManager.getCraftsInWorld(event.getClickedBlock().getWorld()) != null)
@@ -86,8 +86,8 @@ public class InteractListener implements Listener {
                     }
 
                     String targetText = org.bukkit.ChatColor.stripColor(sign.getLine(1));
-                    MovecraftLocation foundLoc = null;
-                    for (MovecraftLocation tloc : foundCraft.getBlockList()) {
+                    BlockPosition foundLoc = null;
+                    for (BlockPosition tloc : foundCraft.getBlockList()) {
                         Block tb = event.getClickedBlock().getWorld().getBlockAt(tloc.x, tloc.y, tloc.z);
                         if (tb.getType() == Material.SIGN_POST || tb.getType() == Material.WALL_SIGN) {
                             Sign ts = (Sign) tb.getState();
@@ -174,7 +174,7 @@ public class InteractListener implements Listener {
                                                                                 .bukkit2MovecraftLoc(event.getPlayer()
                                                                                                           .getLocation()))) {
                                 if (playerCraft.getType().rotateAtMidpoint()) {
-                                    MovecraftLocation midpoint = new MovecraftLocation(
+                                    BlockPosition midpoint = new BlockPosition(
                                             (playerCraft.getMaxX() + playerCraft.getMinX()) / 2,
                                             (playerCraft.getMaxY() + playerCraft.getMinY()) / 2,
                                             (playerCraft.getMaxZ() + playerCraft.getMinZ()) / 2);
@@ -216,8 +216,8 @@ public class InteractListener implements Listener {
                             }
                             final Location loc = event.getClickedBlock().getLocation();
                             final Craft c = new Craft(getCraftTypeFromString(craftTypeStr), loc.getWorld());
-                            MovecraftLocation startPoint = new MovecraftLocation(loc.getBlockX(), loc.getBlockY(),
-                                                                                 loc.getBlockZ());
+                            BlockPosition startPoint = new BlockPosition(loc.getBlockX(), loc.getBlockY(),
+                                                                         loc.getBlockZ());
                             c.detect(null, event.getPlayer(), startPoint);
                             BukkitTask releaseTask = new BukkitRunnable() {
 
@@ -266,7 +266,7 @@ public class InteractListener implements Listener {
             if (player.hasPermission("movecraft." + firstLine + ".pilot")) {
                 // Attempt to run detection
                 Location loc = event.getClickedBlock().getLocation();
-                MovecraftLocation startPoint = new MovecraftLocation(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+                BlockPosition startPoint = new BlockPosition(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
                 final Craft c = new Craft(craftType, loc.getWorld());
 
                 if (c.getType().getCruiseOnPilot()) {
@@ -325,7 +325,7 @@ public class InteractListener implements Listener {
                                                                 playerCraft.getMinZ(),
                                                                 MathUtils.bukkit2MovecraftLoc(player.getLocation()))) {
                         if (playerCraft.getType().rotateAtMidpoint()) {
-                            MovecraftLocation midpoint = new MovecraftLocation(
+                            BlockPosition midpoint = new BlockPosition(
                                     (playerCraft.getMaxX() + playerCraft.getMinX()) / 2,
                                     (playerCraft.getMaxY() + playerCraft.getMinY()) / 2,
                                     (playerCraft.getMaxZ() + playerCraft.getMinZ()) / 2);
@@ -364,8 +364,8 @@ public class InteractListener implements Listener {
                     }
                     final Location loc = event.getClickedBlock().getLocation();
                     final Craft c = new Craft(subcraftType, loc.getWorld());
-                    MovecraftLocation startPoint = new MovecraftLocation(loc.getBlockX(), loc.getBlockY(),
-                                                                         loc.getBlockZ());
+                    BlockPosition startPoint = new BlockPosition(loc.getBlockX(), loc.getBlockY(),
+                                                                 loc.getBlockZ());
                     c.detect(null, player, startPoint);
                     BukkitTask releaseTask = new BukkitRunnable() {
 

@@ -26,8 +26,8 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.countercraft.movecraft.Events;
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.api.Rotation;
-import net.countercraft.movecraft.api.events.SinkingStartedEvent;
 import net.countercraft.movecraft.async.detection.DetectionTask;
 import net.countercraft.movecraft.async.detection.DetectionTaskData;
 import net.countercraft.movecraft.async.rotation.RotationTask;
@@ -43,7 +43,6 @@ import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateManager;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.apache.commons.collections.ListUtils;
@@ -160,10 +159,10 @@ public final class AsyncManager extends BukkitRunnable {
                                         }
 
                                         // remove the new craft from the parent craft
-                                        List<MovecraftLocation> parentBlockList = ListUtils
+                                        List<BlockPosition> parentBlockList = ListUtils
                                                 .subtract(Arrays.asList(craft.getBlockList()),
                                                           Arrays.asList(data.getBlockList()));
-                                        craft.setBlockList(parentBlockList.toArray(new MovecraftLocation[1]));
+                                        craft.setBlockList(parentBlockList.toArray(new BlockPosition[1]));
                                         craft.setOrigBlockCount(craft.getOrigBlockCount() - data.getBlockList().length);
 
                                         // Rerun the polygonal bounding formula for the parent craft
@@ -171,7 +170,7 @@ public final class AsyncManager extends BukkitRunnable {
                                         Integer parentMaxZ = null;
                                         Integer parentMinX = null;
                                         Integer parentMinZ = null;
-                                        for (MovecraftLocation l : parentBlockList) {
+                                        for (BlockPosition l : parentBlockList) {
                                             if (parentMaxX == null || l.x > parentMaxX) {
                                                 parentMaxX = l.x;
                                             }
@@ -188,7 +187,7 @@ public final class AsyncManager extends BukkitRunnable {
                                         int parentSizeX = (parentMaxX - parentMinX) + 1;
                                         int parentSizeZ = (parentMaxZ - parentMinZ) + 1;
                                         int[][][] parentPolygonalBox = new int[parentSizeX][][];
-                                        for (MovecraftLocation l : parentBlockList) {
+                                        for (BlockPosition l : parentBlockList) {
                                             if (parentPolygonalBox[l.x - parentMinX] == null) {
                                                 parentPolygonalBox[l.x - parentMinX] = new int[parentSizeZ][];
                                             }
@@ -278,7 +277,7 @@ public final class AsyncManager extends BukkitRunnable {
                     if (Movecraft.getInstance().getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
                         // convert blocklist to location list
                         List<Location> shipLocations = new ArrayList<>();
-                        for (MovecraftLocation loc : c.getBlockList()) {
+                        for (BlockPosition loc : c.getBlockList()) {
                             Location tloc = new Location(c.getW(), loc.x, loc.y, loc.z);
                             shipLocations.add(tloc);
                         }
@@ -331,7 +330,7 @@ public final class AsyncManager extends BukkitRunnable {
                         if (Movecraft.getInstance().getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
                             // convert blocklist to location list
                             List<Location> shipLocations = new ArrayList<>();
-                            for (MovecraftLocation loc : c.getBlockList()) {
+                            for (BlockPosition loc : c.getBlockList()) {
                                 Location tloc = new Location(c.getW(), loc.x, loc.y, loc.z);
                                 shipLocations.add(tloc);
                             }
@@ -498,7 +497,7 @@ public final class AsyncManager extends BukkitRunnable {
         }
     }
 
-    private boolean isRegionBlockedPVP(MovecraftLocation loc, World w) {
+    private boolean isRegionBlockedPVP(BlockPosition loc, World w) {
         if (Movecraft.getInstance().getWorldGuardPlugin() == null) return false;
         if (!Settings.WorldGuardBlockSinkOnPVPPerm) return false;
 
@@ -508,7 +507,7 @@ public final class AsyncManager extends BukkitRunnable {
         return !set.allows(DefaultFlag.PVP);
     }
 
-    private boolean isRegionFlagSinkAllowed(MovecraftLocation loc, World w) {
+    private boolean isRegionFlagSinkAllowed(BlockPosition loc, World w) {
         if (Movecraft.getInstance().getWorldGuardPlugin() != null &&
             Movecraft.getInstance().getWGCustomFlagsPlugin() != null && Settings.WGCustomFlagsUseSinkFlag) {
             Location nativeLoc = new Location(w, loc.x, loc.y, loc.z);
@@ -519,7 +518,7 @@ public final class AsyncManager extends BukkitRunnable {
         }
     }
 
-    private Location isTownyPlotPVPEnabled(MovecraftLocation loc, World w, Set<TownBlock> townBlockSet) {
+    private Location isTownyPlotPVPEnabled(BlockPosition loc, World w, Set<TownBlock> townBlockSet) {
         Location plugLoc = new Location(w, loc.x, loc.y, loc.z);
         TownBlock townBlock = TownyUtils.getTownBlock(plugLoc);
         if (townBlock != null && !townBlockSet.contains(townBlock)) {
@@ -561,7 +560,7 @@ public final class AsyncManager extends BukkitRunnable {
                                 // go through each block in the blocklist, and if its in the FlyBlocks, total up the
                                 // number of them
                                 Location townyLoc = null;
-                                for (MovecraftLocation l : pcraft.getBlockList()) {
+                                for (BlockPosition l : pcraft.getBlockList()) {
                                     if (isRegionBlockedPVP(l, w)) regionPVPBlocked = true;
                                     if (!isRegionFlagSinkAllowed(l, w)) sinkingForbiddenByFlag = true;
                                     if (townyLoc == null && townyEnabled && Settings.TownyBlockSinkOnNoPVP) {
@@ -856,7 +855,7 @@ public final class AsyncManager extends BukkitRunnable {
             for (World w : Bukkit.getWorlds()) {
                 if (w != null) {
                     ArrayList<MapUpdateCommand> updateCommands = new ArrayList<>();
-                    CopyOnWriteArrayList<MovecraftLocation> locations = null;
+                    CopyOnWriteArrayList<BlockPosition> locations = null;
 
                     // I know this is horrible, but I honestly don't see another way to do this...
                     int numTries = 0;
@@ -874,7 +873,7 @@ public final class AsyncManager extends BukkitRunnable {
                         }
                     }
 
-                    for (MovecraftLocation loc : locations) {
+                    for (BlockPosition loc : locations) {
                         if (Movecraft.getInstance().blockFadeWorldMap.get(loc) == w) {
                             Long time = Movecraft.getInstance().blockFadeTimeMap.get(loc);
                             Integer type = Movecraft.getInstance().blockFadeTypeMap.get(loc);

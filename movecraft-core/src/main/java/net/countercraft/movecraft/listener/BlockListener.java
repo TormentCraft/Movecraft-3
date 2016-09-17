@@ -27,7 +27,7 @@ import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.items.StorageChestItem;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.api.MovecraftLocation;
+import net.countercraft.movecraft.api.BlockPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -72,7 +72,7 @@ public class BlockListener implements Listener {
                     .equalsIgnoreCase(I18nSupport.getInternationalisedString("Item - Storage Crate name"))) {
             e.getBlockPlaced().setTypeId(33);
             Location l = e.getBlockPlaced().getLocation();
-            MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+            BlockPosition l1 = new BlockPosition(l.getBlockX(), l.getBlockY(), l.getBlockZ());
             StorageChestItem.createNewInventory(l1, e.getBlockPlaced().getWorld());
             new BukkitRunnable() {
 
@@ -87,7 +87,7 @@ public class BlockListener implements Listener {
         BlockState info = event.getNewState();
         if (info.getType() == Material.SNOW) {
             Block below = event.getBlock().getRelative(BlockFace.DOWN);
-            MovecraftLocation mloc = new MovecraftLocation(below.getX(), below.getY(), below.getZ());
+            BlockPosition mloc = new BlockPosition(below.getX(), below.getY(), below.getZ());
             boolean blockInCraft = false;
             Craft[] crafts = CraftManager.getInstance().getCraftsInWorld(info.getWorld());
             if (crafts != null) {
@@ -106,7 +106,7 @@ public class BlockListener implements Listener {
             if (event.getClickedBlock().getTypeId() == 33 && event.getClickedBlock().getData() == ((byte) 6)) {
                 if (Settings.DisableCrates) return;
                 Location l = event.getClickedBlock().getLocation();
-                MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+                BlockPosition l1 = new BlockPosition(l.getBlockX(), l.getBlockY(), l.getBlockZ());
                 Inventory i = StorageChestItem.getInventoryOfCrateAtLocation(l1, event.getPlayer().getWorld());
 
                 if (i != null) {
@@ -121,12 +121,12 @@ public class BlockListener implements Listener {
             return;
         }
         if (Settings.ProtectPilotedCrafts) {
-            MovecraftLocation mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
+            BlockPosition mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
             boolean blockInCraft = false;
             if (CraftManager.getInstance().getCraftsInWorld(e.getBlock().getWorld()) != null)
                 for (Craft craft : CraftManager.getInstance().getCraftsInWorld(e.getBlock().getWorld())) {
                     if (craft != null) {
-                        for (MovecraftLocation tloc : craft.getBlockList()) {
+                        for (BlockPosition tloc : craft.getBlockList()) {
                             if (tloc.x == mloc.x && tloc.y == mloc.y && tloc.z == mloc.z) blockInCraft = true;
                         }
                     }
@@ -139,7 +139,7 @@ public class BlockListener implements Listener {
         if (e.getBlock().getTypeId() == 33 && e.getBlock().getData() == ((byte) 6)) {
             if (Settings.DisableCrates) return;
             Location l = e.getBlock().getLocation();
-            MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+            BlockPosition l1 = new BlockPosition(l.getBlockX(), l.getBlockY(), l.getBlockZ());
             for (ItemStack i : StorageChestItem.getInventoryOfCrateAtLocation(l1, e.getBlock().getWorld())
                                                .getContents()) {
                 if (i != null) {

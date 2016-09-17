@@ -23,13 +23,13 @@ import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.BoundingBoxUtils;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.TownyWorldHeightLimits;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
@@ -48,16 +48,16 @@ import java.util.Set;
 import java.util.Stack;
 
 public class DetectionTask extends AsyncTask {
-    private final MovecraftLocation startLocation;
+    private final BlockPosition startLocation;
     private final Integer minSize;
     private final Integer maxSize;
     private Integer maxX;
     private Integer maxY;
     private Integer maxZ;
     private Integer minY;
-    private final Stack<MovecraftLocation> blockStack = new Stack<>();
-    private final Set<MovecraftLocation> blockList = new HashSet<>();
-    private final Set<MovecraftLocation> visited = new HashSet<>();
+    private final Stack<BlockPosition> blockStack = new Stack<>();
+    private final Set<BlockPosition> blockList = new HashSet<>();
+    private final Set<BlockPosition> visited = new HashSet<>();
     private final Map<List<Integer>, Integer> blockTypeCount = new HashMap<>();
     private Map<List<Integer>, List<Double>> dFlyBlocks;
     private final DetectionTaskData data;
@@ -69,7 +69,7 @@ public class DetectionTask extends AsyncTask {
     TownyWorld townyWorld = null;
     TownyWorldHeightLimits townyWorldHeightLimits = null;
 
-    public DetectionTask(Craft c, MovecraftLocation startLocation, int minSize, int maxSize, Integer[] allowedBlocks,
+    public DetectionTask(Craft c, BlockPosition startLocation, int minSize, int maxSize, Integer[] allowedBlocks,
                          Integer[] forbiddenBlocks, Player player, Player notificationPlayer, World w)
     {
         super(c);
@@ -119,7 +119,7 @@ public class DetectionTask extends AsyncTask {
 
     private void detectBlock(int x, int y, int z) {
 
-        MovecraftLocation workingLocation = new MovecraftLocation(x, y, z);
+        BlockPosition workingLocation = new BlockPosition(x, y, z);
 
         if (notVisited(workingLocation, visited)) {
 
@@ -324,7 +324,7 @@ public class DetectionTask extends AsyncTask {
         return data;
     }
 
-    private boolean notVisited(MovecraftLocation l, Set<MovecraftLocation> locations) {
+    private boolean notVisited(BlockPosition l, Set<BlockPosition> locations) {
         if (locations.contains(l)) {
             return false;
         } else {
@@ -333,11 +333,11 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private void addToBlockList(MovecraftLocation l) {
+    private void addToBlockList(BlockPosition l) {
         blockList.add(l);
     }
 
-    private void addToDetectionStack(MovecraftLocation l) {
+    private void addToDetectionStack(BlockPosition l) {
         blockStack.push(l);
     }
 
@@ -351,7 +351,7 @@ public class DetectionTask extends AsyncTask {
         blockTypeCount.put(id, count + 1);
     }
 
-    private void detectSurrounding(MovecraftLocation l) {
+    private void detectSurrounding(BlockPosition l) {
         int x = l.x;
         int y = l.y;
         int z = l.z;
@@ -373,7 +373,7 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private void calculateBounds(MovecraftLocation l) {
+    private void calculateBounds(BlockPosition l) {
         if (maxX == null || l.x > maxX) {
             maxX = l.x;
         }
@@ -408,20 +408,20 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private MovecraftLocation[] finaliseBlockList(Set<MovecraftLocation> blockSet) {
-        //MovecraftLocation[] finalList=blockSet.toArray( new MovecraftLocation[1] );
-        ArrayList<MovecraftLocation> finalList = new ArrayList<>();
+    private BlockPosition[] finaliseBlockList(Set<BlockPosition> blockSet) {
+        //BlockPosition[] finalList=blockSet.toArray( new BlockPosition[1] );
+        ArrayList<BlockPosition> finalList = new ArrayList<>();
 
         // Sort the blocks from the bottom up to minimize lower altitude block updates
         for (int posx = data.getMinX(); posx <= this.maxX; posx++) {
             for (int posz = data.getMinZ(); posz <= this.maxZ; posz++) {
                 for (int posy = this.minY; posy <= this.maxY; posy++) {
-                    MovecraftLocation test = new MovecraftLocation(posx, posy, posz);
+                    BlockPosition test = new BlockPosition(posx, posy, posz);
                     if (blockSet.contains(test)) finalList.add(test);
                 }
             }
         }
-        return finalList.toArray(new MovecraftLocation[1]);
+        return finalList.toArray(new BlockPosition[1]);
     }
 
     private boolean confirmStructureRequirements(Map<List<Integer>, List<Double>> flyBlocks,
