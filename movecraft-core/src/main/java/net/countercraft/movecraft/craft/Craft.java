@@ -36,7 +36,6 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     private final AtomicBoolean processing = new AtomicBoolean();
     private int minX;
     private int minZ;
-    private final int maxHeightLimit;
     private boolean cruising;
     private boolean sinking;
     private Direction cruiseDirection;
@@ -58,11 +57,6 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
         this.type = type;
         this.w = world;
         this.blockList = new BlockVec[1];
-        if (type.getMaxHeightLimit() > w.getMaxHeight() - 1) {
-            this.maxHeightLimit = w.getMaxHeight() - 1;
-        } else {
-            this.maxHeightLimit = type.getMaxHeightLimit();
-        }
         this.pilotLocked = false;
         this.pilotLockedX = 0.0;
         this.pilotLockedY = 0.0;

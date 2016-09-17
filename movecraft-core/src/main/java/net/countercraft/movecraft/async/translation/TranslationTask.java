@@ -329,11 +329,11 @@ public class TranslationTask extends AsyncTask {
             BlockVec oldLoc = blocksList[i];
             BlockVec newLoc = oldLoc.translate(data.getDx(), data.getDy(), data.getDz());
 
-            if (newLoc.y > data.getMaxHeight() && newLoc.y > oldLoc.y) {
+            if (newLoc.y > data.heightRange.max && newLoc.y > oldLoc.y) {
                 fail(i18n.get("Translation - Failed Craft hit height limit"));
                 break;
             }
-            if (newLoc.y < data.getMinHeight() && newLoc.y < oldLoc.y && !getCraft().getSinking()) {
+            if (newLoc.y < data.heightRange.min && newLoc.y < oldLoc.y && !getCraft().getSinking()) {
                 fail(i18n.get("Translation - Failed Craft hit minimum height limit"));
                 break;
             }
@@ -493,19 +493,19 @@ public class TranslationTask extends AsyncTask {
             if (blockObstructed || moveBlockedByTowny) {
                 if (hoverCraft && checkHover) {
                     //we check one up ever, if it is hovercraft and one down if it's using gravity
-                    if (hoverOver == 0 && newLoc.y + 1 <= data.getMaxHeight()) {
+                    if (hoverOver == 0 && newLoc.y + 1 <= data.heightRange.max) {
                         //first was checked actual level, now check if we can go up
                         hoverOver = 1;
                         data.setDy(1);
                         clearNewData = true;
                     } else if (hoverOver >= 1) {
                         //check other options to go up
-                        if (hoverOver < hoverLimit + 1 && newLoc.y + 1 <= data.getMaxHeight()) {
+                        if (hoverOver < hoverLimit + 1 && newLoc.y + 1 <= data.heightRange.max) {
                             data.setDy(hoverOver + 1);
                             hoverOver += 1;
                             clearNewData = true;
                         } else {
-                            if (hoverUseGravity && newLoc.y - hoverOver - 1 >= data.getMinHeight()) {
+                            if (hoverUseGravity && newLoc.y - hoverOver - 1 >= data.heightRange.min) {
                                 //we are on the maximum of top
                                 //if we can't go up so we test bottom side
                                 data.setDy(-1);
@@ -522,7 +522,7 @@ public class TranslationTask extends AsyncTask {
                         }
                     } else if (hoverOver <= -1) {
                         //we cant go down for 1 block, check more to hoverLimit
-                        if (hoverOver > -hoverLimit - 1 && newLoc.y - 1 >= data.getMinHeight()) {
+                        if (hoverOver > -hoverLimit - 1 && newLoc.y - 1 >= data.heightRange.min) {
                             data.setDy(hoverOver - 1);
                             hoverOver -= 1;
                             clearNewData = true;
@@ -537,7 +537,7 @@ public class TranslationTask extends AsyncTask {
                         }
                     } else {
                         // no way - reached MaxHeight during looking new way upstairs
-                        if (hoverUseGravity && newLoc.y - 1 >= data.getMinHeight()) {
+                        if (hoverUseGravity && newLoc.y - 1 >= data.heightRange.min) {
                             //we are on the maximum of top
                             //if we can't go up so we test bottom side
                             data.setDy(-1);
@@ -617,7 +617,7 @@ public class TranslationTask extends AsyncTask {
 
                 if (i == blocksList.length - 1) {
                     if ((hoverCraft && hoverUseGravity) ||
-                        (hoverUseGravity && newLoc.y > data.getMaxHeight() && hoverOver == 0)) {
+                        (hoverUseGravity && newLoc.y > data.heightRange.max && hoverOver == 0)) {
                         //hovecraft using gravity or something else using gravity and flying over its limit
                         int iFreeSpace = 0;
                         //canHoverOverWater adds 1 to dY for better check water under craft
@@ -1022,12 +1022,12 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
-            if (newLoc.y >= data.getMaxHeight() && newLoc.y > oldLoc.y && !checkHover) {
+            if (newLoc.y >= data.heightRange.max && newLoc.y > oldLoc.y && !checkHover) {
                 //if ( newLoc.getY() >= data.getMaxHeight() && newLoc.getY() > oldLoc.getY()) {
                 isFree = false;
                 break;
             }
-            if (newLoc.y <= data.getMinHeight() && newLoc.y < oldLoc.y) {
+            if (newLoc.y <= data.heightRange.min && newLoc.y < oldLoc.y) {
                 isFree = false;
                 break;
             }

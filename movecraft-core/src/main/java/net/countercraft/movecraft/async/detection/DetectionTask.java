@@ -24,6 +24,7 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockVec;
+import net.countercraft.movecraft.api.IntRange;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -52,8 +53,7 @@ public class DetectionTask extends AsyncTask {
     private final Settings settings;
     private final I18nSupport i18n;
     private final BlockVec startLocation;
-    private final Integer minSize;
-    private final Integer maxSize;
+    private final IntRange sizeRange;
     private Integer maxX;
     private Integer maxY;
     private Integer maxZ;
@@ -72,14 +72,13 @@ public class DetectionTask extends AsyncTask {
     TownyWorld townyWorld = null;
     TownyWorldHeightLimits townyWorldHeightLimits = null;
 
-    public DetectionTask(Craft c, BlockVec startLocation, int minSize, int maxSize, Integer[] allowedBlocks,
+    public DetectionTask(Craft c, BlockVec startLocation, IntRange sizeRange, Integer[] allowedBlocks,
                          Integer[] forbiddenBlocks, Player player, Player notificationPlayer, World w, Movecraft plugin,
                          Settings settings, I18nSupport i18n)
     {
         super(c);
         this.startLocation = startLocation;
-        this.minSize = minSize;
-        this.maxSize = maxSize;
+        this.sizeRange = sizeRange;
         this.plugin = plugin;
         this.settings = settings;
         this.i18n = i18n;
@@ -112,7 +111,7 @@ public class DetectionTask extends AsyncTask {
             return;
         }
 
-        if (isWithinLimit(blockList.size(), minSize, maxSize, false)) {
+        if (isWithinLimit(blockList.size(), sizeRange, false)) {
 
             data.setBlockList(finaliseBlockList(blockList));
 
@@ -136,7 +135,7 @@ public class DetectionTask extends AsyncTask {
                 testData = data.getWorld().getBlockAt(x, y, z).getData();
                 testID = data.getWorld().getBlockTypeIdAt(x, y, z);
             } catch (Exception e) {
-                fail(String.format(i18n.get("Detection - Craft too large"), maxSize));
+                fail(String.format(i18n.get("Detection - Craft too large"), sizeRange.max));
             }
 
             if ((testID == 8) || (testID == 9)) {
@@ -290,7 +289,7 @@ public class DetectionTask extends AsyncTask {
                     }
                 }
 
-                if (isWithinLimit(blockList.size(), 0, maxSize, true)) {
+                if (isWithinLimit(blockList.size(), new IntRange(0, sizeRange.max), true)) {
 
                     addToDetectionStack(workingLocation);
 
@@ -396,13 +395,13 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private boolean isWithinLimit(int size, int min, int max, boolean continueOver) {
-        if (size < min) {
-            fail(String.format(i18n.get("Detection - Craft too small"), min) +
+    private boolean isWithinLimit(int size, IntRange sizeRange, boolean continueOver) {
+        if (size < sizeRange.min) {
+            fail(String.format(i18n.get("Detection - Craft too small"), sizeRange.min) +
                  String.format("\nBlocks found: %d", size));
             return false;
-        } else if ((!continueOver && size > max) || (continueOver && size > (max + 1000))) {
-            fail(String.format(i18n.get("Detection - Craft too large"), max) +
+        } else if ((!continueOver && size > sizeRange.max) || (continueOver && size > (sizeRange.max + 1000))) {
+            fail(String.format(i18n.get("Detection - Craft too large"), sizeRange.max) +
                  String.format("\nBlocks found: %d", size));
             return false;
         } else {

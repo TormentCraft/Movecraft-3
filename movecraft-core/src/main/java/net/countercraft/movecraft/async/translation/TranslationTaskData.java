@@ -18,6 +18,7 @@
 package net.countercraft.movecraft.async.translation;
 
 import net.countercraft.movecraft.api.BlockVec;
+import net.countercraft.movecraft.api.IntRange;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
@@ -34,12 +35,11 @@ public class TranslationTaskData {
     private ItemDropUpdateCommand[] itemDropUpdates;
     private int[][][] hitbox;
     private int minX, minZ;
-    private final int maxHeight;
-    private final int minHeight;
+    public final IntRange heightRange;
     private boolean collisionExplosion;
 
     public TranslationTaskData(int dx, int dz, int dy, BlockVec[] blockList, int[][][] hitbox, int minZ, int minX,
-                               int maxHeight, int minHeight)
+                               IntRange heightRange)
     {
         this.dx = dx;
         this.dz = dz;
@@ -48,8 +48,7 @@ public class TranslationTaskData {
         this.hitbox = hitbox;
         this.minZ = minZ;
         this.minX = minX;
-        this.maxHeight = maxHeight;
-        this.minHeight = minHeight;
+        this.heightRange = heightRange;
     }
 
     public int getDx() {
@@ -139,14 +138,6 @@ public class TranslationTaskData {
 
     public void setMinZ(int minZ) {
         this.minZ = minZ;
-    }
-
-    public int getMinHeight() {
-        return minHeight;
-    }
-
-    public int getMaxHeight() {
-        return maxHeight;
     }
 
     public ItemDropUpdateCommand[] getItemDropUpdateCommands() {

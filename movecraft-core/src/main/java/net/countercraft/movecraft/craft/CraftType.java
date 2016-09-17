@@ -17,6 +17,7 @@
 
 package net.countercraft.movecraft.craft;
 
+import net.countercraft.movecraft.api.IntRange;
 import org.bukkit.Material;
 import org.yaml.snakeyaml.Yaml;
 
@@ -32,12 +33,28 @@ import java.util.Map;
 
 public class CraftType {
     private String craftName;
-    private int maxSize, minSize, minHeightLimit, maxHeightLimit, maxHeightAboveGround;
-    private Integer[] allowedBlocks, forbiddenBlocks;
-    private boolean blockedByWater, requireWaterContact, tryNudge, canCruise, canTeleport, canStaticMove, canHover,
-            canDirectControl, useGravity, canHoverOverWater, moveEntities;
-    private boolean allowHorizontalMovement, allowVerticalMovement, allowRemoteSign, cruiseOnPilot,
-            allowVerticalTakeoffAndLanding, rotateAtMidpoint;
+    private IntRange sizeRange;
+    private IntRange heightRange;
+    private int maxHeightAboveGround;
+    private Integer[] allowedBlocks;
+    private Integer[] forbiddenBlocks;
+    private boolean blockedByWater;
+    private boolean requireWaterContact;
+    private boolean tryNudge;
+    private boolean canCruise;
+    private boolean canTeleport;
+    private boolean canStaticMove;
+    private boolean canHover;
+    private boolean canDirectControl;
+    private boolean useGravity;
+    private boolean canHoverOverWater;
+    private boolean moveEntities;
+    private boolean allowHorizontalMovement;
+    private boolean allowVerticalMovement;
+    private boolean allowRemoteSign;
+    private boolean cruiseOnPilot;
+    private boolean allowVerticalTakeoffAndLanding;
+    private boolean rotateAtMidpoint;
     private int cruiseOnPilotVertMove;
     private int maxStaticMove;
     private int cruiseSkipBlocks;
@@ -159,8 +176,11 @@ public class CraftType {
         Yaml yaml = new Yaml();
         Map data = (Map) yaml.load(input);
         craftName = (String) data.get("name");
-        maxSize = integerFromObject(data.get("maxSize"));
-        minSize = integerFromObject(data.get("minSize"));
+
+        int maxSize = integerFromObject(data.get("maxSize"));
+        int minSize = integerFromObject(data.get("minSize"));
+        sizeRange = new IntRange(minSize, maxSize);
+
 //		allowedBlocks = ((ArrayList<String> ) data.get( "allowedBlocks" )).toArray( new Integer[1] );
         allowedBlocks = blockIDListFromObject(data.get("allowedBlocks"));
         Arrays.sort(allowedBlocks);
@@ -313,6 +333,8 @@ public class CraftType {
         } else {
             collisionExplosion = 0.0F;
         }
+
+        int minHeightLimit;
         if (data.containsKey("minHeightLimit")) {
             minHeightLimit = integerFromObject(data.get("minHeightLimit"));
             if (minHeightLimit < 0) {
@@ -321,6 +343,7 @@ public class CraftType {
         } else {
             minHeightLimit = 0;
         }
+        int maxHeightLimit;
         if (data.containsKey("maxHeightLimit")) {
             maxHeightLimit = integerFromObject(data.get("maxHeightLimit"));
             if (maxHeightLimit <= minHeightLimit) {
@@ -329,6 +352,8 @@ public class CraftType {
         } else {
             maxHeightLimit = 254;
         }
+        heightRange = new IntRange(minHeightLimit, maxHeightLimit);
+
         if (data.containsKey("maxHeightAboveGround")) {
             maxHeightAboveGround = integerFromObject(data.get("maxHeightAboveGround"));
         } else {
@@ -413,12 +438,8 @@ public class CraftType {
         return craftName;
     }
 
-    public int getMaxSize() {
-        return maxSize;
-    }
-
-    public int getMinSize() {
-        return minSize;
+    public IntRange getSizeRange() {
+        return sizeRange;
     }
 
     public Integer[] getAllowedBlocks() {
@@ -549,12 +570,8 @@ public class CraftType {
         return flyBlocks;
     }
 
-    public int getMaxHeightLimit() {
-        return maxHeightLimit;
-    }
-
-    public int getMinHeightLimit() {
-        return minHeightLimit;
+    public IntRange getHeightRange() {
+        return heightRange;
     }
 
     public int getMaxHeightAboveGround() {

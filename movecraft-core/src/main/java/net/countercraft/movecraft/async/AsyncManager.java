@@ -103,7 +103,7 @@ public final class AsyncManager extends BukkitRunnable {
     }
 
     public void detect(Craft craft, Player player, Player notificationPlayer, BlockVec startPoint) {
-        submitTask(new DetectionTask(craft, startPoint, craft.type.getMinSize(), craft.type.getMaxSize(),
+        submitTask(new DetectionTask(craft, startPoint, craft.type.getSizeRange(),
                                      craft.type.getAllowedBlocks(), craft.type.getForbiddenBlocks(), player,
                                      notificationPlayer, craft.w, plugin, settings, i18n),
 
@@ -159,8 +159,7 @@ public final class AsyncManager extends BukkitRunnable {
         submitTask(new TranslationTask(craft, plugin, settings, i18n, craftManager,
                                        new TranslationTaskData(dx, dz, dy, craft.getBlockList(), craft.getHitBox(),
                                                                craft.getMinZ(), craft.getMinX(),
-                                                               craft.type.getMaxHeightLimit(),
-                                                               craft.type.getMinHeightLimit())), craft);
+                                                               craft.type.getHeightRange())), craft);
     }
 
     public void rotate(Craft craft, Rotation rotation, BlockVec originPoint) {

@@ -69,10 +69,10 @@ public class CraftHelpListener implements CommandExecutor {
 
         StringBuilder sb = new StringBuilder();
         sb.append("&6==========[ &f" + c.getCraftName() + "&6 ]==========\n");
-        sb.append("\n&6Size: &7" + c.getMinSize() + " to " + c.getMaxSize());
+        sb.append("\n&6Size: &7" + c.getSizeRange().min + " to " + c.getSizeRange().max);
         sb.append("\n&6Speed: &7" + Math.round(20.0 / c.getTickCooldown()) + " to " +
                   (Math.round(20.0 / c.getCruiseTickCooldown()) * c.getCruiseSkipBlocks()));
-        sb.append("\n&6Altitude: &7" + c.getMinHeightLimit() + " to " + c.getMaxHeightLimit());
+        sb.append("\n&6Altitude: &7" + c.getHeightRange().min + " to " + c.getHeightRange().max);
         if (c.getFuelBurnRate() > 0) {
             sb.append("\n&6Fuel Use: &7" + c.getFuelBurnRate());
         }
