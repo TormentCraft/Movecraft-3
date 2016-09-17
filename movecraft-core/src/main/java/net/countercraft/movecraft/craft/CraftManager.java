@@ -100,9 +100,9 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
                     craftTypesSet.add(type);
                     foundCraft = true;
                 } catch (Exception e) {
-                    plugin.getLogger().log(Level.SEVERE, String.format(
-                            i18nSupport.get("Startup - Error parsing CraftType file"),
-                            file.getAbsolutePath()));
+                    plugin.getLogger().log(Level.SEVERE,
+                                           String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
+                                                         file.getAbsolutePath()));
                     e.printStackTrace();
                 }
             }
@@ -111,8 +111,8 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
             plugin.getLogger().log(Level.SEVERE, "ERROR: NO CRAFTS FOUND!!!");
         }
         craftTypes = craftTypesSet.toArray(new CraftType[1]);
-        plugin.getLogger().log(Level.INFO, String.format(
-                i18nSupport.get("Startup - Number of craft files loaded"), craftTypes.length));
+        plugin.getLogger().log(Level.INFO, String.format(i18nSupport.get("Startup - Number of craft files loaded"),
+                                                         craftTypes.length));
     }
 
     public void addCraft(Craft c, Player p) {
@@ -143,13 +143,15 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         Player pilot = getPlayerFromCraft(c);
         if (pilot != null) {
             pilot.sendMessage(i18nSupport.get("Release - Craft has been released message"));
-            plugin.getLogger().log(Level.INFO, String.format(
-                    i18nSupport.get("Release - Player has released a craft console"),
-                    c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,
-                    c.getMinX(), c.getMinZ()));
+            plugin.getLogger().log(Level.INFO,
+                                   String.format(i18nSupport.get("Release - Player has released a craft console"),
+                                                 c.getNotificationPlayer().getName(), c.getType().getCraftName(),
+                                                 c.getBlockList().length, c.getMinX(), c.getMinZ()));
         } else {
-            plugin.getLogger().log(Level.INFO, String.format(i18nSupport.get(
-                    "NULL Player has released a craft of type %s with size %d at coordinates : %d x , %d z"),
+            plugin.getLogger().log(Level.INFO, String.format(i18nSupport
+                                                                     .get("NULL Player has released a craft of type " +
+                                                                          "%s with size %d at coordinates : %d x , %d" +
+                                                                          " z"),
                                                              c.getType().getCraftName(), c.getBlockList().length,
                                                              c.getMinX(), c.getMinZ()));
         }
@@ -274,12 +276,11 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     public void removePlayerFromCraft(Craft c) {
         if (getPlayerFromCraft(c) != null) {
             removeReleaseTask(c);
-            getPlayerFromCraft(c)
-                    .sendMessage(i18nSupport.get("Release - Craft has been released message"));
-            plugin.getLogger().log(Level.INFO, String.format(
-                    i18nSupport.get("Release - Player has released a craft console"),
-                    c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,
-                    c.getMinX(), c.getMinZ()));
+            getPlayerFromCraft(c).sendMessage(i18nSupport.get("Release - Craft has been released message"));
+            plugin.getLogger().log(Level.INFO,
+                                   String.format(i18nSupport.get("Release - Player has released a craft console"),
+                                                 c.getNotificationPlayer().getName(), c.getType().getCraftName(),
+                                                 c.getBlockList().length, c.getMinX(), c.getMinZ()));
             Player p = getPlayerFromCraft(c);
             craftPlayerIndex.put(null, c);
             craftPlayerIndex.remove(p);

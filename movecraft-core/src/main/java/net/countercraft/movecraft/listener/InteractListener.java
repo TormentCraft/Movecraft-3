@@ -87,14 +87,13 @@ public class InteractListener implements Listener {
                         }
 
                     if (foundCraft == null) {
-                        event.getPlayer().sendMessage(i18n.get(
-                                "ERROR: Remote Sign must be a part of a piloted craft!"));
+                        event.getPlayer()
+                             .sendMessage(i18n.get("ERROR: Remote Sign must be a part of a piloted craft!"));
                         return;
                     }
 
                     if (!foundCraft.getType().allowRemoteSign()) {
-                        event.getPlayer().sendMessage(
-                                i18n.get("ERROR: Remote Signs not allowed on this craft!"));
+                        event.getPlayer().sendMessage(i18n.get("ERROR: Remote Signs not allowed on this craft!"));
                         return;
                     }
 
@@ -125,8 +124,7 @@ public class InteractListener implements Listener {
                         }
                     }
                     if (foundLoc == null) {
-                        event.getPlayer()
-                             .sendMessage(i18n.get("ERROR: Could not find target sign!"));
+                        event.getPlayer().sendMessage(i18n.get("ERROR: Could not find target sign!"));
                         return;
                     }
 

@@ -221,8 +221,8 @@ public final class AsyncManager extends BukkitRunnable {
                         task.run();
                         submitCompletedTask(task);
                     } catch (Exception e) {
-                        plugin.getLogger().log(Level.SEVERE, i18n.get(
-                                "Internal - Error - Processor thread encountered an error"));
+                        plugin.getLogger()
+                              .log(Level.SEVERE, i18n.get("Internal - Error - Processor thread encountered an error"));
                         e.printStackTrace();
                     }
                 }
@@ -257,8 +257,7 @@ public final class AsyncManager extends BukkitRunnable {
 
                 if (pCraft != null && p != null) {
                     //Player is already controlling a craft
-                    notifyP.sendMessage(
-                            i18n.get("Detection - Failed - Already commanding a craft"));
+                    notifyP.sendMessage(i18n.get("Detection - Failed - Already commanding a craft"));
                 } else {
                     if (data.failed()) {
                         if (notifyP != null) notifyP.sendMessage(data.getFailMessage());
@@ -275,15 +274,14 @@ public final class AsyncManager extends BukkitRunnable {
                                     (c.getType().getCruiseOnPilot() || p != null)) {  // changed from p!=null
                                     if (craft.getType() == c.getType() ||
                                         craft.getBlockList().length <= data.getBlockList().length) {
-                                        notifyP.sendMessage(i18n.get(
-                                                "Detection - Failed Craft is already being controlled"));
+                                        notifyP.sendMessage(
+                                                i18n.get("Detection - Failed Craft is already being controlled"));
                                         failed = true;
                                     } else { // if this is a different type than the overlapping craft, and is
                                         // smaller, this must be a child craft, like a fighter on a carrier
                                         if (!craft.isNotProcessing()) {
                                             failed = true;
-                                            notifyP.sendMessage(
-                                                    i18n.get("Parent Craft is busy"));
+                                            notifyP.sendMessage(i18n.get("Parent Craft is busy"));
                                         }
 
                                         // remove the new craft from the parent craft
@@ -351,19 +349,20 @@ public final class AsyncManager extends BukkitRunnable {
                             c.setNotificationPlayer(notifyP);
 
                             if (notifyP != null) {
-                                notifyP.sendMessage(
-                                        i18n.get("Detection - Successfully piloted craft") +
-                                        " Size: " +
-                                        c.getBlockList().length);
-                                plugin.getLogger().log(Level.INFO, String.format(
-                                        i18n.get("Detection - Success - Log Output"),
-                                        notifyP.getName(), c.getType().getCraftName(), c.getBlockList().length,
-                                        c.getMinX(), c.getMinZ()));
+                                notifyP.sendMessage(i18n.get("Detection - Successfully piloted craft") +
+                                                    " Size: " +
+                                                    c.getBlockList().length);
+                                plugin.getLogger().log(Level.INFO,
+                                                       String.format(i18n.get("Detection - Success - Log Output"),
+                                                                     notifyP.getName(), c.getType().getCraftName(),
+                                                                     c.getBlockList().length, c.getMinX(),
+                                                                     c.getMinZ()));
                             } else {
-                                plugin.getLogger().log(Level.INFO, String.format(
-                                        i18n.get("Detection - Success - Log Output"),
-                                        "NULL PLAYER", c.getType().getCraftName(), c.getBlockList().length, c.getMinX(),
-                                        c.getMinZ()));
+                                plugin.getLogger().log(Level.INFO,
+                                                       String.format(i18n.get("Detection - Success - Log Output"),
+                                                                     "NULL PLAYER", c.getType().getCraftName(),
+                                                                     c.getBlockList().length, c.getMinX(),
+                                                                     c.getMinZ()));
                             }
                             craftManager.addCraft(c, p);
                         }
@@ -389,8 +388,7 @@ public final class AsyncManager extends BukkitRunnable {
                         boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, null, null);
 
                         if (failed) {
-                            plugin.getLogger()
-                                  .log(Level.SEVERE, i18n.get("Translation - Craft collision"));
+                            plugin.getLogger().log(Level.SEVERE, i18n.get("Translation - Craft collision"));
                         } else {
                             sentMapUpdate = true;
                         }
@@ -416,8 +414,7 @@ public final class AsyncManager extends BukkitRunnable {
                     boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, eUpdates, iUpdates);
 
                     if (failed) {
-                        plugin.getLogger()
-                              .log(Level.SEVERE, i18n.get("Translation - Craft collision"));
+                        plugin.getLogger().log(Level.SEVERE, i18n.get("Translation - Craft collision"));
                     } else {
                         sentMapUpdate = true;
                         c.setBlockList(task.getData().getBlockList());
@@ -469,8 +466,7 @@ public final class AsyncManager extends BukkitRunnable {
                         boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, eUpdates, null);
 
                         if (failed) {
-                            plugin.getLogger()
-                                  .log(Level.SEVERE, i18n.get("Rotation - Craft Collision"));
+                            plugin.getLogger().log(Level.SEVERE, i18n.get("Rotation - Craft Collision"));
                         } else {
                             sentMapUpdate = true;
 
@@ -756,10 +752,10 @@ public final class AsyncManager extends BukkitRunnable {
                                                     "WorldGuard " +
                                                     "region"));
                                         } else if (sinkingForbiddenByFlag) {
-                                            notifyP.sendMessage(i18n.get(
-                                                    "WGCustomFlags - Sinking a craft is not allowed in this " +
-                                                    "WorldGuard " +
-                                                    "region"));
+                                            notifyP.sendMessage(
+                                                    i18n.get("WGCustomFlags - Sinking a craft is not allowed in this " +
+                                                             "WorldGuard " +
+                                                             "region"));
                                         } else if (sinkingForbiddenByTowny) {
                                             if (townyLoc != null) {
                                                 notifyP.sendMessage(String.format(i18n.get(
@@ -772,8 +768,7 @@ public final class AsyncManager extends BukkitRunnable {
                                                         "Towny - Sinking a craft is not allowed in this town plot"));
                                             }
                                         } else {
-                                            notifyP.sendMessage(
-                                                    i18n.get("Sinking a craft is not allowed."));
+                                            notifyP.sendMessage(i18n.get("Sinking a craft is not allowed."));
                                         }
                                     }
                                     pcraft.setCruising(false);
@@ -785,8 +780,7 @@ public final class AsyncManager extends BukkitRunnable {
                                     if (isSinking && pcraft.isNotProcessing()) {
                                         Player p = craftManager.getPlayerFromCraft(pcraft);
                                         Player notifyP = pcraft.getNotificationPlayer();
-                                        if (notifyP != null) notifyP.sendMessage(
-                                                i18n.get("Player- Craft is sinking"));
+                                        if (notifyP != null) notifyP.sendMessage(i18n.get("Player- Craft is sinking"));
                                         pcraft.setCruising(false);
                                         pcraft.setKeepMoving(false);
                                         pcraft.setSinking(true);

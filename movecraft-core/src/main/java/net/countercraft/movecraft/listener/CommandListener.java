@@ -163,8 +163,7 @@ public class CommandListener implements CommandExecutor {
                 //e.getPlayer().sendMessage( String.format( i18n.get( "Player- Craft
                 // has been released" ) ) );
             } else {
-                player.sendMessage(
-                        i18n.get("Player- Error - You do not have a craft to release!"));
+                player.sendMessage(i18n.get("Player- Error - You do not have a craft to release!"));
             }
 
             return true;
@@ -514,8 +513,7 @@ public class CommandListener implements CommandExecutor {
                         plugin.getEconomy().withdrawPlayer(player, cost);
                         plugin.siegeInProgress = true;
                     } else {
-                        player.sendMessage(
-                                i18n.get("The time is not during the Siege schedule"));
+                        player.sendMessage(i18n.get("The time is not during the Siege schedule"));
                         return true;
                     }
                 } else {
@@ -523,8 +521,7 @@ public class CommandListener implements CommandExecutor {
                     return true;
                 }
             } else {
-                player.sendMessage(i18n.get(
-                        "Could not find a siege configuration for the region you are in"));
+                player.sendMessage(i18n.get("Could not find a siege configuration for the region you are in"));
                 return true;
             }
         }

@@ -218,9 +218,7 @@ public class DetectionTask extends AsyncTask {
                         LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
                         if (!WGCustomFlagsUtils
                                 .validateFlag(plugin.getWorldGuardPlugin(), loc, plugin.FLAG_PILOT, lp)) {
-                            fail(String.format(
-                                    i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d",
-                                    x, y, z));
+                            fail(String.format(i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d", x, y, z));
                         }
                     }
 
@@ -270,9 +268,8 @@ public class DetectionTask extends AsyncTask {
                                             }
                                         }
                                         if (failed) {
-                                            fail(String.format(
-                                                    i18n.get("Towny - Detection Failed") +
-                                                    " %s @ %d,%d,%d", town.getName(), x, y, z));
+                                            fail(String.format(i18n.get("Towny - Detection Failed") + " %s @ %d,%d,%d",
+                                                               town.getName(), x, y, z));
                                         }
                                     }
                                 }
@@ -452,27 +449,27 @@ public class DetectionTask extends AsyncTask {
 
             if (minPercentage < 10000.0) {
                 if (blockPercentage < minPercentage) {
-                    fail(String.format(i18n.get("Not enough flyblock") + ": %s %.2f%% < %.2f%%",
-                                       blockName, blockPercentage, minPercentage));
+                    fail(String.format(i18n.get("Not enough flyblock") + ": %s %.2f%% < %.2f%%", blockName,
+                                       blockPercentage, minPercentage));
                     return false;
                 }
             } else {
                 if (numberOfBlocks < entry.getValue().get(0) - 10000.0) {
-                    fail(String.format(i18n.get("Not enough flyblock") + ": %s %d < %d",
-                                       blockName, numberOfBlocks, entry.getValue().get(0).intValue() - 10000));
+                    fail(String.format(i18n.get("Not enough flyblock") + ": %s %d < %d", blockName, numberOfBlocks,
+                                       entry.getValue().get(0).intValue() - 10000));
                     return false;
                 }
             }
             if (maxPercentage < 10000.0) {
                 if (blockPercentage > maxPercentage) {
-                    fail(String.format(i18n.get("Too much flyblock") + ": %s %.2f%% > %.2f%%",
-                                       blockName, blockPercentage, maxPercentage));
+                    fail(String.format(i18n.get("Too much flyblock") + ": %s %.2f%% > %.2f%%", blockName,
+                                       blockPercentage, maxPercentage));
                     return false;
                 }
             } else {
                 if (numberOfBlocks > entry.getValue().get(1) - 10000.0) {
-                    fail(String.format(i18n.get("Too much flyblock") + ": %s %d > %d", blockName,
-                                       numberOfBlocks, entry.getValue().get(1).intValue() - 10000));
+                    fail(String.format(i18n.get("Too much flyblock") + ": %s %d > %d", blockName, numberOfBlocks,
+                                       entry.getValue().get(1).intValue() - 10000));
                     return false;
                 }
             }

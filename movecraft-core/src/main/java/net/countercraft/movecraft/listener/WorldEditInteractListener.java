@@ -113,8 +113,7 @@ public class WorldEditInteractListener implements Listener {
                         "Repair:")) { // left click the Repair sign, and it saves the state
                     final Player player = event.getPlayer();
                     if (settings.RepairTicksPerBlock == 0) {
-                        player.sendMessage(i18n.get(
-                                "Repair functionality is disabled or WorldEdit was not detected"));
+                        player.sendMessage(i18n.get("Repair functionality is disabled or WorldEdit was not detected"));
                         return;
                     }
                     Craft pCraft = craftManager.getCraftByPlayer(player);
@@ -192,8 +191,7 @@ public class WorldEditInteractListener implements Listener {
 
         if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Repair:")) {
             if (settings.RepairTicksPerBlock == 0) {
-                player.sendMessage(i18n.get(
-                        "Repair functionality is disabled or WorldEdit was not detected"));
+                player.sendMessage(i18n.get("Repair functionality is disabled or WorldEdit was not detected"));
                 return;
             }
             if (craft == null) {
@@ -341,10 +339,9 @@ public class WorldEditInteractListener implements Listener {
                         }
                     }
                     if (remainingQty > 0) {
-                        player.sendMessage(
-                                String.format(i18n.get("Need more of material") + ": %s - %d",
-                                              Material.getMaterial(itemTypeId).name().toLowerCase().replace("_", " "),
-                                              remainingQty));
+                        player.sendMessage(String.format(i18n.get("Need more of material") + ": %s - %d",
+                                                         Material.getMaterial(itemTypeId).name().toLowerCase()
+                                                                 .replace("_", " "), remainingQty));
                         enoughMaterial = false;
                     } else {
                         chestsToTakeFrom.put(itemTypeId, chests);
@@ -405,9 +402,8 @@ public class WorldEditInteractListener implements Listener {
                             final int fDur = durationInTicks / 20;
                             BukkitTask statusTask = new BukkitRunnable() {
                                 @Override public void run() {
-                                    player.sendMessage(String.format(
-                                            i18n.get("Repairs underway") + ": %d / %d", fTics,
-                                            fDur));
+                                    player.sendMessage(
+                                            String.format(i18n.get("Repairs underway") + ": %d / %d", fTics, fDur));
                                 }
                             }.runTaskLater(plugin, (ticsFromStart));
                         }
@@ -417,8 +413,7 @@ public class WorldEditInteractListener implements Listener {
                         BukkitTask releaseTask = new BukkitRunnable() {
                             @Override public void run() {
                                 craftManager.removeCraft(craft);
-                                player.sendMessage(i18n.get(
-                                        "Repairs complete. You may now pilot the craft"));
+                                player.sendMessage(i18n.get("Repairs complete. You may now pilot the craft"));
                             }
                         }.runTaskLater(plugin, (durationInTicks + 20));
 
@@ -433,14 +428,11 @@ public class WorldEditInteractListener implements Listener {
             } else {
                 // if this is the first time they have clicked the sign, show the summary of repair costs and
                 // requirements
-                player.sendMessage(
-                        String.format(i18n.get("Total damaged blocks") + ": %d", numdiffblocks));
+                player.sendMessage(String.format(i18n.get("Total damaged blocks") + ": %d", numdiffblocks));
                 float percent = (numdiffblocks * 100) / craft.getOrigBlockCount();
-                player.sendMessage(
-                        String.format(i18n.get("Percentage of craft") + ": %.2f%%", percent));
+                player.sendMessage(String.format(i18n.get("Percentage of craft") + ": %.2f%%", percent));
                 if (percent > 50) {
-                    player.sendMessage(
-                            i18n.get("This craft is too damaged and can not be repaired"));
+                    player.sendMessage(i18n.get("This craft is too damaged and can not be repaired"));
                     return;
                 }
                 if (numdiffblocks != 0) {
@@ -453,12 +445,9 @@ public class WorldEditInteractListener implements Listener {
                     }
                     int durationInSeconds = numdiffblocks * settings.RepairTicksPerBlock / 20;
                     player.sendMessage(
-                            String.format(i18n.get("Seconds to complete repair") + ": %d",
-                                          durationInSeconds));
+                            String.format(i18n.get("Seconds to complete repair") + ": %d", durationInSeconds));
                     int moneyCost = (int) (numdiffblocks * settings.RepairMoneyPerBlock);
-                    player.sendMessage(
-                            String.format(i18n.get("Money to complete repair") + ": %d",
-                                          moneyCost));
+                    player.sendMessage(String.format(i18n.get("Money to complete repair") + ": %d", moneyCost));
                     repairRightClickTimeMap.put(player, System.currentTimeMillis());
                 }
             }

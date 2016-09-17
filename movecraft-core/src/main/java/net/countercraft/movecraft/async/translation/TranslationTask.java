@@ -361,9 +361,8 @@ public class TranslationTask extends AsyncTask {
                     plugin.getWGCustomFlagsPlugin() != null && settings.WGCustomFlagsUsePilotFlag) {
                     LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
                     if (!WGCustomFlagsUtils.validateFlag(plugin.getWorldGuardPlugin(), plugLoc, plugin.FLAG_MOVE, lp)) {
-                        fail(String.format(
-                                i18n.get("WGCustomFlags - Translation Failed") + " @ %d,%d,%d",
-                                oldLoc.x, oldLoc.y, oldLoc.z));
+                        fail(String.format(i18n.get("WGCustomFlags - Translation Failed") + " @ %d,%d,%d", oldLoc.x,
+                                           oldLoc.y, oldLoc.z));
                         break;
                     }
                 }
@@ -435,8 +434,8 @@ public class TranslationTask extends AsyncTask {
             if (testMaterial == Material.CHEST || testMaterial == Material.TRAPPED_CHEST) {
                 if (!checkChests(testMaterial, newLoc, existingBlockSet)) {
                     //prevent chests collision
-                    fail(String.format(i18n.get("Translation - Failed Craft is obstructed") +
-                                       " @ %d,%d,%d,%s", newLoc.x, newLoc.y, newLoc.z,
+                    fail(String.format(i18n.get("Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s",
+                                       newLoc.x, newLoc.y, newLoc.z,
                                        getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
                                                  .toString()));
                     break;
@@ -576,12 +575,12 @@ public class TranslationTask extends AsyncTask {
                         // ramming collisions
                         if (getCraft().getType().getCollisionExplosion() == 0.0F) {
                             if (moveBlockedByTowny) {
-                                fail(String.format(i18n.get("Towny - Translation Failed") +
-                                                   " %s @ %d,%d,%d", townName, oldLoc.x, oldLoc.y, oldLoc.z));
+                                fail(String.format(i18n.get("Towny - Translation Failed") + " %s @ %d,%d,%d", townName,
+                                                   oldLoc.x, oldLoc.y, oldLoc.z));
                             } else {
                                 fail(String.format(
-                                        i18n.get("Translation - Failed Craft is obstructed") +
-                                        " @ %d,%d,%d,%s", oldLoc.x, oldLoc.y, oldLoc.z,
+                                        i18n.get("Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s",
+                                        oldLoc.x, oldLoc.y, oldLoc.z,
                                         getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
                                                   .toString()));
                                 getCraft().setCruising(false);
@@ -656,14 +655,13 @@ public class TranslationTask extends AsyncTask {
                             }
                             if (iFreeSpace > hoverLimit) {
                                 if (bladeOK) {
-                                    fail(i18n.get(
-                                            "Translation - Failed Craft hit height limit"));
+                                    fail(i18n.get("Translation - Failed Craft hit height limit"));
                                 } else {
-                                    fail(String.format(i18n.get(
-                                            "Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s", oldLoc.x,
-                                                       oldLoc.y, oldLoc.z,
-                                                       getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z)
-                                                                 .getType().toString()));
+                                    fail(String.format(
+                                            i18n.get("Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s",
+                                            oldLoc.x, oldLoc.y, oldLoc.z,
+                                            getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
+                                                      .toString()));
                                 }
                                 break;
                             }

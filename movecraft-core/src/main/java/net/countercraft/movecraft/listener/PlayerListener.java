@@ -127,9 +127,8 @@ public class PlayerListener implements Listener {
                         String ret = checkCraftBorders(craft);
                         if (ret != null) {
                             player.sendMessage(ChatColor.RED +
-                                               i18n.get(
-                                                       "WARNING! There are blocks near your craft, part of" +
-                                                       " your craft may be damaged!") +
+                                               i18n.get("WARNING! There are blocks near your craft, part of" +
+                                                        " your craft may be damaged!") +
                                                ChatColor.RESET + "\n" + ret);
                         }
                     }

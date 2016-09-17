@@ -277,8 +277,8 @@ public class RotationTask extends AsyncTask {
                     //prevent chests collision
                     failed = true;
                     failMessage = String
-                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d",
-                                    blockList[i].x, blockList[i].y, blockList[i].z);
+                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d", blockList[i].x,
+                                    blockList[i].y, blockList[i].z);
                     break;
                 }
             }
@@ -309,8 +309,9 @@ public class RotationTask extends AsyncTask {
                     if (!WGCustomFlagsUtils
                             .validateFlag(plugin.getWorldGuardPlugin(), plugLoc, plugin.FLAG_ROTATE, lp)) {
                         failed = true;
-                        failMessage = String.format(i18n.get("WGCustomFlags - Rotation Failed") +
-                                                    " @ %d,%d,%d", blockList[i].x, blockList[i].y, blockList[i].z);
+                        failMessage = String
+                                .format(i18n.get("WGCustomFlags - Rotation Failed") + " @ %d,%d,%d", blockList[i].x,
+                                        blockList[i].y, blockList[i].z);
                         break;
                     }
                 }
@@ -361,9 +362,8 @@ public class RotationTask extends AsyncTask {
                                     }
                                     if (failed) {
                                         failMessage = String
-                                                .format(i18n.get("Towny - Rotation Failed") +
-                                                        " %s @ %d,%d,%d", town.getName(), blockList[i].x,
-                                                        blockList[i].y, blockList[i].z);
+                                                .format(i18n.get("Towny - Rotation Failed") + " %s @ %d,%d,%d",
+                                                        town.getName(), blockList[i].x, blockList[i].y, blockList[i].z);
                                         break;
                                     }
                                 }
@@ -378,8 +378,8 @@ public class RotationTask extends AsyncTask {
                 if ((typeID != 0 && typeID != 9 && typeID != 34) && !existingBlockSet.contains(blockList[i])) {
                     failed = true;
                     failMessage = String
-                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d",
-                                    blockList[i].x, blockList[i].y, blockList[i].z);
+                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d", blockList[i].x,
+                                    blockList[i].y, blockList[i].z);
                     break;
                 } else {
                     int id = w.getBlockTypeIdAt(originalBlockList[i].x, originalBlockList[i].y, originalBlockList[i].z);
@@ -395,8 +395,8 @@ public class RotationTask extends AsyncTask {
                 if ((typeID != 0 && typeID != 34) && !existingBlockSet.contains(blockList[i])) {
                     failed = true;
                     failMessage = String
-                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d",
-                                    blockList[i].x, blockList[i].y, blockList[i].z);
+                            .format(i18n.get("Rotation - Craft is obstructed") + " @ %d,%d,%d", blockList[i].x,
+                                    blockList[i].y, blockList[i].z);
                     break;
                 } else {
                     int id = w.getBlockTypeIdAt(originalBlockList[i].x, originalBlockList[i].y, originalBlockList[i].z);

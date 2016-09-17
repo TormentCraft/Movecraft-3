@@ -663,7 +663,7 @@ Changed for 1.8, and quite possibly wrong:
                         }
                     }
                 }
-				
+
 /*				// move entities again
 				if(!Settings.CompatibilityMode)
 					for(BlockPosition i : entityMap.keySet()) {

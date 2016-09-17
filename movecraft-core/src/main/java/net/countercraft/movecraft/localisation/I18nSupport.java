@@ -19,19 +19,9 @@ package net.countercraft.movecraft.localisation;
 
 import org.bukkit.plugin.Plugin;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.Properties;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 
 public final class I18nSupport {
     private final ResourceBundle bundle;
