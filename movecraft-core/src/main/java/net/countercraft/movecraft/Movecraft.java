@@ -35,7 +35,6 @@ import net.countercraft.movecraft.listener.InteractListener;
 import net.countercraft.movecraft.listener.PlayerListener;
 import net.countercraft.movecraft.listener.WorldEditInteractListener;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.metrics.MovecraftMetrics;
 import net.countercraft.movecraft.utils.MapUpdateManager;
 import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
@@ -327,8 +326,6 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
                        .registerEvents(new BlockListener(this, settings, i18nSupport, craftManager), this);
             getServer().getPluginManager()
                        .registerEvents(new PlayerListener(this, settings, i18nSupport, craftManager), this);
-
-            new MovecraftMetrics(craftManager.getCraftTypes().length);
 
             logger.log(Level.INFO,
                        String.format(i18nSupport.get("Startup - Enabled message"), getDescription().getVersion()));
