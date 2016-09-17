@@ -18,13 +18,7 @@
 package net.countercraft.movecraft.craft;
 
 import net.countercraft.movecraft.api.BlockPosition;
-import net.countercraft.movecraft.async.AsyncManager;
-import net.countercraft.movecraft.async.detection.DetectionTask;
-import net.countercraft.movecraft.async.rotation.RotationTask;
-import net.countercraft.movecraft.async.translation.TranslationTask;
-import net.countercraft.movecraft.async.translation.TranslationTaskData;
 import net.countercraft.movecraft.api.Direction;
-import net.countercraft.movecraft.api.Rotation;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
@@ -36,9 +30,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Craft implements net.countercraft.movecraft.api.Craft {
     private int[][][] hitBox;
-    private final CraftType type;
+    public final CraftType type;
     private BlockPosition[] blockList;
-    private final World w;
+    public final World w;
     private final AtomicBoolean processing = new AtomicBoolean();
     private int minX;
     private int minZ;
@@ -112,66 +106,6 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
         this.hitBox = hitBox;
     }
 
-    public void detect(Player player, Player notificationPlayer, BlockPosition startPoint) {
-        AsyncManager.getInstance().submitTask(
-                new DetectionTask(this, startPoint, type.getMinSize(), type.getMaxSize(), type.getAllowedBlocks(),
-                                  type.getForbiddenBlocks(), player, notificationPlayer, w), this);
-    }
-
-    public void translate(int dx, int dy, int dz) {
-        // check to see if the craft is trying to move in a direction not permitted by the type
-        if (!this.getType().allowHorizontalMovement() && !this.getSinking()) {
-            dx = 0;
-            dz = 0;
-        }
-        if (!this.getType().allowVerticalMovement() && !this.getSinking()) {
-            dy = 0;
-        }
-        if (dx == 0 && dy == 0 && dz == 0) {
-            return;
-        }
-
-        if (!this.getType().allowVerticalTakeoffAndLanding() && dy != 0 && !this.getSinking()) {
-            if (dx == 0 && dz == 0) {
-                return;
-            }
-        }
-
-        // find region that will need to be loaded to translate this craft
-        int cminX = minX;
-        int cmaxX = minX;
-        if (dx < 0) cminX = cminX + dx;
-        int cminZ = minZ;
-        int cmaxZ = minZ;
-        if (dz < 0) cminZ = cminZ + dz;
-        for (BlockPosition m : blockList) {
-            if (m.x > cmaxX) cmaxX = m.x;
-            if (m.z > cmaxZ) cmaxZ = m.z;
-        }
-        if (dx > 0) cmaxX = cmaxX + dx;
-        if (dz > 0) cmaxZ = cmaxZ + dz;
-        cminX = cminX >> 4;
-        cminZ = cminZ >> 4;
-        cmaxX = cmaxX >> 4;
-        cmaxZ = cmaxZ >> 4;
-
-        // load all chunks that will be needed to translate this craft
-        for (int posX = cminX - 1; posX <= cmaxX + 1; posX++) {
-            for (int posZ = cminZ - 1; posZ <= cmaxZ + 1; posZ++) {
-                if (!this.getW().isChunkLoaded(posX, posZ)) {
-                    this.getW().loadChunk(posX, posZ);
-                }
-            }
-        }
-
-        AsyncManager.getInstance().submitTask(new TranslationTask(this,
-                                                                  new TranslationTaskData(dx, dz, dy, getBlockList(),
-                                                                                          getHitBox(), minZ, minX,
-                                                                                          type.getMaxHeightLimit(),
-                                                                                          type.getMinHeightLimit())),
-                                              this);
-    }
-
     public void resetSigns(boolean resetCruise, boolean resetAscend, boolean resetDescend) {
         for (BlockPosition location : blockList) {
             int blockID = w.getBlockAt(location.x, location.y, location.z).getTypeId();
@@ -191,49 +125,6 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
                 }
             }
         }
-    }
-
-    public void rotate(Rotation rotation, BlockPosition originPoint) {
-        // find region that will need to be loaded to rotate this craft
-        int cminX = minX;
-        int cmaxX = minX;
-        int cminZ = minZ;
-        int cmaxZ = minZ;
-        for (BlockPosition m : blockList) {
-            if (m.x > cmaxX) cmaxX = m.x;
-            if (m.z > cmaxZ) cmaxZ = m.z;
-        }
-        int distX = cmaxX - cminX;
-        int distZ = cmaxZ - cminZ;
-        if (distX > distZ) {
-            cminZ -= (distX - distZ) / 2;
-            cmaxZ += (distX - distZ) / 2;
-        }
-        if (distZ > distX) {
-            cminX -= (distZ - distX) / 2;
-            cmaxX += (distZ - distX) / 2;
-        }
-        cminX = cminX >> 4;
-        cminZ = cminZ >> 4;
-        cmaxX = cmaxX >> 4;
-        cmaxZ = cmaxZ >> 4;
-
-        // load all chunks that will be needed to rotate this craft
-        for (int posX = cminX; posX <= cmaxX; posX++) {
-            for (int posZ = cminZ; posZ <= cmaxZ; posZ++) {
-                if (!this.getW().isChunkLoaded(posX, posZ)) {
-                    this.getW().loadChunk(posX, posZ);
-                }
-            }
-        }
-
-        AsyncManager.getInstance()
-                    .submitTask(new RotationTask(this, originPoint, this.getBlockList(), rotation, this.getW()), this);
-    }
-
-    public void rotate(Rotation rotation, BlockPosition originPoint, boolean isSubCraft) {
-        AsyncManager.getInstance().submitTask(
-                new RotationTask(this, originPoint, this.getBlockList(), rotation, this.getW(), isSubCraft), this);
     }
 
     public int getMaxX() {

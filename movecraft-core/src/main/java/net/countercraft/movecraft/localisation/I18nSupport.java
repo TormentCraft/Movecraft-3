@@ -17,8 +17,7 @@
 
 package net.countercraft.movecraft.localisation;
 
-import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.config.Settings;
+import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,13 +28,12 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 public final class I18nSupport {
-    private static Properties languageFile;
+    private Properties languageFile;
 
-    public static void init() {
+    public void init(Plugin plugin, String locale) {
         languageFile = new Properties();
 
-        File localisationDirectory = new File(
-                Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/localisation");
+        File localisationDirectory = new File(plugin.getDataFolder().getAbsolutePath() + "/localisation");
 
         if (!localisationDirectory.exists()) {
             localisationDirectory.mkdirs();
@@ -44,14 +42,14 @@ public final class I18nSupport {
         InputStream is = null;
         try {
             is = new FileInputStream(
-                    localisationDirectory.getAbsolutePath() + "/movecraftlang" + "_" + Settings.LOCALE + ".properties");
+                    localisationDirectory.getAbsolutePath() + "/movecraftlang" + "_" + locale + ".properties");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
         if (is == null) {
-            Movecraft.getInstance().getLogger().log(Level.SEVERE, "Critical Error in Localisation System");
-            Movecraft.getInstance().getServer().shutdown();
+            plugin.getLogger().log(Level.SEVERE, "Critical Error in Localisation System");
+            plugin.getServer().shutdown();
             return;
         }
 
@@ -63,7 +61,7 @@ public final class I18nSupport {
         }
     }
 
-    public static String getInternationalisedString(String key) {
+    public String getInternationalisedString(String key) {
         String ret = languageFile.getProperty(key);
         if (ret != null) {
             return ret;

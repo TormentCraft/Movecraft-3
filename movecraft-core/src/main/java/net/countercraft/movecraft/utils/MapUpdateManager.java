@@ -26,13 +26,10 @@ import net.countercraft.movecraft.api.BlockPosition;
 import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.craft.CraftManager;
-import net.countercraft.movecraft.items.StorageChestItem;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.datastructures.CommandBlockTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.InventoryTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.SignTransferHolder;
-import net.countercraft.movecraft.utils.datastructures.StorageCrateTransferHolder;
 import net.countercraft.movecraft.utils.datastructures.TransferData;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -47,7 +44,6 @@ import org.bukkit.craftbukkit.v1_10_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -65,19 +61,17 @@ import java.util.Set;
 import java.util.logging.Level;
 
 public final class MapUpdateManager extends BukkitRunnable {
+    private final Settings settings;
+    private final I18nSupport i18n;
+    private final Movecraft plugin;
     private final Map<World, ArrayList<MapUpdateCommand>> updates = new HashMap<>();
     private final Map<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<>();
     private final Map<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<>();
 
-    private MapUpdateManager() {
-    }
-
-    public static MapUpdateManager getInstance() {
-        return MapUpdateManagerHolder.INSTANCE;
-    }
-
-    private static final class MapUpdateManagerHolder {
-        private static final MapUpdateManager INSTANCE = new MapUpdateManager();
+    public MapUpdateManager(Settings settings, I18nSupport i18n, Movecraft plugin) {
+        this.settings = settings;
+        this.i18n = i18n;
+        this.plugin = plugin;
     }
 
     private void updateBlock(MapUpdateCommand m, World w, Map<BlockPosition, TransferData> dataMap,
@@ -101,7 +95,7 @@ public final class MapUpdateManager extends BukkitRunnable {
 
         net.minecraft.server.v1_10_R1.Chunk c = null;
         Chunk cmC = null;
-        if (Settings.CompatibilityMode) {
+        if (settings.CompatibilityMode) {
             cmC = chunk;
         } else {
             c = ((CraftChunk) chunk).getHandle();
@@ -117,7 +111,7 @@ public final class MapUpdateManager extends BukkitRunnable {
         int origType = w.getBlockAt(x, y, z).getTypeId();
         byte origData = w.getBlockAt(x, y, z).getData();
 
-        if (Settings.CompatibilityMode) {
+        if (settings.CompatibilityMode) {
 
             if (origType != newTypeID || origData != data) {
                 boolean doBlankOut = (Arrays.binarySearch(blocksToBlankOut, newTypeID) >= 0);
@@ -163,7 +157,8 @@ public final class MapUpdateManager extends BukkitRunnable {
                 cmChunks.add(cmC);
             }
         } else {
-            net.minecraft.server.v1_10_R1.BlockPosition position = new net.minecraft.server.v1_10_R1.BlockPosition(x, y, z);
+            net.minecraft.server.v1_10_R1.BlockPosition position = new net.minecraft.server.v1_10_R1.BlockPosition(x, y,
+                                                                                                                   z);
 
             boolean success = false;
             if ((origType == 149 || origType == 150) &&
@@ -277,9 +272,9 @@ Changed for 1.8, and quite possibly wrong:
                         for (int i = 0; i < signData.getLines().length; i++) {
                             sign.setLine(i, signData.getLines()[i]);
                         }
-                        if (Settings.AllowCrewSigns && signData.getLines()[0].equalsIgnoreCase("Crew:")) {
+                        if (settings.AllowCrewSigns && signData.getLines()[0].equalsIgnoreCase("Crew:")) {
                             String crewName = signData.getLines()[1];
-                            Player crewPlayer = Movecraft.getInstance().getServer().getPlayer(crewName);
+                            Player crewPlayer = plugin.getServer().getPlayer(crewName);
                             if (crewPlayer != null) {
                                 Location loc = sign.getLocation();
                                 loc = loc.subtract(0, 1, 0);
@@ -302,11 +297,6 @@ Changed for 1.8, and quite possibly wrong:
                         }
                         sign.update(true, false);
                     }
-                } else if (transferData instanceof StorageCrateTransferHolder) {
-                    Inventory inventory = Bukkit.createInventory(null, 27, I18nSupport
-                            .getInternationalisedString("Item - Storage Crate name"));
-                    inventory.setContents(((StorageCrateTransferHolder) transferData).getInventory());
-                    StorageChestItem.setInventoryOfCrateAtLocation(inventory, entry.getKey(), w);
                 } else if (transferData instanceof InventoryTransferHolder) {
                     InventoryTransferHolder invData = (InventoryTransferHolder) transferData;
                     InventoryHolder inventoryHolder = (InventoryHolder) w
@@ -322,9 +312,9 @@ Changed for 1.8, and quite possibly wrong:
                 }
                 w.getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).setData(transferData.getData());
             } catch (IndexOutOfBoundsException e) {
-                Movecraft.getInstance().getLogger().log(Level.SEVERE, "Severe error in map updater");
+                plugin.getLogger().log(Level.SEVERE, "Severe error in map updater");
             } catch (IllegalArgumentException e) {
-                Movecraft.getInstance().getLogger().log(Level.SEVERE, "Severe error in map updater");
+                plugin.getLogger().log(Level.SEVERE, "Severe error in map updater");
             }
         }
     }
@@ -333,12 +323,11 @@ Changed for 1.8, and quite possibly wrong:
                           final ArrayList<Boolean> queuedPlaceDispensers, final World w,
                           final Set<net.minecraft.server.v1_10_R1.Chunk> chunks, final Set<Chunk> cmChunks,
                           final HashMap<BlockPosition, Byte> origLightMap,
-                          final Map<BlockPosition, TransferData> dataMap,
-                          final List<MapUpdateCommand> updatesInWorld,
+                          final Map<BlockPosition, TransferData> dataMap, final List<MapUpdateCommand> updatesInWorld,
                           final Map<BlockPosition, List<EntityUpdateCommand>> entityMap)
     {
         int numToRun = queuedMapUpdateCommands.size();
-        if (numToRun > Settings.BlockQueueChunkSize) numToRun = Settings.BlockQueueChunkSize;
+        if (numToRun > settings.BlockQueueChunkSize) numToRun = settings.BlockQueueChunkSize;
         long start = System.currentTimeMillis();
         for (int i = 0; i < numToRun; i++) {
             MapUpdateCommand m = queuedMapUpdateCommands.get(0);
@@ -357,35 +346,32 @@ Changed for 1.8, and quite possibly wrong:
                         StringWriter sw = new StringWriter();
                         PrintWriter pw = new PrintWriter(sw);
                         e.printStackTrace(pw);
-                        Movecraft.getInstance().getLogger().log(Level.SEVERE, sw.toString());
+                        plugin.getLogger().log(Level.SEVERE, sw.toString());
                     }
                 }
-            }.runTaskLater(Movecraft.getInstance(), ((end - start) / 50));
+            }.runTaskLater(plugin, ((end - start) / 50));
         } else {
             // all done, do final cleanup with sign data, inventories, etc
             updateData(dataMap, w);
 
-            if (CraftManager.getInstance().getCraftsInWorld(w) != null) {
-
-                // and set all crafts that were updated to not processing
-                for (MapUpdateCommand c : updatesInWorld) {
-                    if (c != null) {
-                        Craft craft = c.getCraft();
-                        if (craft != null) {
-                            if (!craft.isNotProcessing()) {
-                                craft.setProcessing(false);
-                                if (Settings.Debug) {
-                                    long finish = System.currentTimeMillis();
-                                    Movecraft.getInstance().getServer().broadcastMessage(
-                                            "Time from last cruise to update (ms): " +
-                                            (finish - craft.getLastCruiseUpdate()));
-                                }
+            // and set all crafts that were updated to not processing
+            for (MapUpdateCommand c : updatesInWorld) {
+                if (c != null) {
+                    Craft craft = c.getCraft();
+                    if (craft != null) {
+                        if (!craft.isNotProcessing()) {
+                            craft.setProcessing(false);
+                            if (settings.Debug) {
+                                long finish = System.currentTimeMillis();
+                                plugin.getServer().broadcastMessage("Time from last cruise to update (ms): " +
+                                                                    (finish - craft.getLastCruiseUpdate()));
                             }
                         }
                     }
                 }
             }
-            if (!Settings.CompatibilityMode) {
+
+            if (!settings.CompatibilityMode) {
                 // send updates to client
                 for (MapUpdateCommand c : updatesInWorld) {
                     Location loc = new Location(w, c.getNewBlockLocation().x, c.getNewBlockLocation().y,
@@ -446,7 +432,7 @@ Changed for 1.8, and quite possibly wrong:
                 ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<>();
                 ArrayList<Boolean> queuedPlaceDispensers = new ArrayList<>();
 
-                if (Settings.CompatibilityMode) {
+                if (settings.CompatibilityMode) {
                     cmChunks = new HashSet<>();
                 } else {
                     chunks = new HashSet<>();
@@ -507,7 +493,7 @@ Changed for 1.8, and quite possibly wrong:
                     for (EntityUpdateCommand i : entityUpdatesInWorld) {
                         if (i != null) {
                             BlockPosition entityLoc = new BlockPosition(i.getNewLocation().getBlockX(),
-                                                                                i.getNewLocation().getBlockY() - 1,
+                                                                        i.getNewLocation().getBlockY() - 1,
                                                                         i.getNewLocation().getBlockZ());
                             if (entityMap.containsKey(entityLoc)) {
                                 List<EntityUpdateCommand> entUpdateList = entityMap.get(entityLoc);
@@ -598,7 +584,7 @@ Changed for 1.8, and quite possibly wrong:
 
                         // if the block you just updated had any entities on it, move them. If they are moving, add
                         // in their motion to the craft motion
-                        if (entityMap.containsKey(m.getNewBlockLocation()) && !Settings.CompatibilityMode) {
+                        if (entityMap.containsKey(m.getNewBlockLocation()) && !settings.CompatibilityMode) {
                             List<EntityUpdateCommand> mapUpdateList = entityMap.get(m.getNewBlockLocation());
                             for (EntityUpdateCommand entityUpdate : mapUpdateList) {
                                 Entity entity = entityUpdate.getEntity();
@@ -636,9 +622,9 @@ Changed for 1.8, and quite possibly wrong:
                         }
                     }
                 }
-				
+
 				/*for ( MapUpdateCommand i : updatesInWorld ) {
-					if(i!=null) {
+                    if(i!=null) {
 						// Place air
 						if(i.getTypeID()==0) {
 							if(Settings.CompatibilityMode) {
@@ -701,9 +687,8 @@ Changed for 1.8, and quite possibly wrong:
 
 //				if(Settings.CompatibilityMode) {
                 long endTime = System.currentTimeMillis();
-                if (Settings.Debug) {
-                    Movecraft.getInstance().getServer()
-                             .broadcastMessage("Map update setup took (ms): " + (endTime - startTime));
+                if (settings.Debug) {
+                    plugin.getServer().broadcastMessage("Map update setup took (ms): " + (endTime - startTime));
                 }
                 try {
                     runQueue(queuedMapUpdateCommands, queuedPlaceDispensers, entry.getKey(), chunks, cmChunks,
@@ -712,7 +697,7 @@ Changed for 1.8, and quite possibly wrong:
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
                     e.printStackTrace(pw);
-                    Movecraft.getInstance().getLogger().log(Level.SEVERE, sw.toString());
+                    plugin.getLogger().log(Level.SEVERE, sw.toString());
                 }
 /*				} else {
 					// update signs, inventories, other special data
@@ -777,7 +762,7 @@ Changed for 1.8, and quite possibly wrong:
                                     @Override public void run() {
                                         world.dropItemNaturally(loc, stack);
                                     }
-                                }.runTaskLater(Movecraft.getInstance(), (20 * 1));
+                                }.runTaskLater(plugin, (20 * 1));
                             }
                         }
                     }
@@ -913,8 +898,7 @@ Changed for 1.8, and quite possibly wrong:
             case 154:
                 // Data and Inventory
                 if (((InventoryHolder) s).getInventory().getSize() == 54) {
-                    Movecraft.getInstance().getLogger()
-                             .log(Level.SEVERE, "ERROR: Double chest detected. This is not supported.");
+                    plugin.getLogger().log(Level.SEVERE, "ERROR: Double chest detected. This is not supported.");
                     throw new IllegalArgumentException("INVALID BLOCK");
                 }
                 ItemStack[] contents = ((InventoryHolder) s).getInventory().getContents().clone();
@@ -927,14 +911,7 @@ Changed for 1.8, and quite possibly wrong:
                 return new SignTransferHolder(data, ((Sign) s).getLines());
 
             case 33:
-                BlockPosition l = MathUtils.bukkit2MovecraftLoc(s.getLocation());
-                Inventory i = StorageChestItem.getInventoryOfCrateAtLocation(l, s.getWorld());
-                if (i != null) {
-                    StorageChestItem.removeInventoryAtLocation(s.getWorld(), l);
-                    return new StorageCrateTransferHolder(data, i.getContents());
-                } else {
-                    return new TransferData(data);
-                }
+                return new TransferData(data);
 
             case 137:
                 CommandBlock cblock = (CommandBlock) s;
@@ -949,9 +926,9 @@ Changed for 1.8, and quite possibly wrong:
 //        if (Settings.CompatibilityMode){
         //using other-explosion flag ... isn't secure
         boolean explosionblocked = false;
-        if (Movecraft.getInstance().getWorldGuardPlugin() != null) {
-            ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(loc.getWorld())
-                                               .getApplicableRegions(loc);
+        if (plugin.getWorldGuardPlugin() != null) {
+            ApplicableRegionSet set = plugin.getWorldGuardPlugin().getRegionManager(loc.getWorld())
+                                            .getApplicableRegions(loc);
             if (!set.allows(DefaultFlag.OTHER_EXPLOSION)) {
                 explosionblocked = true;
             }

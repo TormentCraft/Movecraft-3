@@ -60,10 +60,20 @@ import java.util.Random;
 import java.util.Set;
 
 public class TranslationTask extends AsyncTask {
+    private final Movecraft plugin;
+    private final Settings settings;
+    private final I18nSupport i18n;
+    private final CraftManager craftManager;
     private final TranslationTaskData data;
 
-    public TranslationTask(Craft c, TranslationTaskData data) {
+    public TranslationTask(Craft c, Movecraft plugin, Settings settings, I18nSupport i18n, CraftManager craftManager,
+                           TranslationTaskData data)
+    {
         super(c);
+        this.plugin = plugin;
+        this.settings = settings;
+        this.i18n = i18n;
+        this.craftManager = craftManager;
         this.data = data;
     }
 
@@ -82,7 +92,7 @@ public class TranslationTask extends AsyncTask {
 
         int hoverLimit = getCraft().getType().getHoverLimit();
 
-        Player craftPilot = CraftManager.getInstance().getPlayerFromCraft(getCraft());
+        Player craftPilot = craftManager.getPlayerFromCraft(getCraft());
 
         int[][][] hb = getCraft().getHitBox();
         if (hb == null) return;
@@ -239,7 +249,7 @@ public class TranslationTask extends AsyncTask {
                     }
                 }
                 if (fuelHolder == null) {
-                    fail(I18nSupport.getInternationalisedString("Translation - Failed Craft out of fuel"));
+                    fail(i18n.getInternationalisedString("Translation - Failed Craft out of fuel"));
                 } else {
                     InventoryHolder inventoryHolder = (InventoryHolder) fuelHolder.getState();
                     if (inventoryHolder.getInventory().contains(263)) {
@@ -287,19 +297,19 @@ public class TranslationTask extends AsyncTask {
         boolean hoverUseGravity = getCraft().getType().getUseGravity();
         boolean checkHover = (data.getDx() != 0 || data.getDz() != 0);// we want to check only horizontal moves
         boolean canHoverOverWater = getCraft().getType().getCanHoverOverWater();
-        boolean townyEnabled = Movecraft.getInstance().getTownyPlugin() != null;
+        boolean townyEnabled = plugin.getTownyPlugin() != null;
         boolean validateTownyExplosion = false;
 
         Set<TownBlock> townBlockSet = new HashSet<>();
         TownyWorld townyWorld = null;
         TownyWorldHeightLimits townyWorldHeightLimits = null;
 
-        if (townyEnabled && Settings.TownyBlockMoveOnSwitchPerm) {
+        if (townyEnabled && settings.TownyBlockMoveOnSwitchPerm) {
             townyWorld = TownyUtils.getTownyWorld(getCraft().getW());
             if (townyWorld != null) {
                 townyEnabled = townyWorld.isUsingTowny();
                 if (townyEnabled) {
-                    townyWorldHeightLimits = TownyUtils.getWorldLimits(getCraft().getW());
+                    townyWorldHeightLimits = TownyUtils.getWorldLimits(settings, getCraft().getW());
                     if (getCraft().getType().getCollisionExplosion() != 0.0F) {
                         validateTownyExplosion = true;
                     }
@@ -320,20 +330,20 @@ public class TranslationTask extends AsyncTask {
             BlockPosition newLoc = oldLoc.translate(data.getDx(), data.getDy(), data.getDz());
 
             if (newLoc.y > data.getMaxHeight() && newLoc.y > oldLoc.y) {
-                fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit height limit"));
+                fail(i18n.getInternationalisedString("Translation - Failed Craft hit height limit"));
                 break;
             }
             if (newLoc.y < data.getMinHeight() && newLoc.y < oldLoc.y && !getCraft().getSinking()) {
-                fail(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum height limit"));
+                fail(i18n.getInternationalisedString("Translation - Failed Craft hit minimum height limit"));
                 break;
             }
 
             Location plugLoc = new Location(getCraft().getW(), newLoc.x, newLoc.y, newLoc.z);
             if (craftPilot != null) {
                 // See if they are permitted to build in the area, if WorldGuard integration is turned on
-                if (Movecraft.getInstance().getWorldGuardPlugin() != null && Settings.WorldGuardBlockMoveOnBuildPerm) {
-                    if (!Movecraft.getInstance().getWorldGuardPlugin().canBuild(craftPilot, plugLoc)) {
-                        fail(String.format(I18nSupport.getInternationalisedString(
+                if (plugin.getWorldGuardPlugin() != null && settings.WorldGuardBlockMoveOnBuildPerm) {
+                    if (!plugin.getWorldGuardPlugin().canBuild(craftPilot, plugLoc)) {
+                        fail(String.format(i18n.getInternationalisedString(
                                 "Translation - Failed Player is not permitted to build in this WorldGuard region") +
                                            " @ %d,%d,%d", oldLoc.x, oldLoc.y, oldLoc.z));
                         break;
@@ -347,14 +357,13 @@ public class TranslationTask extends AsyncTask {
                 p = craftPilot;
             }
             if (p != null) {
-                if (Movecraft.getInstance().getWorldGuardPlugin() != null &&
-                    Movecraft.getInstance().getWGCustomFlagsPlugin() != null && Settings.WGCustomFlagsUsePilotFlag) {
-                    LocalPlayer lp = Movecraft.getInstance().getWorldGuardPlugin().wrapPlayer(p);
-                    WGCustomFlagsUtils WGCFU = new WGCustomFlagsUtils();
-                    if (!WGCFU.validateFlag(plugLoc, Movecraft.FLAG_MOVE, lp)) {
+                if (plugin.getWorldGuardPlugin() != null &&
+                    plugin.getWGCustomFlagsPlugin() != null && settings.WGCustomFlagsUsePilotFlag) {
+                    LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
+                    if (!WGCustomFlagsUtils.validateFlag(plugin.getWorldGuardPlugin(), plugLoc, plugin.FLAG_MOVE, lp)) {
                         fail(String.format(
-                                I18nSupport.getInternationalisedString("WGCustomFlags - Translation Failed") +
-                                " @ %d,%d,%d", oldLoc.x, oldLoc.y, oldLoc.z));
+                                i18n.getInternationalisedString("WGCustomFlags - Translation Failed") + " @ %d,%d,%d",
+                                oldLoc.x, oldLoc.y, oldLoc.z));
                         break;
                     }
                 }
@@ -368,7 +377,7 @@ public class TranslationTask extends AsyncTask {
                                 }
                             }
                         }
-                        if (TownyUtils.validateCraftMoveEvent(p, plugLoc, townyWorld)) {
+                        if (TownyUtils.validateCraftMoveEvent(plugin.getTownyPlugin(), p, plugLoc, townyWorld)) {
                             townBlockSet.add(townBlock);
                         } else {
                             int y = plugLoc.getBlockY();
@@ -394,17 +403,17 @@ public class TranslationTask extends AsyncTask {
                                         failed = true;
                                     }
                                     if (failed) {
-                                        if (Movecraft.getInstance().getWorldGuardPlugin() != null &&
-                                            Movecraft.getInstance().getWGCustomFlagsPlugin() != null &&
-                                            Settings.WGCustomFlagsUsePilotFlag) {
-                                            LocalPlayer lp = Movecraft.getInstance().getWorldGuardPlugin()
-                                                                      .wrapPlayer(p);
-                                            ApplicableRegionSet regions = Movecraft.getInstance().getWorldGuardPlugin()
-                                                                                   .getRegionManager(plugLoc.getWorld())
-                                                                                   .getApplicableRegions(plugLoc);
+                                        if (plugin.getWorldGuardPlugin() != null &&
+                                            plugin.getWGCustomFlagsPlugin() != null &&
+                                            settings.WGCustomFlagsUsePilotFlag) {
+                                            LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
+                                            ApplicableRegionSet regions = plugin.getWorldGuardPlugin()
+                                                                                .getRegionManager(plugLoc.getWorld())
+                                                                                .getApplicableRegions(plugLoc);
                                             if (regions.size() != 0) {
-                                                WGCustomFlagsUtils WGCFU = new WGCustomFlagsUtils();
-                                                if (WGCFU.validateFlag(plugLoc, Movecraft.FLAG_MOVE, lp)) {
+                                                if (WGCustomFlagsUtils
+                                                        .validateFlag(plugin.getWorldGuardPlugin(), plugLoc,
+                                                                      plugin.FLAG_MOVE, lp)) {
                                                     failed = false;
                                                 }
                                             }
@@ -426,10 +435,10 @@ public class TranslationTask extends AsyncTask {
             if (testMaterial == Material.CHEST || testMaterial == Material.TRAPPED_CHEST) {
                 if (!checkChests(testMaterial, newLoc, existingBlockSet)) {
                     //prevent chests collision
-                    fail(String.format(
-                            I18nSupport.getInternationalisedString("Translation - Failed Craft is obstructed") +
-                            " @ %d,%d,%d,%s", newLoc.x, newLoc.y, newLoc.z,
-                            getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType().toString()));
+                    fail(String.format(i18n.getInternationalisedString("Translation - Failed Craft is obstructed") +
+                                       " @ %d,%d,%d,%s", newLoc.x, newLoc.y, newLoc.z,
+                                       getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
+                                                 .toString()));
                     break;
                 }
             }
@@ -567,15 +576,14 @@ public class TranslationTask extends AsyncTask {
                         // ramming collisions
                         if (getCraft().getType().getCollisionExplosion() == 0.0F) {
                             if (moveBlockedByTowny) {
-                                fail(String.format(
-                                        I18nSupport.getInternationalisedString("Towny - Translation Failed") +
-                                        " %s @ %d,%d,%d", townName, oldLoc.x, oldLoc.y, oldLoc.z));
+                                fail(String.format(i18n.getInternationalisedString("Towny - Translation Failed") +
+                                                   " %s @ %d,%d,%d", townName, oldLoc.x, oldLoc.y, oldLoc.z));
                             } else {
-                                fail(String.format(I18nSupport.getInternationalisedString(
-                                        "Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s", oldLoc.x,
-                                                   oldLoc.y, oldLoc.z,
-                                                   getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
-                                                             .toString()));
+                                fail(String.format(
+                                        i18n.getInternationalisedString("Translation - Failed Craft is obstructed") +
+                                        " @ %d,%d,%d,%s", oldLoc.x, oldLoc.y, oldLoc.z,
+                                        getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
+                                                  .toString()));
                                 getCraft().setCruising(false);
                             }
                             break;
@@ -648,10 +656,10 @@ public class TranslationTask extends AsyncTask {
                             }
                             if (iFreeSpace > hoverLimit) {
                                 if (bladeOK) {
-                                    fail(I18nSupport.getInternationalisedString(
+                                    fail(i18n.getInternationalisedString(
                                             "Translation - Failed Craft hit height limit"));
                                 } else {
-                                    fail(String.format(I18nSupport.getInternationalisedString(
+                                    fail(String.format(i18n.getInternationalisedString(
                                             "Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s", oldLoc.x,
                                                        oldLoc.y, oldLoc.z,
                                                        getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z)
@@ -735,19 +743,18 @@ public class TranslationTask extends AsyncTask {
 
                 if (existingBlockSet.contains(m.getNewBlockLocation())) {
                     existingBlockSet.remove(m.getNewBlockLocation());
-                    if (Settings.FadeWrecksAfter > 0) {
+                    if (settings.FadeWrecksAfter > 0) {
                         int typeID = getCraft().getW().getBlockAt(m.getNewBlockLocation().x, m.getNewBlockLocation().y,
                                                                   m.getNewBlockLocation().z).getTypeId();
                         if (typeID != 0 && typeID != 9) {
-                            Movecraft.getInstance().blockFadeTimeMap
-                                    .put(m.getNewBlockLocation(), System.currentTimeMillis());
-                            Movecraft.getInstance().blockFadeTypeMap.put(m.getNewBlockLocation(), typeID);
+                            plugin.blockFadeTimeMap.put(m.getNewBlockLocation(), System.currentTimeMillis());
+                            plugin.blockFadeTypeMap.put(m.getNewBlockLocation(), typeID);
                             if (m.getNewBlockLocation().y <= waterLine) {
-                                Movecraft.getInstance().blockFadeWaterMap.put(m.getNewBlockLocation(), true);
+                                plugin.blockFadeWaterMap.put(m.getNewBlockLocation(), true);
                             } else {
-                                Movecraft.getInstance().blockFadeWaterMap.put(m.getNewBlockLocation(), false);
+                                plugin.blockFadeWaterMap.put(m.getNewBlockLocation(), false);
                             }
-                            Movecraft.getInstance().blockFadeWorldMap.put(m.getNewBlockLocation(), getCraft().getW());
+                            plugin.blockFadeWorldMap.put(m.getNewBlockLocation(), getCraft().getW());
                         }
                     }
                 }
@@ -766,17 +773,17 @@ public class TranslationTask extends AsyncTask {
                                                                   m.getNewBlockLocation().z);
                         if (existingBlockSet.contains(testLoc)) {
                             existingBlockSet.remove(testLoc);
-                            if (Settings.FadeWrecksAfter > 0) {
+                            if (settings.FadeWrecksAfter > 0) {
                                 int typeID = getCraft().getW().getBlockAt(testLoc.x, testLoc.y, testLoc.z).getTypeId();
                                 if (typeID != 0 && typeID != 9) {
-                                    Movecraft.getInstance().blockFadeTimeMap.put(testLoc, System.currentTimeMillis());
-                                    Movecraft.getInstance().blockFadeTypeMap.put(testLoc, typeID);
+                                    plugin.blockFadeTimeMap.put(testLoc, System.currentTimeMillis());
+                                    plugin.blockFadeTypeMap.put(testLoc, typeID);
                                     if (testLoc.y <= waterLine) {
-                                        Movecraft.getInstance().blockFadeWaterMap.put(testLoc, true);
+                                        plugin.blockFadeWaterMap.put(testLoc, true);
                                     } else {
-                                        Movecraft.getInstance().blockFadeWaterMap.put(testLoc, false);
+                                        plugin.blockFadeWaterMap.put(testLoc, false);
                                     }
-                                    Movecraft.getInstance().blockFadeWorldMap.put(testLoc, getCraft().getW());
+                                    plugin.blockFadeWorldMap.put(testLoc, getCraft().getW());
                                 }
                             }
                         }
@@ -792,7 +799,7 @@ public class TranslationTask extends AsyncTask {
             data.setBlockList(newBlockList);
             data.setUpdates(explosionSet.toArray(new MapUpdateCommand[1]));
 
-            fail(I18nSupport.getInternationalisedString("Translation - Failed Craft is obstructed"));
+            fail(i18n.getInternationalisedString("Translation - Failed Craft is obstructed"));
             if (getCraft().getSinking()) {
                 if (getCraft().getType().getSinkPercent() != 0.0) {
                     getCraft().setLastBlockCheck(0);
@@ -829,8 +836,7 @@ public class TranslationTask extends AsyncTask {
                         //if(pTest.getType()!=org.bukkit.entity.EntityType.DROPPED_ITEM ) {
                         if (pTest instanceof LivingEntity) {
                             Location tempLoc = pTest.getLocation();
-                            if (getCraft().getPilotLocked() &&
-                                pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
+                            if (getCraft().getPilotLocked() && pTest == craftManager.getPlayerFromCraft(getCraft())) {
                                 tempLoc.setX(getCraft().getPilotLockedX());
                                 tempLoc.setY(getCraft().getPilotLockedY());
                                 tempLoc.setZ(getCraft().getPilotLockedZ());
@@ -844,8 +850,7 @@ public class TranslationTask extends AsyncTask {
                             EntityUpdateCommand eUp = new EntityUpdateCommand(pTest.getLocation().clone(), newPLoc,
                                                                               pTest);
                             entityUpdateSet.add(eUp);
-                            if (getCraft().getPilotLocked() &&
-                                pTest == CraftManager.getInstance().getPlayerFromCraft(getCraft())) {
+                            if (getCraft().getPilotLocked() && pTest == craftManager.getPlayerFromCraft(getCraft())) {
                                 getCraft().setPilotLockedX(tempLoc.getX());
                                 getCraft().setPilotLockedY(tempLoc.getY());
                                 getCraft().setPilotLockedZ(tempLoc.getZ());
@@ -857,7 +862,7 @@ public class TranslationTask extends AsyncTask {
                 //add releaseTask without playermove to manager
                 if (!getCraft().getType().getCruiseOnPilot() && !getCraft().getSinking())  // not necessary to release
                     // cruiseonpilot crafts, because they will already be released
-                    CraftManager.getInstance().addReleaseTask(getCraft());
+                    craftManager.addReleaseTask(getCraft());
             }
 
             // remove water near sinking crafts
@@ -1000,9 +1005,9 @@ public class TranslationTask extends AsyncTask {
         return data;
     }
 
-    private boolean isFreeSpace(int x, int y, int z, BlockPosition[] blocksList,
-                                Set<BlockPosition> existingBlockSet, boolean waterCraft, boolean hoverCraft,
-                                List<Material> harvestBlocks, boolean canHoverOverWater, boolean checkHover)
+    private boolean isFreeSpace(int x, int y, int z, BlockPosition[] blocksList, Set<BlockPosition> existingBlockSet,
+                                boolean waterCraft, boolean hoverCraft, List<Material> harvestBlocks,
+                                boolean canHoverOverWater, boolean checkHover)
     {
         boolean isFree = true;
         // this checking for hovercrafts should be faster with separating horizontal layers and checking only really
@@ -1015,7 +1020,7 @@ public class TranslationTask extends AsyncTask {
             Material testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
             if (!canHoverOverWater) {
                 if (testMaterial == Material.STATIONARY_WATER || testMaterial == Material.WATER) {
-                    fail(I18nSupport.getInternationalisedString("Translation - Failed Craft over water"));
+                    fail(i18n.getInternationalisedString("Translation - Failed Craft over water"));
                 }
             }
 

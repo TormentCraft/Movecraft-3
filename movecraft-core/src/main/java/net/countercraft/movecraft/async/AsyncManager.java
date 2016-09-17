@@ -27,16 +27,17 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.countercraft.movecraft.Events;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.Direction;
 import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.async.detection.DetectionTask;
 import net.countercraft.movecraft.async.detection.DetectionTaskData;
 import net.countercraft.movecraft.async.rotation.RotationTask;
 import net.countercraft.movecraft.async.translation.TranslationTask;
+import net.countercraft.movecraft.async.translation.TranslationTaskData;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.api.Direction;
 import net.countercraft.movecraft.utils.BlockUtils;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
@@ -70,9 +71,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
 public final class AsyncManager extends BukkitRunnable {
+    private final Settings settings;
+    private final I18nSupport i18n;
+    private final CraftManager craftManager;
+    private final Movecraft plugin;
+    private final MapUpdateManager mapUpdateManager;
     private final Events events = new Events(Bukkit.getPluginManager());
 
-    private static final AsyncManager instance = new AsyncManager();
     private final Map<AsyncTask, Craft> ownershipMap = new HashMap<>();
     private final Map<org.bukkit.entity.TNTPrimed, Double> TNTTracking = new HashMap<>();
     private final Map<Craft, HashMap<Craft, Long>> recentContactTracking = new HashMap<>();
@@ -87,18 +92,141 @@ public final class AsyncManager extends BukkitRunnable {
     private long lastSiegeNotification = 0;
     private long lastSiegePayout = 0;
 
-    public static AsyncManager getInstance() {
-        return instance;
+    public AsyncManager(Settings settings, I18nSupport i18n, CraftManager craftManager, Movecraft plugin,
+                        MapUpdateManager mapUpdateManager)
+    {
+        this.settings = settings;
+        this.i18n = i18n;
+        this.craftManager = craftManager;
+        this.plugin = plugin;
+        this.mapUpdateManager = mapUpdateManager;
     }
 
-    private AsyncManager() {
+    public void detect(Craft craft, Player player, Player notificationPlayer, BlockPosition startPoint) {
+        submitTask(new DetectionTask(craft, startPoint, craft.type.getMinSize(), craft.type.getMaxSize(),
+                                     craft.type.getAllowedBlocks(), craft.type.getForbiddenBlocks(), player,
+                                     notificationPlayer, craft.w, plugin, settings, i18n),
+
+                   craft);
     }
 
-    public void submitTask(AsyncTask task, Craft c) {
+    public void translate(Craft craft, int dx, int dy, int dz) {
+        // check to see if the craft is trying to move in a direction not permitted by the type
+        if (!craft.getType().allowHorizontalMovement() && !craft.getSinking()) {
+            dx = 0;
+            dz = 0;
+        }
+        if (!craft.getType().allowVerticalMovement() && !craft.getSinking()) {
+            dy = 0;
+        }
+        if (dx == 0 && dy == 0 && dz == 0) {
+            return;
+        }
+
+        if (!craft.getType().allowVerticalTakeoffAndLanding() && dy != 0 && !craft.getSinking()) {
+            if (dx == 0 && dz == 0) {
+                return;
+            }
+        }
+
+        // find region that will need to be loaded to translate this craft
+        int cminX = craft.getMinX();
+        int cmaxX = craft.getMinX();
+        if (dx < 0) cminX = cminX + dx;
+        int cminZ = craft.getMinZ();
+        int cmaxZ = craft.getMinZ();
+        if (dz < 0) cminZ = cminZ + dz;
+        for (BlockPosition m : craft.getBlockList()) {
+            if (m.x > cmaxX) cmaxX = m.x;
+            if (m.z > cmaxZ) cmaxZ = m.z;
+        }
+        if (dx > 0) cmaxX = cmaxX + dx;
+        if (dz > 0) cmaxZ = cmaxZ + dz;
+        cminX = cminX >> 4;
+        cminZ = cminZ >> 4;
+        cmaxX = cmaxX >> 4;
+        cmaxZ = cmaxZ >> 4;
+
+        // load all chunks that will be needed to translate this craft
+        for (int posX = cminX - 1; posX <= cmaxX + 1; posX++) {
+            for (int posZ = cminZ - 1; posZ <= cmaxZ + 1; posZ++) {
+                if (!craft.getW().isChunkLoaded(posX, posZ)) {
+                    craft.getW().loadChunk(posX, posZ);
+                }
+            }
+        }
+
+        submitTask(new TranslationTask(craft, plugin, settings, i18n, craftManager,
+                                       new TranslationTaskData(dx, dz, dy, craft.getBlockList(), craft.getHitBox(),
+                                                               craft.getMinZ(), craft.getMinX(),
+                                                               craft.type.getMaxHeightLimit(),
+                                                               craft.type.getMinHeightLimit())), craft);
+    }
+
+    public void rotate(Craft craft, Rotation rotation, BlockPosition originPoint) {
+        // find region that will need to be loaded to rotate this craft
+        int cminX = craft.getMinX();
+        int cmaxX = craft.getMinX();
+        int cminZ = craft.getMinZ();
+        int cmaxZ = craft.getMinZ();
+        for (BlockPosition m : craft.getBlockList()) {
+            if (m.x > cmaxX) cmaxX = m.x;
+            if (m.z > cmaxZ) cmaxZ = m.z;
+        }
+        int distX = cmaxX - cminX;
+        int distZ = cmaxZ - cminZ;
+        if (distX > distZ) {
+            cminZ -= (distX - distZ) / 2;
+            cmaxZ += (distX - distZ) / 2;
+        }
+        if (distZ > distX) {
+            cminX -= (distZ - distX) / 2;
+            cmaxX += (distZ - distX) / 2;
+        }
+        cminX = cminX >> 4;
+        cminZ = cminZ >> 4;
+        cmaxX = cmaxX >> 4;
+        cmaxZ = cmaxZ >> 4;
+
+        // load all chunks that will be needed to rotate this craft
+        for (int posX = cminX; posX <= cmaxX; posX++) {
+            for (int posZ = cminZ; posZ <= cmaxZ; posZ++) {
+                if (!craft.getW().isChunkLoaded(posX, posZ)) {
+                    craft.getW().loadChunk(posX, posZ);
+                }
+            }
+        }
+
+        submitTask(new RotationTask(craft, plugin, settings, i18n, craftManager, originPoint, craft.getBlockList(),
+                                    rotation, craft
+
+                                            .getW()), craft);
+    }
+
+    public void rotate(Craft craft, Rotation rotation, BlockPosition originPoint, boolean isSubCraft) {
+        submitTask(new RotationTask(craft, plugin, settings, i18n, craftManager, originPoint, craft.getBlockList(),
+                                    rotation, craft.getW(), isSubCraft),
+
+                   craft);
+    }
+
+    public void submitTask(final AsyncTask task, Craft c) {
         if (c.isNotProcessing()) {
             c.setProcessing(true);
             ownershipMap.put(task, c);
-            task.runTaskAsynchronously(Movecraft.getInstance());
+
+            new BukkitRunnable() {
+                @Override public void run() {
+                    try {
+                        task.run();
+                        submitCompletedTask(task);
+                    } catch (Exception e) {
+                        plugin.getLogger().log(Level.SEVERE, i18n.getInternationalisedString(
+                                "Internal - Error - Processor thread encountered an error"));
+                        e.printStackTrace();
+                    }
+                }
+            }.runTaskAsynchronously(plugin);
         }
     }
 
@@ -125,19 +253,19 @@ public final class AsyncManager extends BukkitRunnable {
 
                 Player p = data.getPlayer();
                 Player notifyP = data.getNotificationPlayer();
-                Craft pCraft = CraftManager.getInstance().getCraftByPlayer(p);
+                Craft pCraft = craftManager.getCraftByPlayer(p);
 
                 if (pCraft != null && p != null) {
                     //Player is already controlling a craft
                     notifyP.sendMessage(
-                            I18nSupport.getInternationalisedString("Detection - Failed - Already commanding a craft"));
+                            i18n.getInternationalisedString("Detection - Failed - Already commanding a craft"));
                 } else {
                     if (data.failed()) {
                         if (notifyP != null) notifyP.sendMessage(data.getFailMessage());
-                        else Movecraft.getInstance().getLogger()
-                                      .log(Level.INFO, "NULL Player Craft Detection failed:" + data.getFailMessage());
+                        else plugin.getLogger()
+                                   .log(Level.INFO, "NULL Player Craft Detection failed:" + data.getFailMessage());
                     } else {
-                        Craft[] craftsInWorld = CraftManager.getInstance().getCraftsInWorld(c.getW());
+                        Craft[] craftsInWorld = craftManager.getCraftsInWorld(c.getW());
                         boolean failed = false;
 
                         if (craftsInWorld != null) {
@@ -147,7 +275,7 @@ public final class AsyncManager extends BukkitRunnable {
                                     (c.getType().getCruiseOnPilot() || p != null)) {  // changed from p!=null
                                     if (craft.getType() == c.getType() ||
                                         craft.getBlockList().length <= data.getBlockList().length) {
-                                        notifyP.sendMessage(I18nSupport.getInternationalisedString(
+                                        notifyP.sendMessage(i18n.getInternationalisedString(
                                                 "Detection - Failed Craft is already being controlled"));
                                         failed = true;
                                     } else { // if this is a different type than the overlapping craft, and is
@@ -155,7 +283,7 @@ public final class AsyncManager extends BukkitRunnable {
                                         if (!craft.isNotProcessing()) {
                                             failed = true;
                                             notifyP.sendMessage(
-                                                    I18nSupport.getInternationalisedString("Parent Craft is busy"));
+                                                    i18n.getInternationalisedString("Parent Craft is busy"));
                                         }
 
                                         // remove the new craft from the parent craft
@@ -223,20 +351,21 @@ public final class AsyncManager extends BukkitRunnable {
                             c.setNotificationPlayer(notifyP);
 
                             if (notifyP != null) {
-                                notifyP.sendMessage(I18nSupport.getInternationalisedString(
-                                        "Detection - Successfully piloted craft") + " Size: " +
-                                                    c.getBlockList().length);
-                                Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
-                                        I18nSupport.getInternationalisedString("Detection - Success - Log Output"),
+                                notifyP.sendMessage(
+                                        i18n.getInternationalisedString("Detection - Successfully piloted craft") +
+                                        " Size: " +
+                                        c.getBlockList().length);
+                                plugin.getLogger().log(Level.INFO, String.format(
+                                        i18n.getInternationalisedString("Detection - Success - Log Output"),
                                         notifyP.getName(), c.getType().getCraftName(), c.getBlockList().length,
                                         c.getMinX(), c.getMinZ()));
                             } else {
-                                Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
-                                        I18nSupport.getInternationalisedString("Detection - Success - Log Output"),
+                                plugin.getLogger().log(Level.INFO, String.format(
+                                        i18n.getInternationalisedString("Detection - Success - Log Output"),
                                         "NULL PLAYER", c.getType().getCraftName(), c.getBlockList().length, c.getMinX(),
                                         c.getMinZ()));
                             }
-                            CraftManager.getInstance().addCraft(c, p);
+                            craftManager.addCraft(c, p);
                         }
                     }
                 }
@@ -244,7 +373,7 @@ public final class AsyncManager extends BukkitRunnable {
                 //Process translation task
 
                 TranslationTask task = (TranslationTask) poll;
-                Player p = CraftManager.getInstance().getPlayerFromCraft(c);
+                Player p = craftManager.getPlayerFromCraft(c);
                 Player notifyP = c.getNotificationPlayer();
 
                 // Check that the craft hasn't been sneakily unpiloted
@@ -257,11 +386,11 @@ public final class AsyncManager extends BukkitRunnable {
                     if (task.getData().collisionExplosion()) {
                         MapUpdateCommand[] updates = task.getData().getUpdates();
                         c.setBlockList(task.getData().getBlockList());
-                        boolean failed = MapUpdateManager.getInstance().addWorldUpdate(c.getW(), updates, null, null);
+                        boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, null, null);
 
                         if (failed) {
-                            Movecraft.getInstance().getLogger().log(Level.SEVERE, I18nSupport
-                                    .getInternationalisedString("Translation - Craft collision"));
+                            plugin.getLogger()
+                                  .log(Level.SEVERE, i18n.getInternationalisedString("Translation - Craft collision"));
                         } else {
                             sentMapUpdate = true;
                         }
@@ -274,23 +403,21 @@ public final class AsyncManager extends BukkitRunnable {
                     ItemDropUpdateCommand[] iUpdates = task.getData().getItemDropUpdateCommands();
                     //get list of cannons before sending map updates, to avoid conflicts
                     Iterable<Cannon> shipCannons = null;
-                    if (Movecraft.getInstance().getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
+                    if (plugin.getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
                         // convert blocklist to location list
                         List<Location> shipLocations = new ArrayList<>();
                         for (BlockPosition loc : c.getBlockList()) {
                             Location tloc = new Location(c.getW(), loc.x, loc.y, loc.z);
                             shipLocations.add(tloc);
                         }
-                        shipCannons = Movecraft.getInstance().getCannonsPlugin().getCannonsAPI()
-                                               .getCannons(shipLocations, c.getNotificationPlayer().getUniqueId(),
-                                                           true);
+                        shipCannons = plugin.getCannonsPlugin().getCannonsAPI()
+                                            .getCannons(shipLocations, c.getNotificationPlayer().getUniqueId(), true);
                     }
-                    boolean failed = MapUpdateManager.getInstance()
-                                                     .addWorldUpdate(c.getW(), updates, eUpdates, iUpdates);
+                    boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, eUpdates, iUpdates);
 
                     if (failed) {
-                        Movecraft.getInstance().getLogger().log(Level.SEVERE, I18nSupport
-                                .getInternationalisedString("Translation - Craft collision"));
+                        plugin.getLogger()
+                              .log(Level.SEVERE, i18n.getInternationalisedString("Translation - Craft collision"));
                     } else {
                         sentMapUpdate = true;
                         c.setBlockList(task.getData().getBlockList());
@@ -299,7 +426,7 @@ public final class AsyncManager extends BukkitRunnable {
                         c.setHitBox(task.getData().getHitbox());
 
                         // move any cannons that were present
-                        if (Movecraft.getInstance().getCannonsPlugin() != null && shipCannons != null) {
+                        if (plugin.getCannonsPlugin() != null && shipCannons != null) {
                             for (Cannon can : shipCannons) {
                                 can.move(new Vector(task.getData().getDx(), task.getData().getDy(),
                                                     task.getData().getDz()));
@@ -310,7 +437,7 @@ public final class AsyncManager extends BukkitRunnable {
             } else if (poll instanceof RotationTask) {
                 // Process rotation task
                 RotationTask task = (RotationTask) poll;
-                Player p = CraftManager.getInstance().getPlayerFromCraft(c);
+                Player p = craftManager.getPlayerFromCraft(c);
                 Player notifyP = c.getNotificationPlayer();
 
                 // Check that the craft hasn't been sneakily unpiloted
@@ -319,32 +446,31 @@ public final class AsyncManager extends BukkitRunnable {
                     if (task.isFailed()) {
                         //The craft translation failed, don't try to notify them if there is no pilot
                         if (notifyP != null) notifyP.sendMessage(task.getFailMessage());
-                        else Movecraft.getInstance().getLogger()
-                                      .log(Level.INFO, "NULL Player Rotation Failed: " + task.getFailMessage());
+                        else
+                            plugin.getLogger().log(Level.INFO, "NULL Player Rotation Failed: " + task.getFailMessage());
                     } else {
                         MapUpdateCommand[] updates = task.getUpdates();
                         EntityUpdateCommand[] eUpdates = task.getEntityUpdates();
 
                         //get list of cannons before sending map updates, to avoid conflicts
                         Iterable<Cannon> shipCannons = null;
-                        if (Movecraft.getInstance().getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
+                        if (plugin.getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
                             // convert blocklist to location list
                             List<Location> shipLocations = new ArrayList<>();
                             for (BlockPosition loc : c.getBlockList()) {
                                 Location tloc = new Location(c.getW(), loc.x, loc.y, loc.z);
                                 shipLocations.add(tloc);
                             }
-                            shipCannons = Movecraft.getInstance().getCannonsPlugin().getCannonsAPI()
-                                                   .getCannons(shipLocations, c.getNotificationPlayer().getUniqueId(),
-                                                               true);
+                            shipCannons = plugin.getCannonsPlugin().getCannonsAPI()
+                                                .getCannons(shipLocations, c.getNotificationPlayer().getUniqueId(),
+                                                            true);
                         }
 
-                        boolean failed = MapUpdateManager.getInstance()
-                                                         .addWorldUpdate(c.getW(), updates, eUpdates, null);
+                        boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, eUpdates, null);
 
                         if (failed) {
-                            Movecraft.getInstance().getLogger().log(Level.SEVERE, I18nSupport
-                                    .getInternationalisedString("Rotation - Craft Collision"));
+                            plugin.getLogger()
+                                  .log(Level.SEVERE, i18n.getInternationalisedString("Rotation - Craft Collision"));
                         } else {
                             sentMapUpdate = true;
 
@@ -354,14 +480,12 @@ public final class AsyncManager extends BukkitRunnable {
                             c.setHitBox(task.getHitbox());
 
                             // rotate any cannons that were present
-                            if (Movecraft.getInstance().getCannonsPlugin() != null && shipCannons != null) {
+                            if (plugin.getCannonsPlugin() != null && shipCannons != null) {
                                 Location tloc = new Location(task.getCraft().getW(), task.getOriginPoint().x,
                                                              task.getOriginPoint().y, task.getOriginPoint().z);
                                 for (Cannon can : shipCannons) {
-                                    if (task.getRotation() == Rotation.CLOCKWISE)
-                                        can.rotateRight(tloc.toVector());
-                                    if (task.getRotation() == Rotation.ANTICLOCKWISE)
-                                        can.rotateLeft(tloc.toVector());
+                                    if (task.getRotation() == Rotation.CLOCKWISE) can.rotateRight(tloc.toVector());
+                                    if (task.getRotation() == Rotation.ANTICLOCKWISE) can.rotateLeft(tloc.toVector());
                                 }
                             }
                         }
@@ -381,8 +505,8 @@ public final class AsyncManager extends BukkitRunnable {
 
     public void processCruise() {
         for (World w : Bukkit.getWorlds()) {
-            if (w != null && CraftManager.getInstance().getCraftsInWorld(w) != null) {
-                for (Craft pcraft : CraftManager.getInstance().getCraftsInWorld(w)) {
+            if (w != null && craftManager.getCraftsInWorld(w) != null) {
+                for (Craft pcraft : craftManager.getCraftsInWorld(w)) {
                     if ((pcraft != null) && pcraft.isNotProcessing()) {
                         if (pcraft.getCruising()) {
                             long ticksElapsed = (System.currentTimeMillis() - pcraft.getLastCruiseUpdate()) / 50;
@@ -410,7 +534,7 @@ public final class AsyncManager extends BukkitRunnable {
                                     if (Math.abs(dz) > 1) dz /= 2;
                                 }
 
-                                pcraft.translate(dx, dy, dz);
+                                translate(pcraft, dx, dy, dz);
                                 pcraft.setLastDX(dx);
                                 pcraft.setLastDZ(dz);
                                 if (pcraft.getLastCruiseUpdate() == -1) {
@@ -433,14 +557,14 @@ public final class AsyncManager extends BukkitRunnable {
                                     long ticksElapsed =
                                             (System.currentTimeMillis() - pcraft.getLastCruiseUpdate()) / 50;
                                     if (Math.abs(ticksElapsed) >= pcraft.getType().getTickCooldown()) {
-                                        pcraft.translate(pcraft.getLastDX(), pcraft.getLastDY(), pcraft.getLastDZ());
+                                        translate(pcraft, pcraft.getLastDX(), pcraft.getLastDY(), pcraft.getLastDZ());
                                         pcraft.setLastCruiseUpdate(System.currentTimeMillis());
                                     }
                                 }
                             }
                             if (pcraft.getPilotLocked() && pcraft.isNotProcessing()) {
 
-                                Player p = CraftManager.getInstance().getPlayerFromCraft(pcraft);
+                                Player p = craftManager.getPlayerFromCraft(pcraft);
                                 if (p != null) if (MathUtils
                                         .playerIsWithinBoundingPolygon(pcraft.getHitBox(), pcraft.getMinX(),
                                                                        pcraft.getMinZ(), MathUtils
@@ -471,7 +595,7 @@ public final class AsyncManager extends BukkitRunnable {
                                                 pcraft.getMinY() < w.getSeaLevel()) ticksElapsed = ticksElapsed >> 1;
 
                                             if (Math.abs(ticksElapsed) >= pcraft.getType().getTickCooldown()) {
-                                                pcraft.translate(dX, 0, dZ);
+                                                translate(pcraft, dX, 0, dZ);
                                                 pcraft.setLastCruiseUpdate(System.currentTimeMillis());
                                             }
                                             pcraft.setLastDX(dX);
@@ -498,21 +622,19 @@ public final class AsyncManager extends BukkitRunnable {
     }
 
     private boolean isRegionBlockedPVP(BlockPosition loc, World w) {
-        if (Movecraft.getInstance().getWorldGuardPlugin() == null) return false;
-        if (!Settings.WorldGuardBlockSinkOnPVPPerm) return false;
+        if (plugin.getWorldGuardPlugin() == null) return false;
+        if (!settings.WorldGuardBlockSinkOnPVPPerm) return false;
 
         Location nativeLoc = new Location(w, loc.x, loc.y, loc.z);
-        ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(w)
-                                           .getApplicableRegions(nativeLoc);
+        ApplicableRegionSet set = plugin.getWorldGuardPlugin().getRegionManager(w).getApplicableRegions(nativeLoc);
         return !set.allows(DefaultFlag.PVP);
     }
 
     private boolean isRegionFlagSinkAllowed(BlockPosition loc, World w) {
-        if (Movecraft.getInstance().getWorldGuardPlugin() != null &&
-            Movecraft.getInstance().getWGCustomFlagsPlugin() != null && Settings.WGCustomFlagsUseSinkFlag) {
+        if (plugin.getWorldGuardPlugin() != null &&
+            plugin.getWGCustomFlagsPlugin() != null && settings.WGCustomFlagsUseSinkFlag) {
             Location nativeLoc = new Location(w, loc.x, loc.y, loc.z);
-            WGCustomFlagsUtils WGCFU = new WGCustomFlagsUtils();
-            return WGCFU.validateFlag(nativeLoc, Movecraft.FLAG_SINK);
+            return WGCustomFlagsUtils.validateFlag(plugin.getWorldGuardPlugin(), nativeLoc, plugin.FLAG_SINK);
         } else {
             return true;
         }
@@ -535,22 +657,22 @@ public final class AsyncManager extends BukkitRunnable {
 
     public void processSinking() {
         for (World w : Bukkit.getWorlds()) {
-            if (w != null && CraftManager.getInstance().getCraftsInWorld(w) != null) {
+            if (w != null && craftManager.getCraftsInWorld(w) != null) {
                 boolean townyEnabled = false;
-                if (Movecraft.getInstance().getTownyPlugin() != null && Settings.TownyBlockSinkOnNoPVP) {
+                if (plugin.getTownyPlugin() != null && settings.TownyBlockSinkOnNoPVP) {
                     TownyWorld townyWorld = TownyUtils.getTownyWorld(w);
                     if (townyWorld != null) {
                         townyEnabled = townyWorld.isUsingTowny();
                     }
                 }
                 // check every few seconds for every craft to see if it should be sinking
-                for (Craft pcraft : CraftManager.getInstance().getCraftsInWorld(w)) {
+                for (Craft pcraft : craftManager.getCraftsInWorld(w)) {
                     Set<TownBlock> townBlockSet = new HashSet<>();
                     if (pcraft != null && !pcraft.getSinking()) {
                         if (pcraft.getType().getSinkPercent() != 0.0 && pcraft.isNotProcessing()) {
                             long ticksElapsed = (System.currentTimeMillis() - pcraft.getLastBlockCheck()) / 50;
 
-                            if (ticksElapsed > Settings.SinkCheckTicks) {
+                            if (ticksElapsed > settings.SinkCheckTicks) {
                                 int totalNonAirBlocks = 0;
                                 int totalNonAirWaterBlocks = 0;
                                 Map<List<Integer>, Integer> foundFlyBlocks = new HashMap<>();
@@ -563,7 +685,7 @@ public final class AsyncManager extends BukkitRunnable {
                                 for (BlockPosition l : pcraft.getBlockList()) {
                                     if (isRegionBlockedPVP(l, w)) regionPVPBlocked = true;
                                     if (!isRegionFlagSinkAllowed(l, w)) sinkingForbiddenByFlag = true;
-                                    if (townyLoc == null && townyEnabled && Settings.TownyBlockSinkOnNoPVP) {
+                                    if (townyLoc == null && townyEnabled && settings.TownyBlockSinkOnNoPVP) {
                                         townyLoc = isTownyPlotPVPEnabled(l, w, townBlockSet);
                                         if (townyLoc != null) {
                                             sinkingForbiddenByTowny = true;
@@ -625,54 +747,56 @@ public final class AsyncManager extends BukkitRunnable {
                                 if (isSinking &&
                                     (regionPVPBlocked || sinkingForbiddenByFlag || sinkingForbiddenByTowny) &&
                                     pcraft.isNotProcessing() || cancelled) {
-                                    Player p = CraftManager.getInstance().getPlayerFromCraft(pcraft);
+                                    Player p = craftManager.getPlayerFromCraft(pcraft);
                                     Player notifyP = pcraft.getNotificationPlayer();
                                     if (notifyP != null) {
                                         if (regionPVPBlocked) {
-                                            notifyP.sendMessage(I18nSupport.getInternationalisedString(
-                                                    "Player- Craft should sink but PVP is not allowed in this WorldGuard " +
+                                            notifyP.sendMessage(i18n.getInternationalisedString(
+                                                    "Player- Craft should sink but PVP is not allowed in this " +
+                                                    "WorldGuard " +
                                                     "region"));
                                         } else if (sinkingForbiddenByFlag) {
-                                            notifyP.sendMessage(I18nSupport.getInternationalisedString(
-                                                    "WGCustomFlags - Sinking a craft is not allowed in this WorldGuard " +
+                                            notifyP.sendMessage(i18n.getInternationalisedString(
+                                                    "WGCustomFlags - Sinking a craft is not allowed in this " +
+                                                    "WorldGuard " +
                                                     "region"));
                                         } else if (sinkingForbiddenByTowny) {
                                             if (townyLoc != null) {
-                                                notifyP.sendMessage(String.format(I18nSupport.getInternationalisedString(
+                                                notifyP.sendMessage(String.format(i18n.getInternationalisedString(
                                                         "Towny - Sinking a craft is not allowed in this town plot") +
                                                                                   " @ %d,%d,%d", townyLoc.getBlockX(),
                                                                                   townyLoc.getBlockY(),
                                                                                   townyLoc.getBlockZ()));
                                             } else {
-                                                notifyP.sendMessage(I18nSupport.getInternationalisedString(
+                                                notifyP.sendMessage(i18n.getInternationalisedString(
                                                         "Towny - Sinking a craft is not allowed in this town plot"));
                                             }
                                         } else {
-                                            notifyP.sendMessage(I18nSupport.getInternationalisedString(
-                                                    "Sinking a craft is not allowed."));
+                                            notifyP.sendMessage(
+                                                    i18n.getInternationalisedString("Sinking a craft is not allowed."));
                                         }
                                     }
                                     pcraft.setCruising(false);
                                     pcraft.setKeepMoving(false);
-                                    CraftManager.getInstance().removeCraft(pcraft);
+                                    craftManager.removeCraft(pcraft);
                                 } else {
                                     // if the craft is sinking, let the player know and release the craft. Otherwise
                                     // update the time for the next check
                                     if (isSinking && pcraft.isNotProcessing()) {
-                                        Player p = CraftManager.getInstance().getPlayerFromCraft(pcraft);
+                                        Player p = craftManager.getPlayerFromCraft(pcraft);
                                         Player notifyP = pcraft.getNotificationPlayer();
                                         if (notifyP != null) notifyP.sendMessage(
-                                                I18nSupport.getInternationalisedString("Player- Craft is sinking"));
+                                                i18n.getInternationalisedString("Player- Craft is sinking"));
                                         pcraft.setCruising(false);
                                         pcraft.setKeepMoving(false);
                                         pcraft.setSinking(true);
-                                        CraftManager.getInstance().removePlayerFromCraft(pcraft);
+                                        craftManager.removePlayerFromCraft(pcraft);
                                         final Craft releaseCraft = pcraft;
                                         BukkitTask releaseTask = new BukkitRunnable() {
                                             @Override public void run() {
-                                                CraftManager.getInstance().removeCraft(releaseCraft);
+                                                craftManager.removeCraft(releaseCraft);
                                             }
-                                        }.runTaskLater(Movecraft.getInstance(), (20 * 600));
+                                        }.runTaskLater(plugin, (20 * 600));
                                     } else {
                                         pcraft.setLastBlockCheck(System.currentTimeMillis());
                                     }
@@ -683,40 +807,39 @@ public final class AsyncManager extends BukkitRunnable {
                 }
 
                 // sink all the sinking ships
-                if (CraftManager.getInstance().getCraftsInWorld(w) != null)
-                    for (Craft pcraft : CraftManager.getInstance().getCraftsInWorld(w)) {
-                        if (pcraft != null && pcraft.getSinking()) {
-                            if (pcraft.getBlockList().length == 0) {
-                                CraftManager.getInstance().removeCraft(pcraft);
+                if (craftManager.getCraftsInWorld(w) != null) for (Craft pcraft : craftManager.getCraftsInWorld(w)) {
+                    if (pcraft != null && pcraft.getSinking()) {
+                        if (pcraft.getBlockList().length == 0) {
+                            craftManager.removeCraft(pcraft);
+                        }
+                        if (pcraft.getMinY() < -1) {
+                            craftManager.removeCraft(pcraft);
+                        }
+                        long ticksElapsed = (System.currentTimeMillis() - pcraft.getLastCruiseUpdate()) / 50;
+                        if (Math.abs(ticksElapsed) >= pcraft.getType().getSinkRateTicks()) {
+                            int dx = 0;
+                            int dz = 0;
+                            if (pcraft.getType().getKeepMovingOnSink()) {
+                                dx = pcraft.getLastDX();
+                                dz = pcraft.getLastDZ();
                             }
-                            if (pcraft.getMinY() < -1) {
-                                CraftManager.getInstance().removeCraft(pcraft);
-                            }
-                            long ticksElapsed = (System.currentTimeMillis() - pcraft.getLastCruiseUpdate()) / 50;
-                            if (Math.abs(ticksElapsed) >= pcraft.getType().getSinkRateTicks()) {
-                                int dx = 0;
-                                int dz = 0;
-                                if (pcraft.getType().getKeepMovingOnSink()) {
-                                    dx = pcraft.getLastDX();
-                                    dz = pcraft.getLastDZ();
-                                }
-                                pcraft.translate(dx, -1, dz);
-                                if (pcraft.getLastCruiseUpdate() == -1) {
-                                    pcraft.setLastCruiseUpdate(0);
-                                } else {
-                                    pcraft.setLastCruiseUpdate(System.currentTimeMillis());
-                                }
+                            translate(pcraft, dx, -1, dz);
+                            if (pcraft.getLastCruiseUpdate() == -1) {
+                                pcraft.setLastCruiseUpdate(0);
+                            } else {
+                                pcraft.setLastCruiseUpdate(System.currentTimeMillis());
                             }
                         }
                     }
+                }
             }
         }
     }
 
     public void processTracers() {
-        if (Settings.TracerRateTicks == 0) return;
+        if (settings.TracerRateTicks == 0) return;
         long ticksElapsed = (System.currentTimeMillis() - lastTracerUpdate) / 50;
-        if (ticksElapsed > Settings.TracerRateTicks) {
+        if (ticksElapsed > settings.TracerRateTicks) {
             for (World w : Bukkit.getWorlds()) {
                 if (w != null) {
                     for (org.bukkit.entity.TNTPrimed tnt : w.getEntitiesByClass(org.bukkit.entity.TNTPrimed.class)) {
@@ -738,7 +861,7 @@ public final class AsyncManager extends BukkitRunnable {
                                         @Override public void run() {
                                             fp.sendBlockChange(loc, 30, (byte) 0);
                                         }
-                                    }.runTaskLater(Movecraft.getInstance(), 5);
+                                    }.runTaskLater(plugin, 5);
                                     // then remove it
                                     BukkitTask removeCobweb = new BukkitRunnable() {
                                         @Override public void run() {
@@ -746,7 +869,7 @@ public final class AsyncManager extends BukkitRunnable {
 // .getData());
                                             fp.sendBlockChange(loc, 0, (byte) 0);
                                         }
-                                    }.runTaskLater(Movecraft.getInstance(), 160);
+                                    }.runTaskLater(plugin, 160);
                                 }
                             }
                         }
@@ -793,7 +916,7 @@ public final class AsyncManager extends BukkitRunnable {
                 }
             }
 
-            int timelimit = 20 * Settings.FireballLifespan * 50;
+            int timelimit = 20 * settings.FireballLifespan * 50;
             //then, removed any exploded TNT from tracking
             Iterator<org.bukkit.entity.SmallFireball> fireballI = FireballTracking.keySet().iterator();
             while (fireballI.hasNext()) {
@@ -849,7 +972,7 @@ public final class AsyncManager extends BukkitRunnable {
     }
 
     public void processFadingBlocks() {
-        if (Settings.FadeWrecksAfter == 0) return;
+        if (settings.FadeWrecksAfter == 0) return;
         long ticksElapsed = (System.currentTimeMillis() - lastFadeCheck) / 50;
         if (ticksElapsed > 20) {
             for (World w : Bukkit.getWorlds()) {
@@ -861,28 +984,28 @@ public final class AsyncManager extends BukkitRunnable {
                     int numTries = 0;
                     while ((locations == null) && (numTries < 100)) {
                         try {
-                            locations = new CopyOnWriteArrayList<>(Movecraft.getInstance().blockFadeTimeMap.keySet());
+                            locations = new CopyOnWriteArrayList<>(plugin.blockFadeTimeMap.keySet());
                         } catch (java.util.ConcurrentModificationException e) {
                             numTries++;
                         } catch (java.lang.NegativeArraySizeException e) {
-                            Movecraft.getInstance().blockFadeTimeMap = new HashMap<>();
-                            Movecraft.getInstance().blockFadeTypeMap = new HashMap<>();
-                            Movecraft.getInstance().blockFadeWaterMap = new HashMap<>();
-                            Movecraft.getInstance().blockFadeWorldMap = new HashMap<>();
-                            locations = new CopyOnWriteArrayList<>(Movecraft.getInstance().blockFadeTimeMap.keySet());
+                            plugin.blockFadeTimeMap = new HashMap<>();
+                            plugin.blockFadeTypeMap = new HashMap<>();
+                            plugin.blockFadeWaterMap = new HashMap<>();
+                            plugin.blockFadeWorldMap = new HashMap<>();
+                            locations = new CopyOnWriteArrayList<>(plugin.blockFadeTimeMap.keySet());
                         }
                     }
 
                     for (BlockPosition loc : locations) {
-                        if (Movecraft.getInstance().blockFadeWorldMap.get(loc) == w) {
-                            Long time = Movecraft.getInstance().blockFadeTimeMap.get(loc);
-                            Integer type = Movecraft.getInstance().blockFadeTypeMap.get(loc);
-                            Boolean water = Movecraft.getInstance().blockFadeWaterMap.get(loc);
+                        if (plugin.blockFadeWorldMap.get(loc) == w) {
+                            Long time = plugin.blockFadeTimeMap.get(loc);
+                            Integer type = plugin.blockFadeTypeMap.get(loc);
+                            Boolean water = plugin.blockFadeWaterMap.get(loc);
                             if (time != null && type != null && water != null) {
-                                long secsElapsed = (System.currentTimeMillis() -
-                                                    Movecraft.getInstance().blockFadeTimeMap.get(loc)) / 1000;
+                                long secsElapsed =
+                                        (System.currentTimeMillis() - plugin.blockFadeTimeMap.get(loc)) / 1000;
                                 // has enough time passed to fade the block?
-                                if (secsElapsed > Settings.FadeWrecksAfter) {
+                                if (secsElapsed > settings.FadeWrecksAfter) {
                                     // load the chunk if it hasn't been already
                                     int cx = loc.x >> 4;
                                     int cz = loc.z >> 4;
@@ -890,10 +1013,9 @@ public final class AsyncManager extends BukkitRunnable {
                                         w.loadChunk(cx, cz);
                                     }
                                     // check to see if the block type has changed, if so don't fade it
-                                    if (w.getBlockTypeIdAt(loc.x, loc.y, loc.z) ==
-                                        Movecraft.getInstance().blockFadeTypeMap.get(loc)) {
+                                    if (w.getBlockTypeIdAt(loc.x, loc.y, loc.z) == plugin.blockFadeTypeMap.get(loc)) {
                                         // should it become water? if not, then air
-                                        if (Movecraft.getInstance().blockFadeWaterMap.get(loc)) {
+                                        if (plugin.blockFadeWaterMap.get(loc)) {
                                             MapUpdateCommand updateCom = new MapUpdateCommand(loc, 9, (byte) 0, null);
                                             updateCommands.add(updateCom);
                                         } else {
@@ -901,17 +1023,16 @@ public final class AsyncManager extends BukkitRunnable {
                                             updateCommands.add(updateCom);
                                         }
                                     }
-                                    Movecraft.getInstance().blockFadeTimeMap.remove(loc);
-                                    Movecraft.getInstance().blockFadeTypeMap.remove(loc);
-                                    Movecraft.getInstance().blockFadeWorldMap.remove(loc);
-                                    Movecraft.getInstance().blockFadeWaterMap.remove(loc);
+                                    plugin.blockFadeTimeMap.remove(loc);
+                                    plugin.blockFadeTypeMap.remove(loc);
+                                    plugin.blockFadeWorldMap.remove(loc);
+                                    plugin.blockFadeWaterMap.remove(loc);
                                 }
                             }
                         }
                     }
                     if (!updateCommands.isEmpty()) {
-                        MapUpdateManager.getInstance()
-                                        .addWorldUpdate(w, updateCommands.toArray(new MapUpdateCommand[1]), null, null);
+                        mapUpdateManager.addWorldUpdate(w, updateCommands.toArray(new MapUpdateCommand[1]), null, null);
                     }
                 }
             }
@@ -924,13 +1045,13 @@ public final class AsyncManager extends BukkitRunnable {
         long ticksElapsed = (System.currentTimeMillis() - lastContactCheck) / 50;
         if (ticksElapsed > 21) {
             for (World w : Bukkit.getWorlds()) {
-                if (w != null && CraftManager.getInstance().getCraftsInWorld(w) != null) {
-                    for (Craft ccraft : CraftManager.getInstance().getCraftsInWorld(w)) {
-                        if (CraftManager.getInstance().getPlayerFromCraft(ccraft) != null) {
+                if (w != null && craftManager.getCraftsInWorld(w) != null) {
+                    for (Craft ccraft : craftManager.getCraftsInWorld(w)) {
+                        if (craftManager.getPlayerFromCraft(ccraft) != null) {
                             if (!recentContactTracking.containsKey(ccraft)) {
                                 recentContactTracking.put(ccraft, new HashMap<Craft, Long>());
                             }
-                            for (Craft tcraft : CraftManager.getInstance().getCraftsInWorld(w)) {
+                            for (Craft tcraft : craftManager.getCraftsInWorld(w)) {
                                 long cposx = ccraft.getMaxX() + ccraft.getMinX();
                                 long cposy = ccraft.getMaxY() + ccraft.getMinY();
                                 long cposz = ccraft.getMaxZ() + ccraft.getMinZ();
@@ -992,7 +1113,7 @@ public final class AsyncManager extends BukkitRunnable {
                                             @Override public void run() {
                                                 sw.playSound(sp.getLocation(), Sound.BLOCK_ANVIL_LAND, 10.0f, 2.0f);
                                             }
-                                        }.runTaskLater(Movecraft.getInstance(), (5));
+                                        }.runTaskLater(plugin, (5));
                                     }
 
                                     long timestamp = System.currentTimeMillis();
@@ -1009,20 +1130,17 @@ public final class AsyncManager extends BukkitRunnable {
     }
 
     public void processSiege() {
-        if (Movecraft.getInstance().currentSiegeName != null) {
+        if (plugin.currentSiegeName != null) {
             long secsElapsed = (System.currentTimeMillis() - lastSiegeNotification) / 1000;
             if (secsElapsed > 180) {
                 lastSiegeNotification = System.currentTimeMillis();
                 boolean siegeLeaderPilotingShip = false;
-                Player siegeLeader = Movecraft.getInstance().getServer()
-                                              .getPlayer(Movecraft.getInstance().currentSiegePlayer);
+                Player siegeLeader = plugin.getServer().getPlayer(plugin.currentSiegePlayer);
                 if (siegeLeader != null) {
-                    if (CraftManager.getInstance().getCraftByPlayer(siegeLeader) != null) {
-                        for (String tTypeName : Settings.SiegeCraftsToWin
-                                .get(Movecraft.getInstance().currentSiegeName)) {
+                    if (craftManager.getCraftByPlayer(siegeLeader) != null) {
+                        for (String tTypeName : settings.SiegeCraftsToWin.get(plugin.currentSiegeName)) {
                             if (tTypeName.equalsIgnoreCase(
-                                    CraftManager.getInstance().getCraftByPlayer(siegeLeader).getType()
-                                                .getCraftName())) {
+                                    craftManager.getCraftByPlayer(siegeLeader).getType().getCraftName())) {
                                 siegeLeaderPilotingShip = true;
                             }
                         }
@@ -1033,58 +1151,56 @@ public final class AsyncManager extends BukkitRunnable {
                 int midY = 0;
                 int midZ = 0;
                 if (siegeLeaderPilotingShip) {
-                    midX = (CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMaxX() +
-                            CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMinX()) / 2;
-                    midY = (CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMaxY() +
-                            CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMinY()) / 2;
-                    midZ = (CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMaxZ() +
-                            CraftManager.getInstance().getCraftByPlayer(siegeLeader).getMinZ()) / 2;
-                    if (Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(siegeLeader.getWorld())
-                                 .getRegion(Settings.SiegeRegion.get(Movecraft.getInstance().currentSiegeName))
-                                 .contains(midX, midY, midZ)) {
+                    midX = (craftManager.getCraftByPlayer(siegeLeader).getMaxX() +
+                            craftManager.getCraftByPlayer(siegeLeader).getMinX()) / 2;
+                    midY = (craftManager.getCraftByPlayer(siegeLeader).getMaxY() +
+                            craftManager.getCraftByPlayer(siegeLeader).getMinY()) / 2;
+                    midZ = (craftManager.getCraftByPlayer(siegeLeader).getMaxZ() +
+                            craftManager.getCraftByPlayer(siegeLeader).getMinZ()) / 2;
+                    if (plugin.getWorldGuardPlugin().getRegionManager(siegeLeader.getWorld())
+                              .getRegion(settings.SiegeRegion.get(plugin.currentSiegeName))
+                              .contains(midX, midY, midZ)) {
                         siegeLeaderShipInRegion = true;
                     }
                 }
-                long timeLapsed = (System.currentTimeMillis() - Movecraft.getInstance().currentSiegeStartTime) / 1000;
-                int timeLeft = (int) (Settings.SiegeDuration.get(Movecraft.getInstance().currentSiegeName) -
-                                      timeLapsed);
+                long timeLapsed = (System.currentTimeMillis() - plugin.currentSiegeStartTime) / 1000;
+                int timeLeft = (int) (settings.SiegeDuration.get(plugin.currentSiegeName) - timeLapsed);
                 if (timeLeft > 10) {
                     if (siegeLeaderShipInRegion) {
                         Bukkit.getServer().broadcastMessage(String.format(
                                 "The Siege of %s is under way. The Siege Flagship is a %s of size %d under the " +
-                                "command of %s at %d, %d, %d. Siege will end in %d minutes",
-                                Movecraft.getInstance().currentSiegeName,
-                                CraftManager.getInstance().getCraftByPlayer(siegeLeader).getType().getCraftName(),
-                                CraftManager.getInstance().getCraftByPlayer(siegeLeader).getOrigBlockCount(),
+                                "command of %s at %d, %d, %d. Siege will end in %d minutes", plugin.currentSiegeName,
+                                craftManager.getCraftByPlayer(siegeLeader).getType().getCraftName(),
+                                craftManager.getCraftByPlayer(siegeLeader).getOrigBlockCount(),
                                 siegeLeader.getDisplayName(), midX, midY, midZ, timeLeft / 60));
                     } else {
                         Bukkit.getServer().broadcastMessage(String.format(
                                 "The Siege of %s is under way. The Siege Leader, %s, is not in command of a Flagship " +
                                 "within the Siege Region! If they are still not when the duration expires, the siege " +
-                                "will fail! Siege will end in %d minutes", Movecraft.getInstance().currentSiegeName,
+                                "will fail! Siege will end in %d minutes", plugin.currentSiegeName,
                                 siegeLeader.getDisplayName(), timeLeft / 60));
                     }
                 } else {
                     if (siegeLeaderShipInRegion) {
                         Bukkit.getServer().broadcastMessage(
                                 String.format("The Siege of %s has succeeded! The forces of %s have been victorious!",
-                                              Movecraft.getInstance().currentSiegeName, siegeLeader.getDisplayName()));
-                        ProtectedRegion controlRegion = Movecraft.getInstance().getWorldGuardPlugin()
-                                                                 .getRegionManager(siegeLeader.getWorld()).getRegion(
-                                        Settings.SiegeControlRegion.get(Movecraft.getInstance().currentSiegeName));
+                                              plugin.currentSiegeName, siegeLeader.getDisplayName()));
+                        ProtectedRegion controlRegion = plugin.getWorldGuardPlugin()
+                                                              .getRegionManager(siegeLeader.getWorld()).getRegion(
+                                        settings.SiegeControlRegion.get(plugin.currentSiegeName));
                         DefaultDomain newOwner = new DefaultDomain();
-                        newOwner.addPlayer(Movecraft.getInstance().currentSiegePlayer);
+                        newOwner.addPlayer(plugin.currentSiegePlayer);
                         controlRegion.setOwners(newOwner);
                         DefaultDomain newMember = new DefaultDomain();
-                        newOwner.addPlayer(Movecraft.getInstance().currentSiegePlayer);
+                        newOwner.addPlayer(plugin.currentSiegePlayer);
                         controlRegion.setMembers(newMember);
                     } else {
                         Bukkit.getServer().broadcastMessage(
                                 String.format("The Siege of %s has failed! The forces of %s have been crushed!",
-                                              Movecraft.getInstance().currentSiegeName, siegeLeader.getDisplayName()));
+                                              plugin.currentSiegeName, siegeLeader.getDisplayName()));
                     }
-                    Movecraft.getInstance().currentSiegeName = null;
-                    Movecraft.getInstance().siegeInProgress = false;
+                    plugin.currentSiegeName = null;
+                    plugin.siegeInProgress = false;
                 }
             }
         }
@@ -1096,17 +1212,18 @@ public final class AsyncManager extends BukkitRunnable {
             int minute = rightNow.get(Calendar.MINUTE);
             if ((hour == 1) && (minute == 1)) {
                 lastSiegePayout = System.currentTimeMillis();
-                for (String tSiegeName : Settings.SiegeName) {
-                    int payment = Settings.SiegeIncome.get(tSiegeName);
-                    for (World tW : Movecraft.getInstance().getServer().getWorlds()) {
-                        ProtectedRegion tRegion = Movecraft.getInstance().getWorldGuardPlugin().getRegionManager(tW)
-                                                           .getRegion(Settings.SiegeControlRegion.get(tSiegeName));
+                for (String tSiegeName : settings.SiegeName) {
+                    int payment = settings.SiegeIncome.get(tSiegeName);
+                    for (World tW : plugin.getServer().getWorlds()) {
+                        ProtectedRegion tRegion = plugin.getWorldGuardPlugin().getRegionManager(tW)
+                                                        .getRegion(settings.SiegeControlRegion.get(tSiegeName));
                         if (tRegion != null) {
                             for (String tPlayerName : tRegion.getOwners().getPlayers()) {
                                 int share = payment / tRegion.getOwners().getPlayers().size();
-                                Movecraft.getInstance().getEconomy().depositPlayer(tPlayerName, share);
-                                Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
-                                        "Player %s paid %d for their ownership in %s", tPlayerName, share, tSiegeName));
+                                plugin.getEconomy().depositPlayer(tPlayerName, share);
+                                plugin.getLogger().log(Level.INFO,
+                                                       String.format("Player %s paid %d for their ownership in %s",
+                                                                     tPlayerName, share, tSiegeName));
                             }
                         }
                     }

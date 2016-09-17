@@ -16,9 +16,14 @@ import java.util.Map;
 import java.util.Set;
 
 public class CraftHelpListener implements CommandExecutor {
+    private final CraftManager craftManager;
+
+    public CraftHelpListener(CraftManager craftManager) {
+        this.craftManager = craftManager;
+    }
 
     private CraftType getCraftByName(String string) {
-        CraftType[] crafts = CraftManager.getInstance().getCraftTypes();
+        CraftType[] crafts = craftManager.getCraftTypes();
         if (crafts == null || string == null || string.isEmpty()) {
             return null;
         }
@@ -44,7 +49,7 @@ public class CraftHelpListener implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("movecraftadmin.reload")) {
-            CraftManager.getInstance().initCraftTypes();
+            craftManager.initCraftTypes();
             sender.sendMessage(ChatColor.GOLD + "Craft configuration reloaded.");
             return true;
         }
@@ -97,8 +102,7 @@ public class CraftHelpListener implements CommandExecutor {
         return true;
     }
 
-    private void appendFlyBlocks(StringBuilder sbReq, StringBuilder sbLimit,
-                                 Map<List<Integer>, List<Double>> flyBlocks)
+    private void appendFlyBlocks(StringBuilder sbReq, StringBuilder sbLimit, Map<List<Integer>, List<Double>> flyBlocks)
     {
         for (Map.Entry<List<Integer>, List<Double>> entry : flyBlocks.entrySet()) {
             String blockName = BlockNames.itemName(entry.getKey().get(0));
@@ -128,7 +132,7 @@ public class CraftHelpListener implements CommandExecutor {
     }
 
     private void doCraftList(CommandSender sender) {
-        CraftType[] crafts = CraftManager.getInstance().getCraftTypes();
+        CraftType[] crafts = craftManager.getCraftTypes();
         if (crafts == null) crafts = new CraftType[0];
         String[] names = new String[crafts.length];
         for (int ix = 0; ix < crafts.length; ix++) {

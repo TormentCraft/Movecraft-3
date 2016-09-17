@@ -38,8 +38,8 @@ public class TranslationTaskData {
     private final int minHeight;
     private boolean collisionExplosion;
 
-    public TranslationTaskData(int dx, int dz, int dy, BlockPosition[] blockList, int[][][] hitbox, int minZ,
-                               int minX, int maxHeight, int minHeight)
+    public TranslationTaskData(int dx, int dz, int dy, BlockPosition[] blockList, int[][][] hitbox, int minZ, int minX,
+                               int maxHeight, int minHeight)
     {
         this.dx = dx;
         this.dz = dz;

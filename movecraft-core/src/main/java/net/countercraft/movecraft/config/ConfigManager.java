@@ -17,8 +17,8 @@
 
 package net.countercraft.movecraft.config;
 
-import net.countercraft.movecraft.Movecraft;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +30,15 @@ class ConfigManager {
         this.configFile = configFile;
     }
 
-    public void loadConfig() {
-        setupDefaults();
+    public void loadConfig(Plugin plugin, Settings settings) {
+        setupDefaults(plugin);
 
-        Settings.DATA_BLOCKS = configFile.getIntegerList("dataBlocks");
-        Settings.THREAD_POOL_SIZE = configFile.getInt("ThreadPoolSize");
-        Settings.IGNORE_RESET = configFile.getBoolean("safeReload");
+        settings.DATA_BLOCKS = configFile.getIntegerList("dataBlocks");
+        settings.THREAD_POOL_SIZE = configFile.getInt("ThreadPoolSize");
+        settings.IGNORE_RESET = configFile.getBoolean("safeReload");
     }
 
-    private void setupDefaults() {
+    private void setupDefaults(Plugin plugin) {
         configFile.addDefault("ThreadPoolSize", 5);
         configFile.addDefault("safeReload", false);
         List<Integer> dataBlockList = new ArrayList<>();
@@ -57,6 +57,6 @@ class ConfigManager {
         dataBlockList.add(65);
         configFile.addDefault("dataBlocks", dataBlockList);
         configFile.options().copyDefaults(true);
-        Movecraft.getInstance().saveConfig();
+        plugin.saveConfig();
     }
 }

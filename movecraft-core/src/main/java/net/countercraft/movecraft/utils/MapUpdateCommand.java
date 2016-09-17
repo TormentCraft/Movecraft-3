@@ -35,8 +35,8 @@ public class MapUpdateCommand {
     private final Craft craft;
     private final int smoke;
 
-    public MapUpdateCommand(BlockPosition blockLocation, BlockPosition newBlockLocation, int typeID,
-                            byte dataID, Rotation rotation, Craft craft)
+    public MapUpdateCommand(BlockPosition blockLocation, BlockPosition newBlockLocation, int typeID, byte dataID,
+                            Rotation rotation, Craft craft)
     {
         this.blockLocation = blockLocation;
         this.newBlockLocation = newBlockLocation;
@@ -48,8 +48,8 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(BlockPosition blockLocation, BlockPosition newBlockLocation, int typeID,
-                            byte dataID, Craft craft)
+    public MapUpdateCommand(BlockPosition blockLocation, BlockPosition newBlockLocation, int typeID, byte dataID,
+                            Craft craft)
     {
         this.blockLocation = blockLocation;
         this.newBlockLocation = newBlockLocation;

@@ -2,9 +2,9 @@ package net.countercraft.movecraft.utils;
 
 import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
 import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
-import net.countercraft.movecraft.Movecraft;
 import org.bukkit.Location;
 
 import java.lang.reflect.Constructor;
@@ -15,7 +15,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class WGCustomFlagsUtils {
 
-    public StateFlag getNewStateFlag(String name, boolean def) {
+    public static StateFlag getNewStateFlag(String name, boolean def) {
         Constructor<?> cc = getStateFlagConstructor();
         if (cc == null) {
             return null;
@@ -34,7 +34,7 @@ public class WGCustomFlagsUtils {
         }
     }
 
-    public Constructor<?> getStateFlagConstructor() {
+    public static Constructor<?> getStateFlagConstructor() {
         try {
             Class<?> c = Class.forName("com.sk89q.worldguard.protection.flags.StateFlag");
             return c.getConstructor(String.class, boolean.class);
@@ -47,15 +47,14 @@ public class WGCustomFlagsUtils {
         }
     }
 
-    public boolean registerStageFlag(Object o) {
-        WGCustomFlagsPlugin wgcf = Movecraft.getInstance().getWGCustomFlagsPlugin();
-        if (wgcf != null) {
+    public static boolean registerStageFlag(WGCustomFlagsPlugin plugin, Object o) {
+        if (plugin != null) {
             Constructor<?> cc = getStateFlagConstructor();
             if (cc == null) {
                 return false;
             }
             try {
-                wgcf.addCustomFlag((Flag) o);
+                plugin.addCustomFlag((Flag) o);
             } catch (Exception e) {
                 return false;
             }
@@ -64,37 +63,27 @@ public class WGCustomFlagsUtils {
         return false;
     }
 
-    public void init() {
-        if (Movecraft.FLAG_PILOT != null) {
-            this.registerStageFlag(Movecraft.FLAG_PILOT);
-        }
-        if (Movecraft.FLAG_MOVE != null) {
-            this.registerStageFlag(Movecraft.FLAG_MOVE);
-        }
-        if (Movecraft.FLAG_ROTATE != null) {
-            this.registerStageFlag(Movecraft.FLAG_ROTATE);
-        }
-        if (Movecraft.FLAG_SINK != null) {
-            this.registerStageFlag(Movecraft.FLAG_SINK);
+    public static void registerFlags(WGCustomFlagsPlugin plugin, StateFlag... flags) {
+        for (StateFlag flag : flags) {
+            if (flag != null) registerStageFlag(plugin, flag);
         }
     }
 
-    public boolean validateFlag(Location loc, Object flag) {
+    public static boolean validateFlag(WorldGuardPlugin worldGuardPlugin, Location loc, Object flag) {
         if (flag != null) {
-            StateFlag.State state = (StateFlag.State) Movecraft.getInstance().getWorldGuardPlugin()
-                                                               .getRegionManager(loc.getWorld())
-                                                               .getApplicableRegions(loc).getFlag((Flag) flag);
+            StateFlag.State state = (StateFlag.State) worldGuardPlugin.getRegionManager(loc.getWorld())
+                                                                      .getApplicableRegions(loc).getFlag((Flag) flag);
             return state != null && state == StateFlag.State.ALLOW;
         } else {
             return true;
         }
     }
 
-    public boolean validateFlag(Location loc, Object flag, LocalPlayer lp) {
+    public static boolean validateFlag(WorldGuardPlugin worldGuardPlugin, Location loc, Object flag, LocalPlayer lp) {
         if (flag != null) {
-            StateFlag.State state = (StateFlag.State) Movecraft.getInstance().getWorldGuardPlugin()
-                                                               .getRegionManager(loc.getWorld())
-                                                               .getApplicableRegions(loc).getFlag((Flag) flag, lp);
+            StateFlag.State state = (StateFlag.State) worldGuardPlugin.getRegionManager(loc.getWorld())
+                                                                      .getApplicableRegions(loc)
+                                                                      .getFlag((Flag) flag, lp);
             return state != null && state == StateFlag.State.ALLOW;
         } else {
             return true;
