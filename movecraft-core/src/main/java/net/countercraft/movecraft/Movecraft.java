@@ -23,7 +23,7 @@ import com.palmergames.bukkit.towny.Towny;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.StateFlag;
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.MovecraftPlugin;
 import net.countercraft.movecraft.async.AsyncManager;
 import net.countercraft.movecraft.config.Settings;
@@ -77,10 +77,10 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
     private Logger logger;
 
     private boolean shuttingDown;
-    public Map<BlockPosition, Long> blockFadeTimeMap = new HashMap<>();
-    public Map<BlockPosition, Integer> blockFadeTypeMap = new HashMap<>();
-    public Map<BlockPosition, Boolean> blockFadeWaterMap = new HashMap<>();
-    public Map<BlockPosition, World> blockFadeWorldMap = new HashMap<>();
+    public Map<BlockVec, Long> blockFadeTimeMap = new HashMap<>();
+    public Map<BlockVec, Integer> blockFadeTypeMap = new HashMap<>();
+    public Map<BlockVec, Boolean> blockFadeWaterMap = new HashMap<>();
+    public Map<BlockVec, World> blockFadeWorldMap = new HashMap<>();
     public boolean siegeInProgress = false;
     public String currentSiegeName = null;
     public String currentSiegePlayer = null;

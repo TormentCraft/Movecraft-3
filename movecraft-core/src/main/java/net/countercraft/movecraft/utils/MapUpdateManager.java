@@ -22,7 +22,7 @@ import com.sk89q.worldedit.blocks.SignBlock;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -74,11 +74,11 @@ public final class MapUpdateManager extends BukkitRunnable {
         this.plugin = plugin;
     }
 
-    private void updateBlock(MapUpdateCommand m, World w, Map<BlockPosition, TransferData> dataMap,
+    private void updateBlock(MapUpdateCommand m, World w, Map<BlockVec, TransferData> dataMap,
                              Set<net.minecraft.server.v1_10_R1.Chunk> chunks, Set<Chunk> cmChunks,
-                             HashMap<BlockPosition, Byte> origLightMap, boolean placeDispensers)
+                             HashMap<BlockVec, Byte> origLightMap, boolean placeDispensers)
     {
-        BlockPosition workingL = m.getNewBlockLocation();
+        BlockVec workingL = m.getNewBlockLocation();
         final int[] blocksToBlankOut = new int[]{54, 61, 62, 63, 68, 116, 117, 146, 149, 150, 154, 158, 145};
 
         int x = workingL.x;
@@ -196,7 +196,7 @@ public final class MapUpdateManager extends BukkitRunnable {
 									if(linearDist<=15) {
 //										((CraftWorld) w).getHandle().b(EnumSkyBlock.BLOCK, x, y, z, lightLevel);
 Changed for 1.8, and quite possibly wrong:
-										BlockPosition positioni = new BlockPosition(posx, posy, posz);
+										BlockVec positioni = new BlockVec(posx, posy, posz);
 										((CraftWorld) w).getHandle().b(EnumSkyBlock.BLOCK, positioni);
 									}
 								}
@@ -257,9 +257,9 @@ Changed for 1.8, and quite possibly wrong:
         }
     }
 
-    private void updateData(Map<BlockPosition, TransferData> dataMap, World w) {
+    private void updateData(Map<BlockVec, TransferData> dataMap, World w) {
         // Restore block specific information
-        for (Map.Entry<BlockPosition, TransferData> entry : dataMap.entrySet()) {
+        for (Map.Entry<BlockVec, TransferData> entry : dataMap.entrySet()) {
             try {
                 TransferData transferData = entry.getValue();
 
@@ -322,9 +322,9 @@ Changed for 1.8, and quite possibly wrong:
     private void runQueue(final ArrayList<MapUpdateCommand> queuedMapUpdateCommands,
                           final ArrayList<Boolean> queuedPlaceDispensers, final World w,
                           final Set<net.minecraft.server.v1_10_R1.Chunk> chunks, final Set<Chunk> cmChunks,
-                          final HashMap<BlockPosition, Byte> origLightMap,
-                          final Map<BlockPosition, TransferData> dataMap, final List<MapUpdateCommand> updatesInWorld,
-                          final Map<BlockPosition, List<EntityUpdateCommand>> entityMap)
+                          final HashMap<BlockVec, Byte> origLightMap,
+                          final Map<BlockVec, TransferData> dataMap, final List<MapUpdateCommand> updatesInWorld,
+                          final Map<BlockVec, List<EntityUpdateCommand>> entityMap)
     {
         int numToRun = queuedMapUpdateCommands.size();
         if (numToRun > settings.BlockQueueChunkSize) numToRun = settings.BlockQueueChunkSize;
@@ -381,7 +381,7 @@ Changed for 1.8, and quite possibly wrong:
 //				for ( net.minecraft.server.v1_8_R3.Chunk c : chunks ) {
 //					c.initLighting();
 //				}
-/*				for(BlockPosition mloc : origLightMap.keySet()) {
+/*				for(BlockVec mloc : origLightMap.keySet()) {
                     Location loc=new Location(w, mloc.getX(), mloc.getY(), mloc.getZ());
 					for ( Player p : w.getPlayers() ) {
 						Chunk c=p.getLocation().getChunk();
@@ -423,10 +423,10 @@ Changed for 1.8, and quite possibly wrong:
                 List<MapUpdateCommand> updatesInWorld = entry.getValue();
                 List<EntityUpdateCommand> entityUpdatesInWorld = entityUpdates.get(entry.getKey());
                 List<ItemDropUpdateCommand> itemDropUpdatesInWorld = itemDropUpdates.get(entry.getKey());
-                Map<BlockPosition, List<EntityUpdateCommand>> entityMap = new HashMap<>();
-                Map<BlockPosition, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
-                Map<BlockPosition, TransferData> dataMap = new HashMap<>();
-                HashMap<BlockPosition, Byte> origLightMap = new HashMap<>();
+                Map<BlockVec, List<EntityUpdateCommand>> entityMap = new HashMap<>();
+                Map<BlockVec, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
+                Map<BlockVec, TransferData> dataMap = new HashMap<>();
+                HashMap<BlockVec, Byte> origLightMap = new HashMap<>();
                 Set<net.minecraft.server.v1_10_R1.Chunk> chunks = null;
                 Set<Chunk> cmChunks = null;
                 ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<>();
@@ -440,7 +440,7 @@ Changed for 1.8, and quite possibly wrong:
 
                 // Preprocessing
                 for (MapUpdateCommand c : updatesInWorld) {
-                    BlockPosition l;
+                    BlockVec l;
                     if (c != null) l = c.getOldBlockLocation();
                     else l = null;
 
@@ -492,9 +492,9 @@ Changed for 1.8, and quite possibly wrong:
                 if (entityUpdatesInWorld != null) {
                     for (EntityUpdateCommand i : entityUpdatesInWorld) {
                         if (i != null) {
-                            BlockPosition entityLoc = new BlockPosition(i.getNewLocation().getBlockX(),
+                            BlockVec entityLoc = new BlockVec(i.getNewLocation().getBlockX(),
                                                                         i.getNewLocation().getBlockY() - 1,
-                                                                        i.getNewLocation().getBlockZ());
+                                                              i.getNewLocation().getBlockZ());
                             if (entityMap.containsKey(entityLoc)) {
                                 List<EntityUpdateCommand> entUpdateList = entityMap.get(entityLoc);
                                 entUpdateList.add(i);
@@ -666,7 +666,7 @@ Changed for 1.8, and quite possibly wrong:
 
 /*				// move entities again
 				if(!Settings.CompatibilityMode)
-					for(BlockPosition i : entityMap.keySet()) {
+					for(BlockVec i : entityMap.keySet()) {
 						List<EntityUpdateCommand> mapUpdateList=entityMap.get(i);
 							for(EntityUpdateCommand entityUpdate : mapUpdateList) {
 								Entity entity=entityUpdate.getEntity();
@@ -787,7 +787,7 @@ Changed for 1.8, and quite possibly wrong:
 
         Integer minx = Integer.MAX_VALUE, miny = Integer.MAX_VALUE, minz = Integer.MAX_VALUE;
         Integer maxx = Integer.MIN_VALUE, maxy = Integer.MIN_VALUE, maxz = Integer.MIN_VALUE;
-        Map<BlockPosition, MapUpdateCommand> sortRef = new HashMap<>();
+        Map<BlockVec, MapUpdateCommand> sortRef = new HashMap<>();
         if (mapUpdates != null) {
             for (MapUpdateCommand m : mapUpdates) {
                 if (setContainsConflict(get, m)) {

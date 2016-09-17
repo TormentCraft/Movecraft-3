@@ -17,7 +17,7 @@
 
 package net.countercraft.movecraft.async.detection;
 
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -26,7 +26,7 @@ public class DetectionTaskData {
     private boolean failed;
     private boolean waterContact;
     private String failMessage;
-    private BlockPosition[] blockList;
+    private BlockVec[] blockList;
     private Player player;
     private Player notificationPlayer;
     private int[][][] hitBox;
@@ -79,11 +79,11 @@ public class DetectionTaskData {
         this.failMessage = failMessage;
     }
 
-    public BlockPosition[] getBlockList() {
+    public BlockVec[] getBlockList() {
         return blockList;
     }
 
-    void setBlockList(BlockPosition[] blockList) {
+    void setBlockList(BlockVec[] blockList) {
         this.blockList = blockList;
     }
 

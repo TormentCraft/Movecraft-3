@@ -17,7 +17,7 @@
 
 package net.countercraft.movecraft.listener;
 
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -54,15 +54,15 @@ public class PlayerListener implements Listener {
     }
 
     private String checkCraftBorders(Craft craft) {
-        Set<BlockPosition> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
-        for (BlockPosition block : craftBlocks) {
+        Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        for (BlockVec block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
                         //No diagonals
                         if ((z != 0 && x != 0) || (x == 0 && y == 0 && z == 0)) continue;
 
-                        BlockPosition test = new BlockPosition(block.x + x, block.y + y, block.z + z);
+                        BlockVec test = new BlockVec(block.x + x, block.y + y, block.z + z);
                         if (!craftBlocks.contains(test)) {
                             Block testBlock = craft.getW().getBlockAt(block.x + x, block.y + y, block.z + z);
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||

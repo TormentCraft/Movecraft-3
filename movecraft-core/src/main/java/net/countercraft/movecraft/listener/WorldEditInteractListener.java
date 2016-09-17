@@ -22,7 +22,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.SignBlock;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -143,7 +143,7 @@ public class WorldEditInteractListener implements Listener {
                             26, 34, 64, 71, 140, 144, 176, 177, 193, 194, 195, 196,
                             197};  // BLOCKS THAT CAN'T BE PARTIALLY RECONSTRUCTED
 
-                    for (BlockPosition loc : pCraft.getBlockList()) {
+                    for (BlockVec loc : pCraft.getBlockList()) {
                         Vector ccpos = new Vector(loc.x - pCraft.getMinX(), loc.y - pCraft.getMinY(),
                                                   loc.z - pCraft.getMinZ());
                         Block b = sign.getWorld().getBlockAt(loc.x, loc.y, loc.z);
@@ -321,7 +321,7 @@ public class WorldEditInteractListener implements Listener {
                     final int itemTypeId = entry.getKey();
                     ArrayList<InventoryHolder> chests = new ArrayList<>();
 
-                    for (BlockPosition loc : craft.getBlockList()) {
+                    for (BlockVec loc : craft.getBlockList()) {
                         Block b = craft.getW().getBlockAt(loc.x, loc.y, loc.z);
                         if ((b.getTypeId() == 54) || (b.getTypeId() == 146)) {
                             InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
@@ -384,7 +384,7 @@ public class WorldEditInteractListener implements Listener {
                             sb.setNbtData(bb.getNbtData());
                             bb = sb;
                         }
-                        BlockPosition moveloc = new BlockPosition(
+                        BlockVec moveloc = new BlockVec(
                                 sign.getX() + cc.getOffset().getBlockX() + ccloc.getBlockX(),
                                 sign.getY() + cc.getOffset().getBlockY() + ccloc.getBlockY(),
                                 sign.getZ() + cc.getOffset().getBlockZ() + ccloc.getBlockZ());

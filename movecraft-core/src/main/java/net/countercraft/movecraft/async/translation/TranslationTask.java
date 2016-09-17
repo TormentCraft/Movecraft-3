@@ -23,7 +23,7 @@ import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -78,7 +78,7 @@ public class TranslationTask extends AsyncTask {
     }
 
     @Override public void execute() {
-        BlockPosition[] blocksList = data.getBlockList();
+        BlockVec[] blocksList = data.getBlockList();
 
         final int[] fallThroughBlocks = new int[]{
                 0, 8, 9, 10, 11, 31, 37, 38, 39, 40, 50, 51, 55, 59, 63, 65, 68, 69, 70, 72, 75, 76, 77, 78, 83, 85, 93,
@@ -199,7 +199,7 @@ public class TranslationTask extends AsyncTask {
 
             // now add all the air blocks found within the craft's hitbox immediately above the waterline and below
             // to the craft blocks so they will be translated
-            HashSet<BlockPosition> newHSBlockList = new HashSet<>(Arrays.asList(blocksList));
+            HashSet<BlockVec> newHSBlockList = new HashSet<>(Arrays.asList(blocksList));
             int posY = waterLine + 1;
             for (int posX = minX; posX < maxX; posX++) {
                 for (int posZ = minZ; posZ < maxZ; posZ++) {
@@ -207,7 +207,7 @@ public class TranslationTask extends AsyncTask {
                         if (hb[posX - minX][posZ - minZ] != null) {
                             if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 0 &&
                                 posY > hb[posX - minX][posZ - minZ][0] && posY < hb[posX - minX][posZ - minZ][1]) {
-                                BlockPosition l = new BlockPosition(posX, posY, posZ);
+                                BlockVec l = new BlockVec(posX, posY, posZ);
                                 newHSBlockList.add(l);
                             }
                         }
@@ -219,14 +219,14 @@ public class TranslationTask extends AsyncTask {
                 for (int posX = minX; posX < maxX; posX++) {
                     for (int posZ = minZ; posZ < maxZ; posZ++) {
                         if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 0) {
-                            BlockPosition l = new BlockPosition(posX, posY, posZ);
+                            BlockVec l = new BlockVec(posX, posY, posZ);
                             newHSBlockList.add(l);
                         }
                     }
                 }
             }
 
-            blocksList = newHSBlockList.toArray(new BlockPosition[newHSBlockList.size()]);
+            blocksList = newHSBlockList.toArray(new BlockVec[newHSBlockList.size()]);
         }
 
         // check for fuel, burn some from a furnace if needed. Blocks of coal are supported, in addition to coal and
@@ -238,7 +238,7 @@ public class TranslationTask extends AsyncTask {
         if (fuelBurnRate != 0.0 && !getCraft().getSinking()) {
             if (getCraft().getBurningFuel() < fuelBurnRate) {
                 Block fuelHolder = null;
-                for (BlockPosition bTest : blocksList) {
+                for (BlockVec bTest : blocksList) {
                     Block b = getCraft().getW().getBlockAt(bTest.x, bTest.y, bTest.z);
                     if (b.getTypeId() == 61) {
                         InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
@@ -279,8 +279,8 @@ public class TranslationTask extends AsyncTask {
             }
         }
 
-        List<BlockPosition> tempBlockList = new ArrayList<>();
-        HashSet<BlockPosition> existingBlockSet = new HashSet<>(Arrays.asList(blocksList));
+        List<BlockVec> tempBlockList = new ArrayList<>();
+        HashSet<BlockVec> existingBlockSet = new HashSet<>(Arrays.asList(blocksList));
         HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<>();
         Set<MapUpdateCommand> updateSet = new HashSet<>();
 
@@ -288,9 +288,9 @@ public class TranslationTask extends AsyncTask {
         Set<MapUpdateCommand> explosionSet = new HashSet<>();
 
         List<Material> harvestBlocks = getCraft().getType().getHarvestBlocks();
-        List<BlockPosition> harvestedBlocks = new ArrayList<>();
-        List<BlockPosition> droppedBlocks = new ArrayList<>();
-        List<BlockPosition> destroyedBlocks = new ArrayList<>();
+        List<BlockVec> harvestedBlocks = new ArrayList<>();
+        List<BlockVec> droppedBlocks = new ArrayList<>();
+        List<BlockVec> destroyedBlocks = new ArrayList<>();
         List<Material> harvesterBladeBlocks = getCraft().getType().getHarvesterBladeBlocks();
 
         int hoverOver = data.getDy();
@@ -326,8 +326,8 @@ public class TranslationTask extends AsyncTask {
         boolean moveBlockedByTowny = false;
         String townName = "";
         for (int i = 0; i < blocksList.length; i++) {
-            BlockPosition oldLoc = blocksList[i];
-            BlockPosition newLoc = oldLoc.translate(data.getDx(), data.getDy(), data.getDz());
+            BlockVec oldLoc = blocksList[i];
+            BlockVec newLoc = oldLoc.translate(data.getDx(), data.getDy(), data.getDz());
 
             if (newLoc.y > data.getMaxHeight() && newLoc.y > oldLoc.y) {
                 fail(i18n.get("Translation - Failed Craft hit height limit"));
@@ -767,8 +767,8 @@ public class TranslationTask extends AsyncTask {
                                            .getTypeId();
 
                     while (posy <= maxY && !(Arrays.binarySearch(fallThroughBlocks, testID) >= 0)) {
-                        BlockPosition testLoc = new BlockPosition(m.getNewBlockLocation().x, posy,
-                                                                  m.getNewBlockLocation().z);
+                        BlockVec testLoc = new BlockVec(m.getNewBlockLocation().x, posy,
+                                                        m.getNewBlockLocation().z);
                         if (existingBlockSet.contains(testLoc)) {
                             existingBlockSet.remove(testLoc);
                             if (settings.FadeWrecksAfter > 0) {
@@ -793,7 +793,7 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
-            BlockPosition[] newBlockList = existingBlockSet.toArray(new BlockPosition[existingBlockSet.size()]);
+            BlockVec[] newBlockList = existingBlockSet.toArray(new BlockVec[existingBlockSet.size()]);
             data.setBlockList(newBlockList);
             data.setUpdates(explosionSet.toArray(new MapUpdateCommand[1]));
 
@@ -807,7 +807,7 @@ public class TranslationTask extends AsyncTask {
         }
 
         if (!data.failed()) {
-            BlockPosition[] newBlockList = tempBlockList.toArray(new BlockPosition[tempBlockList.size()]);
+            BlockVec[] newBlockList = tempBlockList.toArray(new BlockVec[tempBlockList.size()]);
             data.setBlockList(newBlockList);
 
             //prevents torpedo and rocket pilots :)
@@ -873,7 +873,7 @@ public class TranslationTask extends AsyncTask {
                         for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
                             if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
                                 getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
-                                BlockPosition loc = new BlockPosition(posX, posY, posZ);
+                                BlockVec loc = new BlockVec(posX, posY, posZ);
                                 updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                             }
                         }
@@ -884,7 +884,7 @@ public class TranslationTask extends AsyncTask {
                     for (posX = minX - 1; posX <= maxX + 1; posX++) {
                         if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
                             getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
-                            BlockPosition loc = new BlockPosition(posX, posY, posZ);
+                            BlockVec loc = new BlockVec(posX, posY, posZ);
                             updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                         }
                     }
@@ -892,7 +892,7 @@ public class TranslationTask extends AsyncTask {
                     for (posX = minX - 1; posX <= maxX + 1; posX++) {
                         if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
                             getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
-                            BlockPosition loc = new BlockPosition(posX, posY, posZ);
+                            BlockVec loc = new BlockVec(posX, posY, posZ);
                             updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                         }
                     }
@@ -900,7 +900,7 @@ public class TranslationTask extends AsyncTask {
                     for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
                         if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
                             getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
-                            BlockPosition loc = new BlockPosition(posX, posY, posZ);
+                            BlockVec loc = new BlockVec(posX, posY, posZ);
                             updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                         }
                     }
@@ -908,7 +908,7 @@ public class TranslationTask extends AsyncTask {
                     for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
                         if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
                             getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
-                            BlockPosition loc = new BlockPosition(posX, posY, posZ);
+                            BlockVec loc = new BlockVec(posX, posY, posZ);
                             updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                         }
                     }
@@ -930,23 +930,23 @@ public class TranslationTask extends AsyncTask {
 // mwkaicz 24-02-2015
 //
 // ***********************************************************************************************************/
-//                        Set<BlockPosition> setA = new HashSet(Arrays.asList(blocksList));
-//                        Set<BlockPosition> setB = new HashSet(Arrays.asList(newBlockList));
+//                        Set<BlockVec> setA = new HashSet(Arrays.asList(blocksList));
+//                        Set<BlockVec> setB = new HashSet(Arrays.asList(newBlockList));
 //                        setA.removeAll(setB);
-//                        BlockPosition[] arrA = new BlockPosition[0];
+//                        BlockVec[] arrA = new BlockVec[0];
 //                        arrA = setA.toArray(arrA);
-//                        List<BlockPosition> airLocation = Arrays.asList(arrA);
-            List<BlockPosition> airLocation = ListUtils
+//                        List<BlockVec> airLocation = Arrays.asList(arrA);
+            List<BlockVec> airLocation = ListUtils
                     .subtract(Arrays.asList(blocksList), Arrays.asList(newBlockList));
 
-            for (BlockPosition l1 : airLocation) {
+            for (BlockVec l1 : airLocation) {
                 // for watercraft, fill blocks below the waterline with water
                 if (waterCraft) {
                     if (l1.y <= waterLine) {
                         // if there is air below the ship at the current position, don't fill in with water
-                        BlockPosition testAir = new BlockPosition(l1.x, l1.y - 1, l1.z);
+                        BlockVec testAir = new BlockVec(l1.x, l1.y - 1, l1.z);
                         while (existingBlockSet.contains(testAir)) {
-                            testAir = new BlockPosition(l1.x, testAir.y - 1, l1.z);
+                            testAir = new BlockVec(l1.x, testAir.y - 1, l1.z);
                         }
                         if (getCraft().getW().getBlockAt(testAir.x, testAir.y, testAir.z).getTypeId() == 0) {
                             if (getCraft().getSinking()) {
@@ -977,7 +977,7 @@ public class TranslationTask extends AsyncTask {
             }
 
             //add destroyed parts of growed
-            for (BlockPosition destroyedLocation : destroyedBlocks) {
+            for (BlockVec destroyedLocation : destroyedBlocks) {
                 updateSet.add(new MapUpdateCommand(destroyedLocation, 0, (byte) 0, null));
             }
             data.setUpdates(updateSet.toArray(new MapUpdateCommand[1]));
@@ -1003,7 +1003,7 @@ public class TranslationTask extends AsyncTask {
         return data;
     }
 
-    private boolean isFreeSpace(int x, int y, int z, BlockPosition[] blocksList, Set<BlockPosition> existingBlockSet,
+    private boolean isFreeSpace(int x, int y, int z, BlockVec[] blocksList, Set<BlockVec> existingBlockSet,
                                 boolean waterCraft, boolean hoverCraft, List<Material> harvestBlocks,
                                 boolean canHoverOverWater, boolean checkHover)
     {
@@ -1012,8 +1012,8 @@ public class TranslationTask extends AsyncTask {
         // necessaries,
         // or more better: remember what checked in each translation, but it's beyond my current abilities, I will
         // try to solve it in future
-        for (BlockPosition oldLoc : blocksList) {
-            BlockPosition newLoc = oldLoc.translate(x, y, z);
+        for (BlockVec oldLoc : blocksList) {
+            BlockVec newLoc = oldLoc.translate(x, y, z);
 
             Material testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
             if (!canHoverOverWater) {
@@ -1056,10 +1056,10 @@ public class TranslationTask extends AsyncTask {
         return isFree;
     }
 
-    private boolean checkChests(Material mBlock, BlockPosition newLoc, Set<BlockPosition> existingBlockSet)
+    private boolean checkChests(Material mBlock, BlockVec newLoc, Set<BlockVec> existingBlockSet)
     {
 
-        BlockPosition aroundNewLoc = newLoc.translate(1, 0, 0);
+        BlockVec aroundNewLoc = newLoc.translate(1, 0, 0);
         Material testMaterial = getCraft().getW().getBlockAt(aroundNewLoc.x, aroundNewLoc.y, aroundNewLoc.z).getType();
         if (testMaterial == mBlock) {
             if (!existingBlockSet.contains(aroundNewLoc)) {
@@ -1093,8 +1093,8 @@ public class TranslationTask extends AsyncTask {
         return true;
     }
 
-    private void captureYield(BlockPosition[] blocksList, List<BlockPosition> harvestedBlocks,
-                              List<BlockPosition> droppedBlocks)
+    private void captureYield(BlockVec[] blocksList, List<BlockVec> harvestedBlocks,
+                              List<BlockVec> droppedBlocks)
     {
         if (harvestedBlocks.isEmpty()) {
             return;
@@ -1103,10 +1103,10 @@ public class TranslationTask extends AsyncTask {
         Map<Material, ArrayList<Block>> crates = new HashMap<>();
         HashSet<ItemDropUpdateCommand> itemDropUpdateSet = new HashSet<>();
         Set<Material> droppedSet = new HashSet<>();
-        HashMap<BlockPosition, ItemStack[]> droppedMap = new HashMap<>();
+        HashMap<BlockVec, ItemStack[]> droppedMap = new HashMap<>();
         harvestedBlocks.addAll(droppedBlocks);
 
-        for (BlockPosition harvestedBlock : harvestedBlocks) {
+        for (BlockVec harvestedBlock : harvestedBlocks) {
             Block block = getCraft().getW().getBlockAt(harvestedBlock.x, harvestedBlock.y, harvestedBlock.z);
             ItemStack[] drops = block.getDrops().toArray(new ItemStack[block.getDrops().size()]);
             boolean oSomethingToDrop = false;
@@ -1138,7 +1138,7 @@ public class TranslationTask extends AsyncTask {
         }
 
         //find chests
-        for (BlockPosition bTest : blocksList) {
+        for (BlockVec bTest : blocksList) {
             Block b = getCraft().getW().getBlockAt(bTest.x, bTest.y, bTest.z);
             if (b.getType() == Material.CHEST || b.getType() == Material.TRAPPED_CHEST) {
                 Inventory inv = ((InventoryHolder) b.getState()).getInventory();
@@ -1175,7 +1175,7 @@ public class TranslationTask extends AsyncTask {
             }
         }
 
-        for (BlockPosition harvestedBlock : harvestedBlocks) {
+        for (BlockVec harvestedBlock : harvestedBlocks) {
             if (droppedMap.containsKey(harvestedBlock)) {
                 ItemStack[] drops = droppedMap.get(harvestedBlock);
                 for (ItemStack drop : drops) {
@@ -1284,8 +1284,8 @@ public class TranslationTask extends AsyncTask {
         return stack;
     }
 
-    private void tryPutToDestroyBox(Material mat, BlockPosition loc, List<BlockPosition> harvestedBlocks,
-                                    List<BlockPosition> droppedBlocks, List<BlockPosition> destroyedBlocks)
+    private void tryPutToDestroyBox(Material mat, BlockVec loc, List<BlockVec> harvestedBlocks,
+                                    List<BlockVec> droppedBlocks, List<BlockVec> destroyedBlocks)
     {
         if (mat == Material.DOUBLE_PLANT ||
             mat == Material.WOODEN_DOOR ||
@@ -1294,18 +1294,18 @@ public class TranslationTask extends AsyncTask {
 //                mat.equals(Material.BANNER)    // Apparently Material.Banner was removed from the class
                 ) {
             if (getCraft().getW().getBlockAt(loc.x, loc.y + 1, loc.z).getType() == mat) {
-                BlockPosition tmpLoc = loc.translate(0, 1, 0);
+                BlockVec tmpLoc = loc.translate(0, 1, 0);
                 if (!destroyedBlocks.contains(tmpLoc) && !harvestedBlocks.contains(tmpLoc)) {
                     destroyedBlocks.add(tmpLoc);
                 }
             } else if (getCraft().getW().getBlockAt(loc.x, loc.y - 1, loc.z).getType() == mat) {
-                BlockPosition tmpLoc = loc.translate(0, -1, 0);
+                BlockVec tmpLoc = loc.translate(0, -1, 0);
                 if (!destroyedBlocks.contains(tmpLoc) && !harvestedBlocks.contains(tmpLoc)) {
                     destroyedBlocks.add(tmpLoc);
                 }
             }
         } else if (mat == Material.CACTUS || mat == Material.SUGAR_CANE_BLOCK) {
-            BlockPosition tmpLoc = loc.translate(0, 1, 0);
+            BlockVec tmpLoc = loc.translate(0, 1, 0);
             Material tmpType = getCraft().getW().getBlockAt(tmpLoc.x, tmpLoc.y, tmpLoc.z).getType();
             while (tmpType == mat) {
                 if (!droppedBlocks.contains(tmpLoc) && !harvestedBlocks.contains(tmpLoc)) {
@@ -1319,23 +1319,23 @@ public class TranslationTask extends AsyncTask {
             }
         } else if (mat == Material.BED_BLOCK) {
             if (getCraft().getW().getBlockAt(loc.x + 1, loc.y, loc.z).getType() == mat) {
-                BlockPosition tmpLoc = loc.translate(1, 0, 0);
+                BlockVec tmpLoc = loc.translate(1, 0, 0);
                 if (!destroyedBlocks.contains(tmpLoc) && !harvestedBlocks.contains(tmpLoc)) {
                     destroyedBlocks.add(tmpLoc);
                 }
             } else if (getCraft().getW().getBlockAt(loc.x - 1, loc.y, loc.z).getType() == mat) {
-                BlockPosition tmpLoc = loc.translate(-1, 0, 0);
+                BlockVec tmpLoc = loc.translate(-1, 0, 0);
                 if (!destroyedBlocks.contains(tmpLoc) && !harvestedBlocks.contains(tmpLoc)) {
                     destroyedBlocks.add(tmpLoc);
                 }
             }
             if (getCraft().getW().getBlockAt(loc.x, loc.y, loc.z + 1).getType() == mat) {
-                BlockPosition tmpLoc = loc.translate(0, 0, 1);
+                BlockVec tmpLoc = loc.translate(0, 0, 1);
                 if (!destroyedBlocks.contains(tmpLoc) && !harvestedBlocks.contains(tmpLoc)) {
                     destroyedBlocks.add(tmpLoc);
                 }
             } else if (getCraft().getW().getBlockAt(loc.x, loc.y, loc.z - 1).getType() == mat) {
-                BlockPosition tmpLoc = loc.translate(0, 0, -1);
+                BlockVec tmpLoc = loc.translate(0, 0, -1);
                 if (!destroyedBlocks.contains(tmpLoc) && !harvestedBlocks.contains(tmpLoc)) {
                     destroyedBlocks.add(tmpLoc);
                 }

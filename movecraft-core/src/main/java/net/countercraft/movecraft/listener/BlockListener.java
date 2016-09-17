@@ -20,7 +20,7 @@ package net.countercraft.movecraft.listener;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -70,7 +70,7 @@ public class BlockListener implements Listener {
         BlockState info = event.getNewState();
         if (info.getType() == Material.SNOW) {
             Block below = event.getBlock().getRelative(BlockFace.DOWN);
-            BlockPosition mloc = new BlockPosition(below.getX(), below.getY(), below.getZ());
+            BlockVec mloc = new BlockVec(below.getX(), below.getY(), below.getZ());
             boolean blockInCraft = false;
             Craft[] crafts = craftManager.getCraftsInWorld(info.getWorld());
             if (crafts != null) {
@@ -89,12 +89,12 @@ public class BlockListener implements Listener {
             return;
         }
         if (settings.ProtectPilotedCrafts) {
-            BlockPosition mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
+            BlockVec mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
             boolean blockInCraft = false;
             if (craftManager.getCraftsInWorld(e.getBlock().getWorld()) != null)
                 for (Craft craft : craftManager.getCraftsInWorld(e.getBlock().getWorld())) {
                     if (craft != null) {
-                        for (BlockPosition tloc : craft.getBlockList()) {
+                        for (BlockVec tloc : craft.getBlockList()) {
                             if (tloc.x == mloc.x && tloc.y == mloc.y && tloc.z == mloc.z) blockInCraft = true;
                         }
                     }

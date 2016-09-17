@@ -17,7 +17,7 @@
 
 package net.countercraft.movecraft.craft;
 
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Direction;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Craft implements net.countercraft.movecraft.api.Craft {
     private int[][][] hitBox;
     public final CraftType type;
-    private BlockPosition[] blockList;
+    private BlockVec[] blockList;
     public final World w;
     private final AtomicBoolean processing = new AtomicBoolean();
     private int minX;
@@ -57,7 +57,7 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     public Craft(CraftType type, World world) {
         this.type = type;
         this.w = world;
-        this.blockList = new BlockPosition[1];
+        this.blockList = new BlockVec[1];
         if (type.getMaxHeightLimit() > w.getMaxHeight() - 1) {
             this.maxHeightLimit = w.getMaxHeight() - 1;
         } else {
@@ -78,13 +78,13 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
         this.processing.set(processing);
     }
 
-    public BlockPosition[] getBlockList() {
+    public BlockVec[] getBlockList() {
         synchronized (blockList) {
             return blockList.clone();
         }
     }
 
-    public void setBlockList(BlockPosition[] blockList) {
+    public void setBlockList(BlockVec[] blockList) {
         synchronized (this.blockList) {
             this.blockList = blockList;
         }
@@ -107,7 +107,7 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     }
 
     public void resetSigns(boolean resetCruise, boolean resetAscend, boolean resetDescend) {
-        for (BlockPosition location : blockList) {
+        for (BlockVec location : blockList) {
             int blockID = w.getBlockAt(location.x, location.y, location.z).getTypeId();
             if (blockID == 63 || blockID == 68) {
                 Sign s = (Sign) w.getBlockAt(location.x, location.y, location.z).getState();
@@ -187,13 +187,13 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
         this.minZ = minZ;
     }
 
-    public boolean isCraftBlock(BlockPosition mloc) {
+    public boolean isCraftBlock(BlockVec mloc) {
 
         if (mloc.x < getMinX() || mloc.x > getMaxX()) return false;
         if (mloc.z < getMinZ() || mloc.z > getMaxZ()) return false;
         if (mloc.y < getMinY() || mloc.y > getMaxY()) return false;
 
-        for (BlockPosition loc : getBlockList()) {
+        for (BlockVec loc : getBlockList()) {
             if (loc.x == mloc.x && loc.y == mloc.y && loc.z == mloc.z) return true;
         }
         return false;

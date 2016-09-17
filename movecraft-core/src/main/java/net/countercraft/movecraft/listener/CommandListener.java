@@ -21,7 +21,7 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Direction;
 import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.async.AsyncManager;
@@ -107,7 +107,7 @@ public class CommandListener implements CommandExecutor {
         return new Location(w, telX, telY, telZ);
     }
 
-    private BlockPosition getCraftMidPoint(Craft craft) {
+    private BlockVec getCraftMidPoint(Craft craft) {
         int maxDX = 0;
         int maxDZ = 0;
         int maxY = 0;
@@ -137,7 +137,7 @@ public class CommandListener implements CommandExecutor {
         int midX = craft.getMinX() + (maxDX / 2);
         int midY = (minY + maxY) / 2;
         int midZ = craft.getMinZ() + (maxDZ / 2);
-        return new BlockPosition(midX, midY, midZ);
+        return new BlockVec(midX, midY, midZ);
     }
 
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -177,7 +177,7 @@ public class CommandListener implements CommandExecutor {
 
             if (args.length > 0) {
                 if (player.hasPermission("movecraft." + args[0] + ".pilot")) {
-                    BlockPosition startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
+                    BlockVec startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
                     Craft c = new Craft(getCraftTypeFromString(args[0]), player.getWorld());
 
                     if (playerCraft == null) {
@@ -201,7 +201,7 @@ public class CommandListener implements CommandExecutor {
 
             if (playerCraft == null) {
             } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                BlockPosition midPoint = getCraftMidPoint(playerCraft);
+                BlockVec midPoint = getCraftMidPoint(playerCraft);
                 Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left")) ? Rotation.ANTICLOCKWISE
                                                                                           : Rotation.CLOCKWISE;
                 asyncManager.rotate(playerCraft, rotation, midPoint);
@@ -220,7 +220,7 @@ public class CommandListener implements CommandExecutor {
 
             if (playerCraft == null) {
             } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                BlockPosition midPoint = getCraftMidPoint(playerCraft);
+                BlockVec midPoint = getCraftMidPoint(playerCraft);
                 asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
             } else {
                 player.sendMessage(i18n.get("Insufficient Permissions"));
@@ -238,7 +238,7 @@ public class CommandListener implements CommandExecutor {
 
             if (playerCraft == null) {
             } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                BlockPosition midPoint = getCraftMidPoint(playerCraft);
+                BlockVec midPoint = getCraftMidPoint(playerCraft);
                 asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
             } else {
                 player.sendMessage(i18n.get("Insufficient Permissions"));

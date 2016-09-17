@@ -23,7 +23,7 @@ import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockPosition;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -51,16 +51,16 @@ public class DetectionTask extends AsyncTask {
     private final Movecraft plugin;
     private final Settings settings;
     private final I18nSupport i18n;
-    private final BlockPosition startLocation;
+    private final BlockVec startLocation;
     private final Integer minSize;
     private final Integer maxSize;
     private Integer maxX;
     private Integer maxY;
     private Integer maxZ;
     private Integer minY;
-    private final Stack<BlockPosition> blockStack = new Stack<>();
-    private final Set<BlockPosition> blockList = new HashSet<>();
-    private final Set<BlockPosition> visited = new HashSet<>();
+    private final Stack<BlockVec> blockStack = new Stack<>();
+    private final Set<BlockVec> blockList = new HashSet<>();
+    private final Set<BlockVec> visited = new HashSet<>();
     private final Map<List<Integer>, Integer> blockTypeCount = new HashMap<>();
     private Map<List<Integer>, List<Double>> dFlyBlocks;
     private final DetectionTaskData data;
@@ -72,7 +72,7 @@ public class DetectionTask extends AsyncTask {
     TownyWorld townyWorld = null;
     TownyWorldHeightLimits townyWorldHeightLimits = null;
 
-    public DetectionTask(Craft c, BlockPosition startLocation, int minSize, int maxSize, Integer[] allowedBlocks,
+    public DetectionTask(Craft c, BlockVec startLocation, int minSize, int maxSize, Integer[] allowedBlocks,
                          Integer[] forbiddenBlocks, Player player, Player notificationPlayer, World w, Movecraft plugin,
                          Settings settings, I18nSupport i18n)
     {
@@ -126,7 +126,7 @@ public class DetectionTask extends AsyncTask {
 
     private void detectBlock(int x, int y, int z) {
 
-        BlockPosition workingLocation = new BlockPosition(x, y, z);
+        BlockVec workingLocation = new BlockVec(x, y, z);
 
         if (notVisited(workingLocation, visited)) {
 
@@ -326,7 +326,7 @@ public class DetectionTask extends AsyncTask {
         return data;
     }
 
-    private boolean notVisited(BlockPosition l, Set<BlockPosition> locations) {
+    private boolean notVisited(BlockVec l, Set<BlockVec> locations) {
         if (locations.contains(l)) {
             return false;
         } else {
@@ -335,11 +335,11 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private void addToBlockList(BlockPosition l) {
+    private void addToBlockList(BlockVec l) {
         blockList.add(l);
     }
 
-    private void addToDetectionStack(BlockPosition l) {
+    private void addToDetectionStack(BlockVec l) {
         blockStack.push(l);
     }
 
@@ -353,7 +353,7 @@ public class DetectionTask extends AsyncTask {
         blockTypeCount.put(id, count + 1);
     }
 
-    private void detectSurrounding(BlockPosition l) {
+    private void detectSurrounding(BlockVec l) {
         int x = l.x;
         int y = l.y;
         int z = l.z;
@@ -375,7 +375,7 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private void calculateBounds(BlockPosition l) {
+    private void calculateBounds(BlockVec l) {
         if (maxX == null || l.x > maxX) {
             maxX = l.x;
         }
@@ -410,20 +410,20 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private BlockPosition[] finaliseBlockList(Set<BlockPosition> blockSet) {
-        //BlockPosition[] finalList=blockSet.toArray( new BlockPosition[1] );
-        ArrayList<BlockPosition> finalList = new ArrayList<>();
+    private BlockVec[] finaliseBlockList(Set<BlockVec> blockSet) {
+        //BlockVec[] finalList=blockSet.toArray( new BlockVec[1] );
+        ArrayList<BlockVec> finalList = new ArrayList<>();
 
         // Sort the blocks from the bottom up to minimize lower altitude block updates
         for (int posx = data.getMinX(); posx <= this.maxX; posx++) {
             for (int posz = data.getMinZ(); posz <= this.maxZ; posz++) {
                 for (int posy = this.minY; posy <= this.maxY; posy++) {
-                    BlockPosition test = new BlockPosition(posx, posy, posz);
+                    BlockVec test = new BlockVec(posx, posy, posz);
                     if (blockSet.contains(test)) finalList.add(test);
                 }
             }
         }
-        return finalList.toArray(new BlockPosition[1]);
+        return finalList.toArray(new BlockVec[1]);
     }
 
     private boolean confirmStructureRequirements(Map<List<Integer>, List<Double>> flyBlocks,
