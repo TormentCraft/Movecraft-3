@@ -43,6 +43,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Calendar;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
@@ -263,7 +264,7 @@ public class CommandListener implements CommandExecutor {
 
                         Direction dir = Direction.fromYawPitch(yaw, pitch);
                         playerCraft.setCruiseDirection(dir);
-                        playerCraft.setCruising(dir != Direction.OFF);
+                        playerCraft.setCruising(!dir.equals(Direction.OFF));
                         return true;
                     } else {
                         Direction dir = Direction.OFF;
@@ -274,11 +275,11 @@ public class CommandListener implements CommandExecutor {
 
                             dir = dir.combine(Direction.namedOr(a, Direction.OFF));
 
-                            if (dir == Direction.OFF) break;
+                            if (Objects.equals(dir, Direction.OFF)) break;
                         }
 
                         playerCraft.setCruiseDirection(dir);
-                        playerCraft.setCruising(dir != Direction.OFF);
+                        playerCraft.setCruising(!dir.equals(Direction.OFF));
                     }
                 }
             } else {
