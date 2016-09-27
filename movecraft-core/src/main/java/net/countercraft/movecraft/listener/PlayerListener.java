@@ -68,10 +68,9 @@ public class PlayerListener implements Listener {
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||
                                 craft.getType().isForbiddenBlock(testBlock.getTypeId(), testBlock.getData())) {
 
-                                return String.format("%s at (%d,%d,%d)", BlockNames
-                                                             .itemName(testBlock.getTypeId(), testBlock.getData(),
-                                                                       true), test.x, test.y,
-                                                     test.z);
+                                return String
+                                        .format("%s at (%d,%d,%d)", BlockNames.itemName(testBlock.getState().getData()),
+                                                test.x, test.y, test.z);
                             }
                         }
                     }

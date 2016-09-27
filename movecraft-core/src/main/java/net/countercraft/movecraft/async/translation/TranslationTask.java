@@ -24,6 +24,7 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockVec;
+import net.countercraft.movecraft.api.MaterialDataPredicate;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -287,11 +288,11 @@ public class TranslationTask extends AsyncTask {
         data.setCollisionExplosion(false);
         Set<MapUpdateCommand> explosionSet = new HashSet<>();
 
-        List<Material> harvestBlocks = getCraft().getType().getHarvestBlocks();
+        MaterialDataPredicate harvestBlocks = getCraft().getType().getHarvestBlocks();
         List<BlockVec> harvestedBlocks = new ArrayList<>();
         List<BlockVec> droppedBlocks = new ArrayList<>();
         List<BlockVec> destroyedBlocks = new ArrayList<>();
-        List<Material> harvesterBladeBlocks = getCraft().getType().getHarvesterBladeBlocks();
+        MaterialDataPredicate harvesterBladeBlocks = getCraft().getType().getHarvesterBladeBlocks();
 
         int hoverOver = data.getDy();
         boolean hoverUseGravity = getCraft().getType().getUseGravity();
@@ -468,23 +469,25 @@ public class TranslationTask extends AsyncTask {
                 blockObstructed = false;
             }
 
-            testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
+            Block newLocBlock = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z);
+            Block oldLocBlock = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z);
+
             boolean bladeOK = true;
             if (blockObstructed) {
-                if (hoverCraft || !harvestBlocks.isEmpty()) {
+                if (hoverCraft || !harvestBlocks.isTrivial()) {
                     // New block is not harvested block
-                    if (harvestBlocks.contains(testMaterial) && !existingBlockSet.contains(newLoc)) {
-                        Material tmpType = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType();
-                        if (!harvesterBladeBlocks.isEmpty()) {
-                            if (!harvesterBladeBlocks.contains(tmpType)) {
+                    if (harvestBlocks.checkBlock(newLocBlock) && !existingBlockSet.contains(newLoc)) {
+                        if (!harvesterBladeBlocks.isTrivial()) {
+                            if (!harvesterBladeBlocks.checkBlock(oldLocBlock)) {
                                 bladeOK = false;
                             }
                         }
                         if (bladeOK) {
                             blockObstructed = false;
-                            boolean harvestBlock = true;
                             tryPutToDestroyBox(testMaterial, newLoc, harvestedBlocks, droppedBlocks, destroyedBlocks);
                             harvestedBlocks.add(newLoc);
+                        } else {
+                            bladeOK = false;
                         }
                     }
                 }
@@ -767,8 +770,7 @@ public class TranslationTask extends AsyncTask {
                                            .getTypeId();
 
                     while (posy <= maxY && !(Arrays.binarySearch(fallThroughBlocks, testID) >= 0)) {
-                        BlockVec testLoc = new BlockVec(m.getNewBlockLocation().x, posy,
-                                                        m.getNewBlockLocation().z);
+                        BlockVec testLoc = new BlockVec(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z);
                         if (existingBlockSet.contains(testLoc)) {
                             existingBlockSet.remove(testLoc);
                             if (settings.FadeWrecksAfter > 0) {
@@ -936,8 +938,7 @@ public class TranslationTask extends AsyncTask {
 //                        BlockVec[] arrA = new BlockVec[0];
 //                        arrA = setA.toArray(arrA);
 //                        List<BlockVec> airLocation = Arrays.asList(arrA);
-            List<BlockVec> airLocation = ListUtils
-                    .subtract(Arrays.asList(blocksList), Arrays.asList(newBlockList));
+            List<BlockVec> airLocation = ListUtils.subtract(Arrays.asList(blocksList), Arrays.asList(newBlockList));
 
             for (BlockVec l1 : airLocation) {
                 // for watercraft, fill blocks below the waterline with water
@@ -1004,7 +1005,7 @@ public class TranslationTask extends AsyncTask {
     }
 
     private boolean isFreeSpace(int x, int y, int z, BlockVec[] blocksList, Set<BlockVec> existingBlockSet,
-                                boolean waterCraft, boolean hoverCraft, List<Material> harvestBlocks,
+                                boolean waterCraft, boolean hoverCraft, MaterialDataPredicate harvestBlocks,
                                 boolean canHoverOverWater, boolean checkHover)
     {
         boolean isFree = true;
@@ -1045,7 +1046,7 @@ public class TranslationTask extends AsyncTask {
             }
             if (blockObstructed && hoverCraft) {
                 // New block is not harvested block and is not part of the existing craft
-                blockObstructed = !(harvestBlocks.contains(testMaterial) && !existingBlockSet.contains(newLoc));
+                blockObstructed = !(harvestBlocks.check(testMaterial) && !existingBlockSet.contains(newLoc));
             }
 
             if (blockObstructed) {
@@ -1093,8 +1094,7 @@ public class TranslationTask extends AsyncTask {
         return true;
     }
 
-    private void captureYield(BlockVec[] blocksList, List<BlockVec> harvestedBlocks,
-                              List<BlockVec> droppedBlocks)
+    private void captureYield(BlockVec[] blocksList, List<BlockVec> harvestedBlocks, List<BlockVec> droppedBlocks)
     {
         if (harvestedBlocks.isEmpty()) {
             return;

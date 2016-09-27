@@ -18,6 +18,7 @@
 package net.countercraft.movecraft.async.detection;
 
 import net.countercraft.movecraft.api.BlockVec;
+import net.countercraft.movecraft.api.MaterialDataPredicate;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -31,10 +32,11 @@ public class DetectionTaskData {
     private Player notificationPlayer;
     private int[][][] hitBox;
     private Integer minX, minZ;
-    private Integer[] allowedBlocks, forbiddenBlocks;
+    private MaterialDataPredicate allowedBlocks;
+    private MaterialDataPredicate forbiddenBlocks;
 
-    public DetectionTaskData(World w, Player player, Player notificationPlayer, Integer[] allowedBlocks,
-                             Integer[] forbiddenBlocks)
+    public DetectionTaskData(World w, Player player, Player notificationPlayer, MaterialDataPredicate allowedBlocks,
+                             MaterialDataPredicate forbiddenBlocks)
     {
         this.w = w;
         this.player = player;
@@ -47,11 +49,11 @@ public class DetectionTaskData {
     public DetectionTaskData() {
     }
 
-    public Integer[] getAllowedBlocks() {
+    public MaterialDataPredicate getAllowedBlocks() {
         return allowedBlocks;
     }
 
-    public Integer[] getForbiddenBlocks() {
+    public MaterialDataPredicate getForbiddenBlocks() {
         return forbiddenBlocks;
     }
 

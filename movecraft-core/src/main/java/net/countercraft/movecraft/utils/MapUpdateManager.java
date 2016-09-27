@@ -322,8 +322,8 @@ Changed for 1.8, and quite possibly wrong:
     private void runQueue(final ArrayList<MapUpdateCommand> queuedMapUpdateCommands,
                           final ArrayList<Boolean> queuedPlaceDispensers, final World w,
                           final Set<net.minecraft.server.v1_10_R1.Chunk> chunks, final Set<Chunk> cmChunks,
-                          final HashMap<BlockVec, Byte> origLightMap,
-                          final Map<BlockVec, TransferData> dataMap, final List<MapUpdateCommand> updatesInWorld,
+                          final HashMap<BlockVec, Byte> origLightMap, final Map<BlockVec, TransferData> dataMap,
+                          final List<MapUpdateCommand> updatesInWorld,
                           final Map<BlockVec, List<EntityUpdateCommand>> entityMap)
     {
         int numToRun = queuedMapUpdateCommands.size();
@@ -493,7 +493,7 @@ Changed for 1.8, and quite possibly wrong:
                     for (EntityUpdateCommand i : entityUpdatesInWorld) {
                         if (i != null) {
                             BlockVec entityLoc = new BlockVec(i.getNewLocation().getBlockX(),
-                                                                        i.getNewLocation().getBlockY() - 1,
+                                                              i.getNewLocation().getBlockY() - 1,
                                                               i.getNewLocation().getBlockZ());
                             if (entityMap.containsKey(entityLoc)) {
                                 List<EntityUpdateCommand> entUpdateList = entityMap.get(entityLoc);
@@ -665,7 +665,7 @@ Changed for 1.8, and quite possibly wrong:
                 }
 
 /*				// move entities again
-				if(!Settings.CompatibilityMode)
+                if(!Settings.CompatibilityMode)
 					for(BlockVec i : entityMap.keySet()) {
 						List<EntityUpdateCommand> mapUpdateList=entityMap.get(i);
 							for(EntityUpdateCommand entityUpdate : mapUpdateList) {

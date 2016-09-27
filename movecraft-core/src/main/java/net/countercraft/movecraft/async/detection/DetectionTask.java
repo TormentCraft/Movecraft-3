@@ -17,6 +17,8 @@
 
 package net.countercraft.movecraft.async.detection;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyWorld;
@@ -25,9 +27,11 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.IntRange;
+import net.countercraft.movecraft.api.MaterialDataPredicate;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.BoundingBoxUtils;
@@ -35,10 +39,13 @@ import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.TownyWorldHeightLimits;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,8 +68,8 @@ public class DetectionTask extends AsyncTask {
     private final Stack<BlockVec> blockStack = new Stack<>();
     private final Set<BlockVec> blockList = new HashSet<>();
     private final Set<BlockVec> visited = new HashSet<>();
-    private final Map<List<Integer>, Integer> blockTypeCount = new HashMap<>();
-    private Map<List<Integer>, List<Double>> dFlyBlocks;
+    private final Map<MaterialDataPredicate, Integer> blockTypeCount = new HashMap<>();
+    private Map<MaterialDataPredicate, List<CraftType.Constraint>> dFlyBlocks;
     private final DetectionTaskData data;
 
     private int craftMinY = 0;
@@ -72,9 +79,9 @@ public class DetectionTask extends AsyncTask {
     TownyWorld townyWorld = null;
     TownyWorldHeightLimits townyWorldHeightLimits = null;
 
-    public DetectionTask(Craft c, BlockVec startLocation, IntRange sizeRange, Integer[] allowedBlocks,
-                         Integer[] forbiddenBlocks, Player player, Player notificationPlayer, World w, Movecraft plugin,
-                         Settings settings, I18nSupport i18n)
+    public DetectionTask(Craft c, BlockVec startLocation, IntRange sizeRange, MaterialDataPredicate allowedBlocks,
+                         MaterialDataPredicate forbiddenBlocks, Player player, Player notificationPlayer, World w,
+                         Movecraft plugin, Settings settings, I18nSupport i18n)
     {
         super(c);
         this.startLocation = startLocation;
@@ -97,8 +104,7 @@ public class DetectionTask extends AsyncTask {
     }
 
     @Override public void execute() {
-
-        Map<List<Integer>, List<Double>> flyBlocks = new HashMap<>(getCraft().getType().getFlyBlocks());
+        Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks = getCraft().getType().getFlyBlocks();
         dFlyBlocks = flyBlocks;
 
         blockStack.push(startLocation);
@@ -115,7 +121,7 @@ public class DetectionTask extends AsyncTask {
 
             data.setBlockList(finaliseBlockList(blockList));
 
-            if (confirmStructureRequirements(flyBlocks, blockTypeCount)) {
+            if (confirmStructureRequirements(flyBlocks, blockTypeCount, data.getBlockList().length)) {
                 data.setHitBox(BoundingBoxUtils
                                        .formBoundingBox(data.getBlockList(), data.getMinX(), maxX, data.getMinZ(),
                                                         maxZ));
@@ -129,13 +135,18 @@ public class DetectionTask extends AsyncTask {
 
         if (notVisited(workingLocation, visited)) {
 
-            int testID = 0;
-            int testData = 0;
+            Block testBlock;
+            Material testMaterial;
+            int testID;
+            byte testData;
             try {
-                testData = data.getWorld().getBlockAt(x, y, z).getData();
-                testID = data.getWorld().getBlockTypeIdAt(x, y, z);
+                testBlock = data.getWorld().getBlockAt(x, y, z);
+                testMaterial = testBlock.getType();
+                testID = testBlock.getTypeId();
+                testData = testBlock.getData();
             } catch (Exception e) {
                 fail(String.format(i18n.get("Detection - Craft too large"), sizeRange.max));
+                return;
             }
 
             if ((testID == 8) || (testID == 9)) {
@@ -161,7 +172,7 @@ public class DetectionTask extends AsyncTask {
 
             if (isForbiddenBlock(testID, testData)) {
                 fail(i18n.get("Detection - Forbidden block found") +
-                     String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(testID, testData, true),
+                     String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(testMaterial, testData),
                                    x, y, z));
             } else if (isAllowedBlock(testID, testData)) {
                 //check for double chests
@@ -278,11 +289,8 @@ public class DetectionTask extends AsyncTask {
                 }
 
                 addToBlockList(workingLocation);
-                Integer blockID = testID;
-                Integer dataID = testData;
-                Integer shiftedID = (blockID << 4) + dataID + 10000;
-                for (List<Integer> flyBlockDef : dFlyBlocks.keySet()) {
-                    if (flyBlockDef.contains(blockID) || flyBlockDef.contains(shiftedID)) {
+                for (MaterialDataPredicate flyBlockDef : dFlyBlocks.keySet()) {
+                    if (flyBlockDef.checkBlock(testBlock)) {
                         addToBlockCount(flyBlockDef);
                     } else {
                         addToBlockCount(null);
@@ -299,26 +307,12 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private boolean isAllowedBlock(int test, int testData) {
-
-        for (int i : data.getAllowedBlocks()) {
-            if ((i == test) || (i == (test << 4) + testData + 10000)) {
-                return true;
-            }
-        }
-
-        return false;
+    private boolean isAllowedBlock(int test, byte testData) {
+        return data.getAllowedBlocks().check(new MaterialData(test, testData));
     }
 
-    private boolean isForbiddenBlock(int test, int testData) {
-
-        for (int i : data.getForbiddenBlocks()) {
-            if ((i == test) || (i == (test << 4) + testData + 10000)) {
-                return true;
-            }
-        }
-
-        return false;
+    private boolean isForbiddenBlock(int test, byte testData) {
+        return data.getForbiddenBlocks().check(new MaterialData(test, testData));
     }
 
     public DetectionTaskData getData() {
@@ -342,13 +336,8 @@ public class DetectionTask extends AsyncTask {
         blockStack.push(l);
     }
 
-    private void addToBlockCount(List<Integer> id) {
-        Integer count = blockTypeCount.get(id);
-
-        if (count == null) {
-            count = 0;
-        }
-
+    private void addToBlockCount(MaterialDataPredicate id) {
+        int count = Optional.fromNullable(blockTypeCount.get(id)).or(0);
         blockTypeCount.put(id, count + 1);
     }
 
@@ -425,8 +414,8 @@ public class DetectionTask extends AsyncTask {
         return finalList.toArray(new BlockVec[1]);
     }
 
-    private boolean confirmStructureRequirements(Map<List<Integer>, List<Double>> flyBlocks,
-                                                 Map<List<Integer>, Integer> countData)
+    private boolean confirmStructureRequirements(Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks,
+                                                 Map<MaterialDataPredicate, Integer> countData, int total)
     {
         if (getCraft().getType().getRequireWaterContact()) {
             if (!data.getWaterContact()) {
@@ -434,41 +423,36 @@ public class DetectionTask extends AsyncTask {
                 return false;
             }
         }
-        for (Map.Entry<List<Integer>, List<Double>> entry : flyBlocks.entrySet()) {
-            Integer numberOfBlocks = countData.get(entry.getKey());
 
-            if (numberOfBlocks == null) {
-                numberOfBlocks = 0;
-            }
+        for (Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
+            MaterialDataPredicate predicate = entry.getKey();
+            List<CraftType.Constraint> constraints = entry.getValue();
+            int count = Optional.fromNullable(countData.get(predicate)).or(0);
+            double percentage = ((double) count / total) * 100;
+            String name = Joiner.on(' ').join(BlockNames.materialDataPredicateNames(entry.getKey()));
 
-            float blockPercentage = (((float) numberOfBlocks / data.getBlockList().length) * 100);
-            Double minPercentage = entry.getValue().get(0);
-            Double maxPercentage = entry.getValue().get(1);
-            String blockName = BlockNames.itemName(entry.getKey().get(0));
+            for (CraftType.Constraint constraint : constraints) {
+                int exactBound = constraint.bound.asExact(total);
+                double ratioBound = constraint.bound.asRatio(total);
 
-            if (minPercentage < 10000.0) {
-                if (blockPercentage < minPercentage) {
-                    fail(String.format(i18n.get("Not enough flyblock") + ": %s %.2f%% < %.2f%%", blockName,
-                                       blockPercentage, minPercentage));
-                    return false;
-                }
-            } else {
-                if (numberOfBlocks < entry.getValue().get(0) - 10000.0) {
-                    fail(String.format(i18n.get("Not enough flyblock") + ": %s %d < %d", blockName, numberOfBlocks,
-                                       entry.getValue().get(0).intValue() - 10000));
-                    return false;
-                }
-            }
-            if (maxPercentage < 10000.0) {
-                if (blockPercentage > maxPercentage) {
-                    fail(String.format(i18n.get("Too much flyblock") + ": %s %.2f%% > %.2f%%", blockName,
-                                       blockPercentage, maxPercentage));
-                    return false;
-                }
-            } else {
-                if (numberOfBlocks > entry.getValue().get(1) - 10000.0) {
-                    fail(String.format(i18n.get("Too much flyblock") + ": %s %d > %d", blockName, numberOfBlocks,
-                                       entry.getValue().get(1).intValue() - 10000));
+                if (!constraint.isSatisfiedBy(count, total)) {
+                    if (constraint.isUpper) {
+                        if (constraint.bound.isExact()) {
+                            fail(String.format(i18n.get("Not enough flyblock") + " (%d < %d) : %s", count, exactBound,
+                                               name));
+                        } else {
+                            fail(String.format(i18n.get("Not enough flyblock") + " (%.2f%% < %.2f%%) : %s", percentage,
+                                               ratioBound * 100.0));
+                        }
+                    } else {
+                        if (constraint.bound.isExact()) {
+                            fail(String.format(i18n.get("Too much flyblock") + " (%d > %d) : %s", count, exactBound,
+                                               name));
+                        } else {
+                            fail(String.format(i18n.get("Too much flyblock") + " (%.2f%% > %.2f%%) : %s", percentage,
+                                               ratioBound * 100.0));
+                        }
+                    }
                     return false;
                 }
             }

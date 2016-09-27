@@ -33,6 +33,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -99,11 +100,14 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
                     type.parseCraftDataFromFile(file, settings.SinkRateTicks);
                     craftTypesSet.add(type);
                     foundCraft = true;
-                } catch (Exception e) {
+                } catch (FileNotFoundException e) {
                     plugin.getLogger().log(Level.SEVERE,
                                            String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
                                                          file.getAbsolutePath()));
-                    e.printStackTrace();
+                } catch (CraftType.ParseException e) {
+                    plugin.getLogger().log(Level.SEVERE,
+                                           String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
+                                                         file.getAbsolutePath()));
                 }
             }
         }

@@ -2,12 +2,14 @@ package net.countercraft.movecraft.api;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.material.MaterialData;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Objects;
@@ -17,23 +19,31 @@ public abstract class MaterialDataPredicate {
     private MaterialDataPredicate() {
     }
 
-    public abstract boolean check(MaterialData materialData);
-
     public abstract boolean isTrivial();
 
+    public abstract boolean check(MaterialData materialData);
+    public boolean check(Material material) {
+        return check(new MaterialData(material));
+    }
+    public boolean check(Material material, byte data) {
+        return check(new MaterialData(material, data));
+    }
     public boolean checkBlock(Block block) {
         return check(block.getState().getData());
     }
 
-    private static final None noneValue = new None();
-    private static final All allValue = new All();
+    public abstract Iterable<Material> allMaterials();
+    public abstract Iterable<MaterialData> allMaterialDataPairs();
+
+    private static final None NONE = new None();
+    private static final AllBlocks ALL_BLOCKS = new AllBlocks();
 
     public static MaterialDataPredicate none() {
-        return noneValue;
+        return NONE;
     }
 
     public static MaterialDataPredicate all() {
-        return allValue;
+        return ALL_BLOCKS;
     }
 
     public static MaterialDataPredicate single(Material material) {
@@ -44,9 +54,13 @@ public abstract class MaterialDataPredicate {
         return new SingleMaterialData(materialData);
     }
 
+    public static MaterialDataPredicate single(Material material, byte data) {
+        return new SingleMaterialData(new MaterialData(material, data));
+    }
+
     public static MaterialDataPredicate many(Set<Material> materials, Set<MaterialData> materialDataPairs) {
         if (materials.isEmpty() && materialDataPairs.isEmpty()) {
-            return noneValue;
+            return NONE;
         } else if (materials.size() == 1 && materialDataPairs.isEmpty()) {
             return new SingleMaterial(materials.toArray(new Material[1])[0]);
         } else if (materialDataPairs.size() == 1 && materials.isEmpty()) {
@@ -57,36 +71,73 @@ public abstract class MaterialDataPredicate {
     }
 
     private static final class None extends MaterialDataPredicate {
-        public None() {
+        @Override public boolean isTrivial() {
+            return true;
         }
 
         @Override public boolean check(MaterialData materialData) {
             return false;
         }
 
-        @Override public boolean isTrivial() {
-            return true;
+        @Override public Iterable<Material> allMaterials() {
+            return Collections.emptyList();
+        }
+
+        @Override public Iterable<MaterialData> allMaterialDataPairs() {
+            return Collections.emptyList();
         }
 
         @Override public String toString() {
             return "()";
         }
-    }
 
-    private static final class All extends MaterialDataPredicate {
-        public All() {
+        @Override public int hashCode() {
+            return NONE.hashCode();
         }
 
-        @Override public boolean check(MaterialData materialData) {
-            return materialData.getItemType() != Material.AIR;
+        @Override public boolean equals(Object o) {
+            return NONE.equals(o);
+        }
+    }
+
+    private static final class AllBlocks extends MaterialDataPredicate {
+        private static final ImmutableSet<Material> NON_AIR_BLOCK_MATERIALS;
+        static {
+            ImmutableSet.Builder<Material> builder = ImmutableSet.builder();
+            for (Material material : EnumSet.allOf(Material.class)) {
+                if (material != Material.AIR && material.isBlock()) {
+                    builder.add(material);
+                }
+            }
+            NON_AIR_BLOCK_MATERIALS = builder.build();
         }
 
         @Override public boolean isTrivial() {
-            return false;
+            return !NON_AIR_BLOCK_MATERIALS.isEmpty();
+        }
+
+        @Override public boolean check(MaterialData materialData) {
+            return materialData.getItemType() != Material.AIR && materialData.getItemType().isBlock();
+        }
+
+        @Override public Iterable<Material> allMaterials() {
+            return NON_AIR_BLOCK_MATERIALS;
+        }
+
+        @Override public Iterable<MaterialData> allMaterialDataPairs() {
+            return Collections.emptyList();
         }
 
         @Override public String toString() {
             return "(*)";
+        }
+
+        @Override public int hashCode() {
+            return ALL_BLOCKS.hashCode();
+        }
+
+        @Override public boolean equals(Object o) {
+            return ALL_BLOCKS.equals(o);
         }
     }
 
@@ -98,12 +149,20 @@ public abstract class MaterialDataPredicate {
             this.material = material;
         }
 
+        @Override public boolean isTrivial() {
+            return false;
+        }
+
         @Override public boolean check(MaterialData materialData) {
             return material == materialData.getItemType();
         }
 
-        @Override public boolean isTrivial() {
-            return false;
+        @Override public Iterable<Material> allMaterials() {
+            return ImmutableList.of(material);
+        }
+
+        @Override public Iterable<MaterialData> allMaterialDataPairs() {
+            return Collections.emptyList();
         }
 
         @Override public int hashCode() {
@@ -131,12 +190,20 @@ public abstract class MaterialDataPredicate {
             this.materialData = materialData;
         }
 
+        @Override public boolean isTrivial() {
+            return false;
+        }
+
         @Override public boolean check(MaterialData materialData) {
             return Objects.equals(this.materialData, materialData);
         }
 
-        @Override public boolean isTrivial() {
-            return false;
+        @Override public Iterable<Material> allMaterials() {
+            return Collections.emptyList();
+        }
+
+        @Override public Iterable<MaterialData> allMaterialDataPairs() {
+            return ImmutableList.of(materialData);
         }
 
         @Override public int hashCode() {
@@ -171,12 +238,20 @@ public abstract class MaterialDataPredicate {
             this.materialDataPairs = ImmutableSet.copyOf(materialDataPairs);
         }
 
+        @Override public boolean isTrivial() {
+            return false;
+        }
+
         @Override public boolean check(MaterialData materialData) {
             return materials.contains(materialData.getItemType()) || materialDataPairs.contains(materialData);
         }
 
-        @Override public boolean isTrivial() {
-            return false;
+        @Override public Iterable<Material> allMaterials() {
+            return materials;
+        }
+
+        @Override public Iterable<MaterialData> allMaterialDataPairs() {
+            return materialDataPairs;
         }
 
         @Override public boolean equals(Object o) {
@@ -237,7 +312,7 @@ public abstract class MaterialDataPredicate {
                 } else if (predicate instanceof Many) {
                     materials.addAll(((Many) predicate).materials);
                     materialDataPairs.addAll(((Many) predicate).materialDataPairs);
-                } else if (predicate instanceof All) {
+                } else if (predicate instanceof AllBlocks) {
                     all = true;
                     materials.clear();
                     materialDataPairs.clear();

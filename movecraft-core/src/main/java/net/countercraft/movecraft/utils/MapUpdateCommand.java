@@ -48,8 +48,7 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(BlockVec blockLocation, BlockVec newBlockLocation, int typeID, byte dataID,
-                            Craft craft)
+    public MapUpdateCommand(BlockVec blockLocation, BlockVec newBlockLocation, int typeID, byte dataID, Craft craft)
     {
         this.blockLocation = blockLocation;
         this.newBlockLocation = newBlockLocation;
@@ -71,8 +70,7 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(BlockVec newBlockLocation, int typeID, byte dataID, Object worldEditBaseBlock,
-                            Craft craft)
+    public MapUpdateCommand(BlockVec newBlockLocation, int typeID, byte dataID, Object worldEditBaseBlock, Craft craft)
     {
         this.newBlockLocation = newBlockLocation;
         this.typeID = typeID;

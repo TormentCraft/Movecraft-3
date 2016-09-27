@@ -1,10 +1,11 @@
 package net.countercraft.movecraft.utils;
 
+import com.google.common.collect.ImmutableSet;
+import net.countercraft.movecraft.api.MaterialDataPredicate;
 import net.minecraft.server.v1_10_R1.Item;
 import net.minecraft.server.v1_10_R1.ItemStack;
 import org.bukkit.Material;
-
-import java.util.Set;
+import org.bukkit.material.MaterialData;
 
 public final class BlockNames {
 
@@ -20,47 +21,67 @@ public final class BlockNames {
         return new String(chars).replaceAll("\\s\\s+", " ").trim();
     }
 
-    public static String itemName(int blockId, int blockData, boolean hasData) {
+    public static ImmutableSet<String> materialDataPredicateNames(MaterialDataPredicate predicate) {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+
+        for (Material material : predicate.allMaterials()) {
+            builder.add(itemName(material));
+        }
+        for (MaterialData materialDataPair : predicate.allMaterialDataPairs()) {
+            builder.add(itemName(materialDataPair));
+        }
+
+        return builder.build();
+    }
+
+    private static String itemName(Material material, byte data, boolean hasData) {
         String tmp = null;
+
         try {
-            ItemStack stack = new ItemStack(Item.getById(blockId), 0, blockData);
-            tmp = stack == null ? null : stack.getName();
+            tmp = new ItemStack(Item.getById(material.getId()), 0, data).getName();
         } catch (Exception e) {
         }
+
         if (tmp == null || tmp.isEmpty()) {
-            tmp = Material.getMaterial(blockId).name();
+            tmp = material.name();
         }
+
         tmp = properCase(tmp);
         tmp = tmp.replaceAll("\\s(On|Off)$", "");
         if (!hasData && tmp.startsWith("White ")) tmp = tmp.substring(6);
         return tmp;
     }
 
-    public static String itemName(int movecraftId) {
-        int blockData = 0, blockId = movecraftId;
-        boolean hasData = false;
-        if (blockId > 10000) {
-            blockId -= 10000;
-            blockData = blockId & 0x0F;
-            blockId = blockId >> 4;
-            hasData = true;
-        }
-        return itemName(blockId, blockData, hasData);
+    public static String itemName(MaterialData materialData) {
+        return itemName(materialData.getItemType(), materialData.getData(), true);
     }
 
-    public static void itemNames(int blk, Set<String> blockList) {
-        if (blk < 10000) {
-            // Wool, Carpet, Stained Glass, Glass Pane, Clay
-            if (blk == 35 || blk == 95 || blk == 159 || blk == 160 || blk == 171) {
-                blockList.add(itemName(blk));
-                return;
-            }
-            for (int ix = 0; ix < 16; ix++) {
-                int shiftedID = (blk << 4) + ix + 10000;
-                blockList.add(itemName(shiftedID));
-            }
-        } else {
-            blockList.add(itemName(blk));
+    public static String itemName(Material material, byte data) {
+        return itemName(material, data, true);
+    }
+
+    public static String itemName(Material material) {
+        return itemName(material, (byte) 0, false);
+    }
+
+    private static final ImmutableSet<Material> COLORED_MATERIALS = ImmutableSet
+            .of(Material.WOOL, Material.CARPET, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE,
+                Material.STAINED_CLAY);
+
+    public static ImmutableSet<String> itemNames(Material blk) {
+        // Wool, Carpet, Stained Glass, Glass Pane, Clay
+        if (COLORED_MATERIALS.contains(blk)) {
+            return ImmutableSet.of(itemName(blk));
         }
+
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        for (byte data = 0; data < 16; data++) {
+            builder.add(itemName(blk, data, true));
+        }
+        return builder.build();
+    }
+
+    public static ImmutableSet<String> itemNames(MaterialData blk) {
+        return ImmutableSet.of(itemName(blk));
     }
 }

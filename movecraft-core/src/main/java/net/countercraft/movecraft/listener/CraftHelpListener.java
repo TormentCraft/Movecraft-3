@@ -1,12 +1,16 @@
 package net.countercraft.movecraft.listener;
 
+import com.google.common.base.Joiner;
+import net.countercraft.movecraft.api.MaterialDataPredicate;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.utils.BlockNames;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,21 +83,26 @@ public class CraftHelpListener implements CommandExecutor {
         if (c.getRequireWaterContact()) {
             sb.append("\n&6Requires Water: &7YES");
         }
-        StringBuilder req = new StringBuilder(), limit = new StringBuilder();
+        List<String> req = new ArrayList<>();
+        List<String> limit = new ArrayList<>();
         appendFlyBlocks(req, limit, c.getFlyBlocks());
-        if (req.length() > 0) {
-            sb.append("\n&6Requirements: &7" + req.toString());
+        if (!req.isEmpty()) {
+            sb.append("\n&6Requirements: &7" + Joiner.on(", ").join(req));
         }
-        if (limit.length() > 0) {
-            sb.append("\n&6Constraints: &7" + limit.toString());
+        if (!limit.isEmpty()) {
+            sb.append("\n&6Constraints: &7" + Joiner.on(", ").join(limit));
         }
 
         sb.append("\n&6Allowed Blocks: &7");
-        Integer[] blockIds = c.getAllowedBlocks();
+        MaterialDataPredicate blockIds = c.getAllowedBlocks();
         Set<String> blockList = new HashSet<>();
-        for (Integer blockId : blockIds) {
-            BlockNames.itemNames(blockId, blockList);
+        for (Material material : blockIds.allMaterials()) {
+            blockList.addAll(BlockNames.itemNames(material));
         }
+        for (MaterialData materialDataPair : blockIds.allMaterialDataPairs()) {
+            blockList.addAll(BlockNames.itemNames(materialDataPair));
+        }
+
         String[] names = blockList.toArray(new String[blockList.size()]);
         Arrays.sort(names);
         sb.append(String.join(", ", names));
@@ -102,30 +111,29 @@ public class CraftHelpListener implements CommandExecutor {
         return true;
     }
 
-    private void appendFlyBlocks(StringBuilder sbReq, StringBuilder sbLimit, Map<List<Integer>, List<Double>> flyBlocks)
+    private void appendFlyBlocks(List<String> sbReq, List<String> sbLimit,
+                                 Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks)
     {
-        for (Map.Entry<List<Integer>, List<Double>> entry : flyBlocks.entrySet()) {
-            String blockName = BlockNames.itemName(entry.getKey().get(0));
-            Double minPercentage = entry.getValue().get(0);
-            Double maxPercentage = entry.getValue().get(1);
+        for (Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
+            MaterialDataPredicate predicate = entry.getKey();
+            List<CraftType.Constraint> constraints = entry.getValue();
+            String name = Joiner.on(" or ").join(BlockNames.materialDataPredicateNames(predicate));
 
-            if (minPercentage > 0.01) {
-                if (sbReq.length() > 0) sbReq.append(", ");
-                if (minPercentage < 10000.0) {
-                    sbReq.append(String.format("%.2f%% %s", minPercentage, blockName));
+            for (CraftType.Constraint constraint : constraints) {
+                if (constraint.isTrivial()) continue;
+
+                if (constraint.isUpper) {
+                    if (constraint.bound.isExact()) {
+                        sbLimit.add(String.format("%s <= %d", name, constraint.bound.asExact(0)));
+                    } else {
+                        sbLimit.add(String.format("%s <= %.2f%%", name, constraint.bound.asRatio(1) * 100.0));
+                    }
                 } else {
-                    minPercentage -= 10000.0;
-                    sbReq.append(String.format("%d %s", minPercentage.intValue(), blockName));
-                }
-            }
-            if (maxPercentage.intValue() < 100 ||
-                (maxPercentage.intValue() >= 10000 && maxPercentage.intValue() < 10100)) {
-                if (sbLimit.length() > 0) sbLimit.append(", ");
-                if (maxPercentage < 10000.0) {
-                    sbLimit.append(String.format("%s <= %.2f%%", blockName, maxPercentage));
-                } else {
-                    maxPercentage -= 10000.0;
-                    sbLimit.append(String.format("%s <= %d", blockName, maxPercentage.intValue()));
+                    if (constraint.bound.isExact()) {
+                        sbReq.add(String.format("%d %s", constraint.bound.asExact(0), name));
+                    } else {
+                        sbReq.add(String.format("%.2f%% %s", constraint.bound.asRatio(1) * 100.0, name));
+                    }
                 }
             }
         }

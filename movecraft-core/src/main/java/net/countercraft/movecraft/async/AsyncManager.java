@@ -18,6 +18,7 @@
 package net.countercraft.movecraft.async;
 
 import at.pavlov.cannons.cannon.Cannon;
+import com.google.common.base.Optional;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.domains.DefaultDomain;
@@ -28,6 +29,7 @@ import net.countercraft.movecraft.Events;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Direction;
+import net.countercraft.movecraft.api.MaterialDataPredicate;
 import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.async.detection.DetectionTask;
 import net.countercraft.movecraft.async.detection.DetectionTaskData;
@@ -37,6 +39,7 @@ import net.countercraft.movecraft.async.translation.TranslationTaskData;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
+import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockUtils;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
@@ -103,9 +106,9 @@ public final class AsyncManager extends BukkitRunnable {
     }
 
     public void detect(Craft craft, Player player, Player notificationPlayer, BlockVec startPoint) {
-        submitTask(new DetectionTask(craft, startPoint, craft.type.getSizeRange(),
-                                     craft.type.getAllowedBlocks(), craft.type.getForbiddenBlocks(), player,
-                                     notificationPlayer, craft.w, plugin, settings, i18n),
+        submitTask(new DetectionTask(craft, startPoint, craft.type.getSizeRange(), craft.type.getAllowedBlocks(),
+                                     craft.type.getForbiddenBlocks(), player, notificationPlayer, craft.w, plugin,
+                                     settings, i18n),
 
                    craft);
     }
@@ -670,7 +673,7 @@ public final class AsyncManager extends BukkitRunnable {
                             if (ticksElapsed > settings.SinkCheckTicks) {
                                 int totalNonAirBlocks = 0;
                                 int totalNonAirWaterBlocks = 0;
-                                Map<List<Integer>, Integer> foundFlyBlocks = new HashMap<>();
+                                Map<MaterialDataPredicate, Integer> foundFlyBlocks = new HashMap<>();
                                 boolean regionPVPBlocked = false;
                                 boolean sinkingForbiddenByFlag = false;
                                 boolean sinkingForbiddenByTowny = false;
@@ -687,10 +690,8 @@ public final class AsyncManager extends BukkitRunnable {
                                         }
                                     }
                                     Integer blockID = w.getBlockAt(l.x, l.y, l.z).getTypeId();
-                                    Integer dataID = (int) w.getBlockAt(l.x, l.y, l.z).getData();
-                                    Integer shiftedID = (blockID << 4) + dataID + 10000;
-                                    for (List<Integer> flyBlockDef : pcraft.getType().getFlyBlocks().keySet()) {
-                                        if (flyBlockDef.contains(blockID) || flyBlockDef.contains(shiftedID)) {
+                                    for (MaterialDataPredicate flyBlockDef : pcraft.getType().getFlyBlocks().keySet()) {
+                                        if (flyBlockDef.checkBlock(w.getBlockAt(l.x, l.y, l.z))) {
                                             Integer count = foundFlyBlocks.get(flyBlockDef);
                                             if (count == null) {
                                                 foundFlyBlocks.put(flyBlockDef, 1);
@@ -711,16 +712,21 @@ public final class AsyncManager extends BukkitRunnable {
                                 // now see if any of the resulting percentages are below the threshold specified in
                                 // SinkPercent
                                 boolean isSinking = false;
-                                for (List<Integer> i : pcraft.getType().getFlyBlocks().keySet()) {
-                                    int numfound = 0;
-                                    if (foundFlyBlocks.get(i) != null) {
-                                        numfound = foundFlyBlocks.get(i);
-                                    }
-                                    double percent = ((double) numfound / (double) totalNonAirBlocks) * 100.0;
-                                    double flyPercent = pcraft.getType().getFlyBlocks().get(i).get(0);
-                                    double sinkPercent = flyPercent * pcraft.getType().getSinkPercent() / 100.0;
-                                    if (percent < sinkPercent) {
-                                        isSinking = true;
+                                for (Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : pcraft
+                                        .getType().getFlyBlocks().entrySet()) {
+                                    MaterialDataPredicate predicate = entry.getKey();
+                                    List<CraftType.Constraint> constraints = entry.getValue();
+                                    int count = Optional.fromNullable(foundFlyBlocks.get(predicate)).or(0);
+
+                                    double percent = count / (double) totalNonAirBlocks;
+                                    for (CraftType.Constraint constraint : constraints) {
+                                        if (constraint.isUpper) continue;
+
+                                        double flyPercent = constraint.bound.asRatio(totalNonAirBlocks);
+                                        double sinkPercent = flyPercent * pcraft.getType().getSinkPercent() / 100.0;
+                                        if (percent < sinkPercent) {
+                                            isSinking = true;
+                                        }
                                     }
                                 }
 
