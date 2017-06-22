@@ -17,7 +17,7 @@
 
 package net.countercraft.movecraft.utils;
 
-import net.countercraft.movecraft.api.MovecraftLocation;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.craft.Craft;
 
@@ -26,8 +26,8 @@ import net.countercraft.movecraft.craft.Craft;
  * retrieved contextually from the submitting craft.
  */
 public class MapUpdateCommand {
-    private MovecraftLocation blockLocation;
-    private final MovecraftLocation newBlockLocation;
+    private BlockVec blockLocation;
+    private final BlockVec newBlockLocation;
     private final int typeID;
     private final byte dataID;
     private final Object worldEditBaseBlock;
@@ -35,8 +35,8 @@ public class MapUpdateCommand {
     private final Craft craft;
     private final int smoke;
 
-    public MapUpdateCommand(MovecraftLocation blockLocation, MovecraftLocation newBlockLocation, int typeID,
-                            byte dataID, Rotation rotation, Craft craft)
+    public MapUpdateCommand(BlockVec blockLocation, BlockVec newBlockLocation, int typeID, byte dataID,
+                            Rotation rotation, Craft craft)
     {
         this.blockLocation = blockLocation;
         this.newBlockLocation = newBlockLocation;
@@ -48,8 +48,7 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(MovecraftLocation blockLocation, MovecraftLocation newBlockLocation, int typeID,
-                            byte dataID, Craft craft)
+    public MapUpdateCommand(BlockVec blockLocation, BlockVec newBlockLocation, int typeID, byte dataID, Craft craft)
     {
         this.blockLocation = blockLocation;
         this.newBlockLocation = newBlockLocation;
@@ -61,7 +60,7 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(MovecraftLocation newBlockLocation, int typeID, byte dataID, Craft craft) {
+    public MapUpdateCommand(BlockVec newBlockLocation, int typeID, byte dataID, Craft craft) {
         this.newBlockLocation = newBlockLocation;
         this.typeID = typeID;
         this.dataID = dataID;
@@ -71,8 +70,7 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(MovecraftLocation newBlockLocation, int typeID, byte dataID, Object worldEditBaseBlock,
-                            Craft craft)
+    public MapUpdateCommand(BlockVec newBlockLocation, int typeID, byte dataID, Object worldEditBaseBlock, Craft craft)
     {
         this.newBlockLocation = newBlockLocation;
         this.typeID = typeID;
@@ -83,7 +81,7 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(MovecraftLocation newBlockLocation, int typeID, byte dataID, Craft craft, int smoke) {
+    public MapUpdateCommand(BlockVec newBlockLocation, int typeID, byte dataID, Craft craft, int smoke) {
         this.newBlockLocation = newBlockLocation;
         this.typeID = typeID;
         this.dataID = dataID;
@@ -109,11 +107,11 @@ public class MapUpdateCommand {
         return smoke;
     }
 
-    public MovecraftLocation getOldBlockLocation() {
+    public BlockVec getOldBlockLocation() {
         return blockLocation;
     }
 
-    public MovecraftLocation getNewBlockLocation() {
+    public BlockVec getNewBlockLocation() {
         return newBlockLocation;
     }
 

@@ -20,14 +20,13 @@ package net.countercraft.movecraft.listener;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.CraftType;
-import net.countercraft.movecraft.items.StorageChestItem;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -40,19 +39,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -60,36 +54,25 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 public class BlockListener implements Listener {
+    private final Movecraft plugin;
+    private final Settings settings;
+    private final I18nSupport i18n;
+    private final CraftManager craftManager;
 
-    @EventHandler public void onBlockPlace(final BlockPlaceEvent e) {
-        if (Settings.DisableCrates) return;
-
-        if (e.getBlockAgainst().getTypeId() == 33 && e.getBlockAgainst().getData() == ((byte) 6)) {
-            e.setCancelled(true);
-        } else if (e.getItemInHand().getItemMeta() != null &&
-                   e.getItemInHand().getItemMeta().getDisplayName() != null &&
-                   e.getItemInHand().getItemMeta().getDisplayName()
-                    .equalsIgnoreCase(I18nSupport.getInternationalisedString("Item - Storage Crate name"))) {
-            e.getBlockPlaced().setTypeId(33);
-            Location l = e.getBlockPlaced().getLocation();
-            MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
-            StorageChestItem.createNewInventory(l1, e.getBlockPlaced().getWorld());
-            new BukkitRunnable() {
-
-                @Override public void run() {
-                    e.getBlockPlaced().setData((byte) 6);
-                }
-            }.runTask(Movecraft.getInstance());
-        }
+    public BlockListener(Movecraft plugin, Settings settings, I18nSupport i18n, CraftManager craftManager) {
+        this.plugin = plugin;
+        this.settings = settings;
+        this.i18n = i18n;
+        this.craftManager = craftManager;
     }
 
     @EventHandler public void onStopSnowForming(BlockFormEvent event) {
         BlockState info = event.getNewState();
         if (info.getType() == Material.SNOW) {
             Block below = event.getBlock().getRelative(BlockFace.DOWN);
-            MovecraftLocation mloc = new MovecraftLocation(below.getX(), below.getY(), below.getZ());
+            BlockVec mloc = new BlockVec(below.getX(), below.getY(), below.getZ());
             boolean blockInCraft = false;
-            Craft[] crafts = CraftManager.getInstance().getCraftsInWorld(info.getWorld());
+            Craft[] crafts = craftManager.getCraftsInWorld(info.getWorld());
             if (crafts != null) {
                 for (Craft craft : crafts) {
                     if (craft != null && craft.isCraftBlock(mloc)) {
@@ -101,56 +84,25 @@ public class BlockListener implements Listener {
         }
     }
 
-    @EventHandler public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (event.getClickedBlock().getTypeId() == 33 && event.getClickedBlock().getData() == ((byte) 6)) {
-                if (Settings.DisableCrates) return;
-                Location l = event.getClickedBlock().getLocation();
-                MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
-                Inventory i = StorageChestItem.getInventoryOfCrateAtLocation(l1, event.getPlayer().getWorld());
-
-                if (i != null) {
-                    event.getPlayer().openInventory(i);
-                }
-            }
-        }
-    }
-
     @EventHandler(priority = EventPriority.HIGHEST) public void onBlockBreak(final BlockBreakEvent e) {
         if (e.isCancelled()) {
             return;
         }
-        if (Settings.ProtectPilotedCrafts) {
-            MovecraftLocation mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
+        if (settings.ProtectPilotedCrafts) {
+            BlockVec mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
             boolean blockInCraft = false;
-            if (CraftManager.getInstance().getCraftsInWorld(e.getBlock().getWorld()) != null)
-                for (Craft craft : CraftManager.getInstance().getCraftsInWorld(e.getBlock().getWorld())) {
+            if (craftManager.getCraftsInWorld(e.getBlock().getWorld()) != null)
+                for (Craft craft : craftManager.getCraftsInWorld(e.getBlock().getWorld())) {
                     if (craft != null) {
-                        for (MovecraftLocation tloc : craft.getBlockList()) {
+                        for (BlockVec tloc : craft.getBlockList()) {
                             if (tloc.x == mloc.x && tloc.y == mloc.y && tloc.z == mloc.z) blockInCraft = true;
                         }
                     }
                 }
             if (blockInCraft) {
-                e.getPlayer().sendMessage(I18nSupport.getInternationalisedString("BLOCK IS PART OF A PILOTED CRAFT"));
+                e.getPlayer().sendMessage(i18n.get("BLOCK IS PART OF A PILOTED CRAFT"));
                 e.setCancelled(true);
             }
-        }
-        if (e.getBlock().getTypeId() == 33 && e.getBlock().getData() == ((byte) 6)) {
-            if (Settings.DisableCrates) return;
-            Location l = e.getBlock().getLocation();
-            MovecraftLocation l1 = new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
-            for (ItemStack i : StorageChestItem.getInventoryOfCrateAtLocation(l1, e.getBlock().getWorld())
-                                               .getContents()) {
-                if (i != null) {
-                    e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(), i);
-                }
-            }
-            StorageChestItem.removeInventoryAtLocation(e.getBlock().getWorld(), l1);
-            e.setCancelled(true);
-            e.getBlock().setType(Material.AIR);
-            e.getBlock().getLocation().getWorld()
-             .dropItemNaturally(e.getBlock().getLocation(), new StorageChestItem().getItemStack());
         }
     }
 
@@ -159,8 +111,8 @@ public class BlockListener implements Listener {
         if (e.isCancelled()) {
             return;
         }
-        if (CraftManager.getInstance().getCraftsInWorld(e.getLocation().getWorld()) != null) {
-            for (Craft tcraft : CraftManager.getInstance().getCraftsInWorld(e.getLocation().getWorld())) {
+        if (craftManager.getCraftsInWorld(e.getLocation().getWorld()) != null) {
+            for (Craft tcraft : craftManager.getCraftsInWorld(e.getLocation().getWorld())) {
                 if ((!tcraft.isNotProcessing()) && MathUtils
                         .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
                                                        MathUtils.bukkit2MovecraftLoc(e.getLocation()))) {
@@ -178,8 +130,8 @@ public class BlockListener implements Listener {
         }
         Block block = e.getToBlock();
         if (block.getType() == Material.WATER) {
-            if (CraftManager.getInstance().getCraftsInWorld(block.getWorld()) != null) {
-                for (Craft tcraft : CraftManager.getInstance().getCraftsInWorld(block.getWorld())) {
+            if (craftManager.getCraftsInWorld(block.getWorld()) != null) {
+                for (Craft tcraft : craftManager.getCraftsInWorld(block.getWorld())) {
                     if ((!tcraft.isNotProcessing()) && MathUtils
                             .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
                                                            MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
@@ -200,8 +152,8 @@ public class BlockListener implements Listener {
         final int[] fragileBlocks = new int[]{
                 26, 34, 50, 55, 63, 64, 65, 68, 69, 70, 71, 72, 75, 76, 77, 93, 94, 96, 131, 132, 143, 147, 148, 149,
                 150, 151, 171, 193, 194, 195, 196, 197};
-        if (CraftManager.getInstance().getCraftsInWorld(block.getWorld()) != null) {
-            for (Craft tcraft : CraftManager.getInstance().getCraftsInWorld(block.getWorld())) {
+        if (craftManager.getCraftsInWorld(block.getWorld()) != null) {
+            for (Craft tcraft : craftManager.getCraftsInWorld(block.getWorld())) {
                 if ((!tcraft.isNotProcessing()) && MathUtils
                         .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
                                                        MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
@@ -219,7 +171,7 @@ public class BlockListener implements Listener {
     }
 
     private CraftType getCraftTypeFromString(String s) {
-        for (CraftType t : CraftManager.getInstance().getCraftTypes()) {
+        for (CraftType t : craftManager.getCraftTypes()) {
             if (s.equalsIgnoreCase(t.getCraftName())) {
                 return t;
             }
@@ -234,24 +186,24 @@ public class BlockListener implements Listener {
         String signText = org.bukkit.ChatColor.stripColor(event.getLine(0));
         // did the player try to create a craft command sign?
         if (getCraftTypeFromString(signText) != null) {
-            if (!Settings.RequireCreatePerm) {
+            if (!settings.RequireCreatePerm) {
                 return;
             }
             if (!p.hasPermission("movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create")) {
-                p.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
+                p.sendMessage(i18n.get("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Cruise: OFF") || signText.equalsIgnoreCase("Cruise: ON")) {
-            if (!p.hasPermission("movecraft.cruisesign") && Settings.RequireCreatePerm) {
-                p.sendMessage(I18nSupport.getInternationalisedString("Insufficient Permissions"));
+            if (!p.hasPermission("movecraft.cruisesign") && settings.RequireCreatePerm) {
+                p.sendMessage(i18n.get("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Crew:")) {
             String crewName = org.bukkit.ChatColor.stripColor(event.getLine(1));
             if (!p.getName().equalsIgnoreCase(crewName)) {
-                p.sendMessage(I18nSupport.getInternationalisedString("You can only create a Crew: sign for yourself"));
+                p.sendMessage(i18n.get("You can only create a Crew: sign for yourself"));
                 event.setLine(1, p.getName());
 //				event.setCancelled(true);
             }
@@ -259,7 +211,7 @@ public class BlockListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOW) public void onBlockIgnite(BlockIgniteEvent event) {
-        if (!Settings.FireballPenetration) return;
+        if (!settings.FireballPenetration) return;
         if (event.isCancelled()) return;
         // replace blocks with fire occasionally, to prevent fast craft from simply ignoring fire
         if (event.getCause() == BlockIgniteEvent.IgniteCause.FIREBALL) {
@@ -271,11 +223,10 @@ public class BlockListener implements Listener {
             if (testBlock.getType().isBurnable()) {
                 boolean isBurnAllowed = true;
                 // check to see if fire spread is allowed, don't check if worldguard integration is not enabled
-                if (Movecraft.getInstance().getWorldGuardPlugin() != null &&
-                    (Settings.WorldGuardBlockMoveOnBuildPerm || Settings.WorldGuardBlockSinkOnPVPPerm)) {
-                    ApplicableRegionSet set = Movecraft.getInstance().getWorldGuardPlugin()
-                                                       .getRegionManager(testBlock.getWorld())
-                                                       .getApplicableRegions(testBlock.getLocation());
+                if (plugin.getWorldGuardPlugin() != null &&
+                    (settings.WorldGuardBlockMoveOnBuildPerm || settings.WorldGuardBlockSinkOnPVPPerm)) {
+                    ApplicableRegionSet set = plugin.getWorldGuardPlugin().getRegionManager(testBlock.getWorld())
+                                                    .getApplicableRegions(testBlock.getLocation());
                     if (!set.allows(DefaultFlag.FIRE_SPREAD)) {
                         isBurnAllowed = false;
                     }
@@ -302,7 +253,7 @@ public class BlockListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL) public void explodeEvent(EntityExplodeEvent e) {
         // Remove any blocks from the list that were adjacent to water, to prevent spillage
         Iterator<Block> i = e.blockList().iterator();
-        if (!Settings.DisableSpillProtection) while (i.hasNext()) {
+        if (!settings.DisableSpillProtection) while (i.hasNext()) {
             Block b = i.next();
             boolean isNearWater = false;
             if (b.getY() > b.getWorld().getSeaLevel()) for (int mx = -1; mx <= 1; mx++) {
@@ -322,7 +273,7 @@ public class BlockListener implements Listener {
         for (Player p : e.getEntity().getWorld().getPlayers()) {
             org.bukkit.entity.Entity tnt = e.getEntity();
 
-            if (e.getEntityType() == EntityType.PRIMED_TNT && Settings.TracerRateTicks != 0) {
+            if (e.getEntityType() == EntityType.PRIMED_TNT && settings.TracerRateTicks != 0) {
                 long minDistSquared = 60 * 60;
                 long maxDistSquared = Bukkit.getServer().getViewDistance() * 16;
                 maxDistSquared = maxDistSquared - 16;
@@ -340,13 +291,13 @@ public class BlockListener implements Listener {
                         @Override public void run() {
                             fp.sendBlockChange(loc, 89, (byte) 0);
                         }
-                    }.runTaskLater(Movecraft.getInstance(), 5);
+                    }.runTaskLater(plugin, 5);
                     // then remove it
                     BukkitTask removeCobweb = new BukkitRunnable() {
                         @Override public void run() {
                             fp.sendBlockChange(loc, 0, (byte) 0);
                         }
-                    }.runTaskLater(Movecraft.getInstance(), 160);
+                    }.runTaskLater(plugin, 160);
                 }
             }
         }

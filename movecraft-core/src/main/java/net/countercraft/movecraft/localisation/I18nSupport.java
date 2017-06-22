@@ -17,58 +17,32 @@
 
 package net.countercraft.movecraft.localisation;
 
-import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.config.Settings;
+import org.bukkit.plugin.Plugin;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import java.util.logging.Level;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 public final class I18nSupport {
-    private static Properties languageFile;
+    private final ResourceBundle bundle;
 
-    public static void init() {
-        languageFile = new Properties();
+    public I18nSupport(ResourceBundle bundle) {
+        this.bundle = bundle;
+    }
 
-        File localisationDirectory = new File(
-                Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/localisation");
+    public static I18nSupport read(Plugin plugin, Locale locale) {
+        return new I18nSupport(ResourceBundle.getBundle("localisation.movecraftlang", locale));
+    }
 
-        if (!localisationDirectory.exists()) {
-            localisationDirectory.mkdirs();
-        }
-
-        InputStream is = null;
+    public String get(String key) {
         try {
-            is = new FileInputStream(
-                    localisationDirectory.getAbsolutePath() + "/movecraftlang" + "_" + Settings.LOCALE + ".properties");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        if (is == null) {
-            Movecraft.getInstance().getLogger().log(Level.SEVERE, "Critical Error in Localisation System");
-            Movecraft.getInstance().getServer().shutdown();
-            return;
-        }
-
-        try {
-            languageFile.load(is);
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            return bundle.getString(key);
+        } catch (MissingResourceException ignored) {
+            return key;
         }
     }
 
-    public static String getInternationalisedString(String key) {
-        String ret = languageFile.getProperty(key);
-        if (ret != null) {
-            return ret;
-        } else {
-            return key;
-        }
+    public String format(String fmt, Object... args) {
+        return String.format(get(fmt), args);
     }
 }

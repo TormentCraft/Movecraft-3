@@ -17,27 +17,35 @@
 
 package net.countercraft.movecraft.async.detection;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockVec;
+import net.countercraft.movecraft.api.IntRange;
+import net.countercraft.movecraft.api.MaterialDataPredicate;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
+import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.BoundingBoxUtils;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.TownyWorldHeightLimits;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,18 +56,20 @@ import java.util.Set;
 import java.util.Stack;
 
 public class DetectionTask extends AsyncTask {
-    private final MovecraftLocation startLocation;
-    private final Integer minSize;
-    private final Integer maxSize;
+    private final Movecraft plugin;
+    private final Settings settings;
+    private final I18nSupport i18n;
+    private final BlockVec startLocation;
+    private final IntRange sizeRange;
     private Integer maxX;
     private Integer maxY;
     private Integer maxZ;
     private Integer minY;
-    private final Stack<MovecraftLocation> blockStack = new Stack<>();
-    private final Set<MovecraftLocation> blockList = new HashSet<>();
-    private final Set<MovecraftLocation> visited = new HashSet<>();
-    private final Map<List<Integer>, Integer> blockTypeCount = new HashMap<>();
-    private Map<List<Integer>, List<Double>> dFlyBlocks;
+    private final Stack<BlockVec> blockStack = new Stack<>();
+    private final Set<BlockVec> blockList = new HashSet<>();
+    private final Set<BlockVec> visited = new HashSet<>();
+    private final Map<MaterialDataPredicate, Integer> blockTypeCount = new HashMap<>();
+    private Map<MaterialDataPredicate, List<CraftType.Constraint>> dFlyBlocks;
     private final DetectionTaskData data;
 
     private int craftMinY = 0;
@@ -69,21 +79,24 @@ public class DetectionTask extends AsyncTask {
     TownyWorld townyWorld = null;
     TownyWorldHeightLimits townyWorldHeightLimits = null;
 
-    public DetectionTask(Craft c, MovecraftLocation startLocation, int minSize, int maxSize, Integer[] allowedBlocks,
-                         Integer[] forbiddenBlocks, Player player, Player notificationPlayer, World w)
+    public DetectionTask(Craft c, BlockVec startLocation, IntRange sizeRange, MaterialDataPredicate allowedBlocks,
+                         MaterialDataPredicate forbiddenBlocks, Player player, Player notificationPlayer, World w,
+                         Movecraft plugin, Settings settings, I18nSupport i18n)
     {
         super(c);
         this.startLocation = startLocation;
-        this.minSize = minSize;
-        this.maxSize = maxSize;
+        this.sizeRange = sizeRange;
+        this.plugin = plugin;
+        this.settings = settings;
+        this.i18n = i18n;
         data = new DetectionTaskData(w, player, notificationPlayer, allowedBlocks, forbiddenBlocks);
 
-        this.townyEnabled = Movecraft.getInstance().getTownyPlugin() != null;
-        if (townyEnabled && Settings.TownyBlockMoveOnSwitchPerm) {
+        this.townyEnabled = plugin.getTownyPlugin() != null;
+        if (townyEnabled && settings.TownyBlockMoveOnSwitchPerm) {
             this.townyWorld = TownyUtils.getTownyWorld(getCraft().getW());
             if (townyWorld != null) {
                 this.townyEnabled = townyWorld.isUsingTowny();
-                if (townyEnabled) townyWorldHeightLimits = TownyUtils.getWorldLimits(getCraft().getW());
+                if (townyEnabled) townyWorldHeightLimits = TownyUtils.getWorldLimits(settings, getCraft().getW());
             }
         } else {
             this.townyEnabled = false;
@@ -91,8 +104,7 @@ public class DetectionTask extends AsyncTask {
     }
 
     @Override public void execute() {
-
-        Map<List<Integer>, List<Double>> flyBlocks = new HashMap<>(getCraft().getType().getFlyBlocks());
+        Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks = getCraft().getType().getFlyBlocks();
         dFlyBlocks = flyBlocks;
 
         blockStack.push(startLocation);
@@ -105,11 +117,11 @@ public class DetectionTask extends AsyncTask {
             return;
         }
 
-        if (isWithinLimit(blockList.size(), minSize, maxSize, false)) {
+        if (isWithinLimit(blockList.size(), sizeRange, false)) {
 
             data.setBlockList(finaliseBlockList(blockList));
 
-            if (confirmStructureRequirements(flyBlocks, blockTypeCount)) {
+            if (confirmStructureRequirements(flyBlocks, blockTypeCount, data.getBlockList().length)) {
                 data.setHitBox(BoundingBoxUtils
                                        .formBoundingBox(data.getBlockList(), data.getMinX(), maxX, data.getMinZ(),
                                                         maxZ));
@@ -119,17 +131,22 @@ public class DetectionTask extends AsyncTask {
 
     private void detectBlock(int x, int y, int z) {
 
-        MovecraftLocation workingLocation = new MovecraftLocation(x, y, z);
+        BlockVec workingLocation = new BlockVec(x, y, z);
 
         if (notVisited(workingLocation, visited)) {
 
-            int testID = 0;
-            int testData = 0;
+            Block testBlock;
+            Material testMaterial;
+            int testID;
+            byte testData;
             try {
-                testData = data.getWorld().getBlockAt(x, y, z).getData();
-                testID = data.getWorld().getBlockTypeIdAt(x, y, z);
+                testBlock = data.getWorld().getBlockAt(x, y, z);
+                testMaterial = testBlock.getType();
+                testID = testBlock.getTypeId();
+                testData = testBlock.getData();
             } catch (Exception e) {
-                fail(String.format(I18nSupport.getInternationalisedString("Detection - Craft too large"), maxSize));
+                fail(String.format(i18n.get("Detection - Craft too large"), sizeRange.max));
+                return;
             }
 
             if ((testID == 8) || (testID == 9)) {
@@ -147,16 +164,15 @@ public class DetectionTask extends AsyncTask {
                             foundPilot = true;
                         }
                         if (!foundPilot && (!data.getPlayer().hasPermission("movecraft.bypasslock"))) {
-                            fail(I18nSupport
-                                         .getInternationalisedString("Not one of the registered pilots on this craft"));
+                            fail(i18n.get("Not one of the registered pilots on this craft"));
                         }
                     }
                 }
             }
 
             if (isForbiddenBlock(testID, testData)) {
-                fail(I18nSupport.getInternationalisedString("Detection - Forbidden block found") +
-                     String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(testID, testData, true),
+                fail(i18n.get("Detection - Forbidden block found") +
+                     String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(testMaterial, testData),
                                    x, y, z));
             } else if (isAllowedBlock(testID, testData)) {
                 //check for double chests
@@ -175,7 +191,7 @@ public class DetectionTask extends AsyncTask {
                         foundDoubleChest = true;
                     }
                     if (foundDoubleChest) {
-                        fail(I18nSupport.getInternationalisedString("Detection - ERROR: Double chest found"));
+                        fail(i18n.get("Detection - ERROR: Double chest found"));
                     }
                 }
                 //check for double trapped chests
@@ -194,7 +210,7 @@ public class DetectionTask extends AsyncTask {
                         foundDoubleChest = true;
                     }
                     if (foundDoubleChest) {
-                        fail(I18nSupport.getInternationalisedString("Detection - ERROR: Double chest found"));
+                        fail(i18n.get("Detection - ERROR: Double chest found"));
                     }
                 }
 
@@ -206,22 +222,20 @@ public class DetectionTask extends AsyncTask {
                     p = data.getPlayer();
                 }
                 if (p != null) {
-                    if (Movecraft.getInstance().getWorldGuardPlugin() != null &&
-                        Movecraft.getInstance().getWGCustomFlagsPlugin() != null &&
-                        Settings.WGCustomFlagsUsePilotFlag) {
-                        LocalPlayer lp = Movecraft.getInstance().getWorldGuardPlugin().wrapPlayer(p);
-                        WGCustomFlagsUtils WGCFU = new WGCustomFlagsUtils();
-                        if (!WGCFU.validateFlag(loc, Movecraft.FLAG_PILOT, lp)) {
-                            fail(String.format(
-                                    I18nSupport.getInternationalisedString("WGCustomFlags - Detection Failed") +
-                                    " @ %d,%d,%d", x, y, z));
+                    if (plugin.getWorldGuardPlugin() != null &&
+                        plugin.getWGCustomFlagsPlugin() != null &&
+                        settings.WGCustomFlagsUsePilotFlag) {
+                        LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
+                        if (!WGCustomFlagsUtils
+                                .validateFlag(plugin.getWorldGuardPlugin(), loc, plugin.FLAG_PILOT, lp)) {
+                            fail(String.format(i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d", x, y, z));
                         }
                     }
 
                     if (this.townyEnabled) {
                         TownBlock townBlock = TownyUtils.getTownBlock(loc);
                         if (townBlock != null && !this.townBlockSet.contains(townBlock)) {
-                            if (TownyUtils.validateCraftMoveEvent(p, loc, this.townyWorld)) {
+                            if (TownyUtils.validateCraftMoveEvent(plugin.getTownyPlugin(), p, loc, this.townyWorld)) {
                                 this.townBlockSet.add(townBlock);
                             } else {
                                 int tY = loc.getBlockY();
@@ -247,27 +261,25 @@ public class DetectionTask extends AsyncTask {
                                             failed = true;
                                         }
                                         if (failed) {
-                                            if (Movecraft.getInstance().getWorldGuardPlugin() != null &&
-                                                Movecraft.getInstance().getWGCustomFlagsPlugin() != null &&
-                                                Settings.WGCustomFlagsUsePilotFlag) {
-                                                LocalPlayer lp = Movecraft.getInstance().getWorldGuardPlugin()
-                                                                          .wrapPlayer(p);
-                                                ApplicableRegionSet regions = Movecraft.getInstance()
-                                                                                       .getWorldGuardPlugin()
-                                                                                       .getRegionManager(loc.getWorld())
-                                                                                       .getApplicableRegions(loc);
+                                            if (plugin.getWorldGuardPlugin() != null &&
+                                                plugin.getWGCustomFlagsPlugin() != null &&
+                                                settings.WGCustomFlagsUsePilotFlag) {
+                                                LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
+                                                ApplicableRegionSet regions = plugin.getWorldGuardPlugin()
+                                                                                    .getRegionManager(loc.getWorld())
+                                                                                    .getApplicableRegions(loc);
                                                 if (regions.size() != 0) {
-                                                    WGCustomFlagsUtils WGCFU = new WGCustomFlagsUtils();
-                                                    if (WGCFU.validateFlag(loc, Movecraft.FLAG_PILOT, lp)) {
+                                                    if (WGCustomFlagsUtils
+                                                            .validateFlag(plugin.getWorldGuardPlugin(), loc,
+                                                                          plugin.FLAG_PILOT, lp)) {
                                                         failed = false;
                                                     }
                                                 }
                                             }
                                         }
                                         if (failed) {
-                                            fail(String.format(
-                                                    I18nSupport.getInternationalisedString("Towny - Detection Failed") +
-                                                    " %s @ %d,%d,%d", town.getName(), x, y, z));
+                                            fail(String.format(i18n.get("Towny - Detection Failed") + " %s @ %d,%d,%d",
+                                                               town.getName(), x, y, z));
                                         }
                                     }
                                 }
@@ -277,18 +289,15 @@ public class DetectionTask extends AsyncTask {
                 }
 
                 addToBlockList(workingLocation);
-                Integer blockID = testID;
-                Integer dataID = testData;
-                Integer shiftedID = (blockID << 4) + dataID + 10000;
-                for (List<Integer> flyBlockDef : dFlyBlocks.keySet()) {
-                    if (flyBlockDef.contains(blockID) || flyBlockDef.contains(shiftedID)) {
+                for (MaterialDataPredicate flyBlockDef : dFlyBlocks.keySet()) {
+                    if (flyBlockDef.checkBlock(testBlock)) {
                         addToBlockCount(flyBlockDef);
                     } else {
                         addToBlockCount(null);
                     }
                 }
 
-                if (isWithinLimit(blockList.size(), 0, maxSize, true)) {
+                if (isWithinLimit(blockList.size(), new IntRange(0, sizeRange.max), true)) {
 
                     addToDetectionStack(workingLocation);
 
@@ -298,33 +307,19 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private boolean isAllowedBlock(int test, int testData) {
-
-        for (int i : data.getAllowedBlocks()) {
-            if ((i == test) || (i == (test << 4) + testData + 10000)) {
-                return true;
-            }
-        }
-
-        return false;
+    private boolean isAllowedBlock(int test, byte testData) {
+        return data.getAllowedBlocks().check(new MaterialData(test, testData));
     }
 
-    private boolean isForbiddenBlock(int test, int testData) {
-
-        for (int i : data.getForbiddenBlocks()) {
-            if ((i == test) || (i == (test << 4) + testData + 10000)) {
-                return true;
-            }
-        }
-
-        return false;
+    private boolean isForbiddenBlock(int test, byte testData) {
+        return data.getForbiddenBlocks().check(new MaterialData(test, testData));
     }
 
     public DetectionTaskData getData() {
         return data;
     }
 
-    private boolean notVisited(MovecraftLocation l, Set<MovecraftLocation> locations) {
+    private boolean notVisited(BlockVec l, Set<BlockVec> locations) {
         if (locations.contains(l)) {
             return false;
         } else {
@@ -333,25 +328,20 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private void addToBlockList(MovecraftLocation l) {
+    private void addToBlockList(BlockVec l) {
         blockList.add(l);
     }
 
-    private void addToDetectionStack(MovecraftLocation l) {
+    private void addToDetectionStack(BlockVec l) {
         blockStack.push(l);
     }
 
-    private void addToBlockCount(List<Integer> id) {
-        Integer count = blockTypeCount.get(id);
-
-        if (count == null) {
-            count = 0;
-        }
-
+    private void addToBlockCount(MaterialDataPredicate id) {
+        int count = Optional.fromNullable(blockTypeCount.get(id)).or(0);
         blockTypeCount.put(id, count + 1);
     }
 
-    private void detectSurrounding(MovecraftLocation l) {
+    private void detectSurrounding(BlockVec l) {
         int x = l.x;
         int y = l.y;
         int z = l.z;
@@ -373,7 +363,7 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private void calculateBounds(MovecraftLocation l) {
+    private void calculateBounds(BlockVec l) {
         if (maxX == null || l.x > maxX) {
             maxX = l.x;
         }
@@ -394,13 +384,13 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private boolean isWithinLimit(int size, int min, int max, boolean continueOver) {
-        if (size < min) {
-            fail(String.format(I18nSupport.getInternationalisedString("Detection - Craft too small"), min) +
+    private boolean isWithinLimit(int size, IntRange sizeRange, boolean continueOver) {
+        if (size < sizeRange.min) {
+            fail(String.format(i18n.get("Detection - Craft too small"), sizeRange.min) +
                  String.format("\nBlocks found: %d", size));
             return false;
-        } else if ((!continueOver && size > max) || (continueOver && size > (max + 1000))) {
-            fail(String.format(I18nSupport.getInternationalisedString("Detection - Craft too large"), max) +
+        } else if ((!continueOver && size > sizeRange.max) || (continueOver && size > (sizeRange.max + 1000))) {
+            fail(String.format(i18n.get("Detection - Craft too large"), sizeRange.max) +
                  String.format("\nBlocks found: %d", size));
             return false;
         } else {
@@ -408,69 +398,61 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private MovecraftLocation[] finaliseBlockList(Set<MovecraftLocation> blockSet) {
-        //MovecraftLocation[] finalList=blockSet.toArray( new MovecraftLocation[1] );
-        ArrayList<MovecraftLocation> finalList = new ArrayList<>();
+    private BlockVec[] finaliseBlockList(Set<BlockVec> blockSet) {
+        //BlockVec[] finalList=blockSet.toArray( new BlockVec[1] );
+        ArrayList<BlockVec> finalList = new ArrayList<>();
 
         // Sort the blocks from the bottom up to minimize lower altitude block updates
         for (int posx = data.getMinX(); posx <= this.maxX; posx++) {
             for (int posz = data.getMinZ(); posz <= this.maxZ; posz++) {
                 for (int posy = this.minY; posy <= this.maxY; posy++) {
-                    MovecraftLocation test = new MovecraftLocation(posx, posy, posz);
+                    BlockVec test = new BlockVec(posx, posy, posz);
                     if (blockSet.contains(test)) finalList.add(test);
                 }
             }
         }
-        return finalList.toArray(new MovecraftLocation[1]);
+        return finalList.toArray(new BlockVec[1]);
     }
 
-    private boolean confirmStructureRequirements(Map<List<Integer>, List<Double>> flyBlocks,
-                                                 Map<List<Integer>, Integer> countData)
+    private boolean confirmStructureRequirements(Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks,
+                                                 Map<MaterialDataPredicate, Integer> countData, int total)
     {
         if (getCraft().getType().getRequireWaterContact()) {
             if (!data.getWaterContact()) {
-                fail(I18nSupport
-                             .getInternationalisedString("Detection - Failed - Water contact required but not found"));
+                fail(i18n.get("Detection - Failed - Water contact required but not found"));
                 return false;
             }
         }
-        for (Map.Entry<List<Integer>, List<Double>> entry : flyBlocks.entrySet()) {
-            Integer numberOfBlocks = countData.get(entry.getKey());
 
-            if (numberOfBlocks == null) {
-                numberOfBlocks = 0;
-            }
+        for (Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
+            MaterialDataPredicate predicate = entry.getKey();
+            List<CraftType.Constraint> constraints = entry.getValue();
+            int count = Optional.fromNullable(countData.get(predicate)).or(0);
+            double percentage = ((double) count / total) * 100;
+            String name = Joiner.on(' ').join(BlockNames.materialDataPredicateNames(entry.getKey()));
 
-            float blockPercentage = (((float) numberOfBlocks / data.getBlockList().length) * 100);
-            Double minPercentage = entry.getValue().get(0);
-            Double maxPercentage = entry.getValue().get(1);
-            String blockName = BlockNames.itemName(entry.getKey().get(0));
+            for (CraftType.Constraint constraint : constraints) {
+                int exactBound = constraint.bound.asExact(total);
+                double ratioBound = constraint.bound.asRatio(total);
 
-            if (minPercentage < 10000.0) {
-                if (blockPercentage < minPercentage) {
-                    fail(String.format(
-                            I18nSupport.getInternationalisedString("Not enough flyblock") + ": %s %.2f%% < %.2f%%",
-                            blockName, blockPercentage, minPercentage));
-                    return false;
-                }
-            } else {
-                if (numberOfBlocks < entry.getValue().get(0) - 10000.0) {
-                    fail(String.format(I18nSupport.getInternationalisedString("Not enough flyblock") + ": %s %d < %d",
-                                       blockName, numberOfBlocks, entry.getValue().get(0).intValue() - 10000));
-                    return false;
-                }
-            }
-            if (maxPercentage < 10000.0) {
-                if (blockPercentage > maxPercentage) {
-                    fail(String.format(
-                            I18nSupport.getInternationalisedString("Too much flyblock") + ": %s %.2f%% > %.2f%%",
-                            blockName, blockPercentage, maxPercentage));
-                    return false;
-                }
-            } else {
-                if (numberOfBlocks > entry.getValue().get(1) - 10000.0) {
-                    fail(String.format(I18nSupport.getInternationalisedString("Too much flyblock") + ": %s %d > %d",
-                                       blockName, numberOfBlocks, entry.getValue().get(1).intValue() - 10000));
+                if (!constraint.isSatisfiedBy(count, total)) {
+                    if (constraint.isUpper) {
+                        if (constraint.bound.isExact()) {
+                            fail(String.format(i18n.get("Not enough flyblock") + " (%d < %d) : %s", count, exactBound,
+                                               name));
+                        } else {
+                            fail(String.format(i18n.get("Not enough flyblock") + " (%.2f%% < %.2f%%) : %s", percentage,
+                                               ratioBound * 100.0));
+                        }
+                    } else {
+                        if (constraint.bound.isExact()) {
+                            fail(String.format(i18n.get("Too much flyblock") + " (%d > %d) : %s", count, exactBound,
+                                               name));
+                        } else {
+                            fail(String.format(i18n.get("Too much flyblock") + " (%.2f%% > %.2f%%) : %s", percentage,
+                                               ratioBound * 100.0));
+                        }
+                    }
                     return false;
                 }
             }

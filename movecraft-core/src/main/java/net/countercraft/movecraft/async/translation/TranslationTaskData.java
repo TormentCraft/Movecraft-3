@@ -17,10 +17,11 @@
 
 package net.countercraft.movecraft.async.translation;
 
+import net.countercraft.movecraft.api.BlockVec;
+import net.countercraft.movecraft.api.IntRange;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
-import net.countercraft.movecraft.api.MovecraftLocation;
 
 public class TranslationTaskData {
     private final int dx;
@@ -28,18 +29,17 @@ public class TranslationTaskData {
     private final int dz;
     private boolean failed = false;
     private String failMessage;
-    private MovecraftLocation[] blockList;
+    private BlockVec[] blockList;
     private MapUpdateCommand[] updates;
     private EntityUpdateCommand[] entityUpdates;
     private ItemDropUpdateCommand[] itemDropUpdates;
     private int[][][] hitbox;
     private int minX, minZ;
-    private final int maxHeight;
-    private final int minHeight;
+    public final IntRange heightRange;
     private boolean collisionExplosion;
 
-    public TranslationTaskData(int dx, int dz, int dy, MovecraftLocation[] blockList, int[][][] hitbox, int minZ,
-                               int minX, int maxHeight, int minHeight)
+    public TranslationTaskData(int dx, int dz, int dy, BlockVec[] blockList, int[][][] hitbox, int minZ, int minX,
+                               IntRange heightRange)
     {
         this.dx = dx;
         this.dz = dz;
@@ -48,8 +48,7 @@ public class TranslationTaskData {
         this.hitbox = hitbox;
         this.minZ = minZ;
         this.minX = minX;
-        this.maxHeight = maxHeight;
-        this.minHeight = minHeight;
+        this.heightRange = heightRange;
     }
 
     public int getDx() {
@@ -93,11 +92,11 @@ public class TranslationTaskData {
         this.failMessage = failMessage;
     }
 
-    public MovecraftLocation[] getBlockList() {
+    public BlockVec[] getBlockList() {
         return blockList;
     }
 
-    public void setBlockList(MovecraftLocation[] blockList) {
+    public void setBlockList(BlockVec[] blockList) {
         this.blockList = blockList;
     }
 
@@ -139,14 +138,6 @@ public class TranslationTaskData {
 
     public void setMinZ(int minZ) {
         this.minZ = minZ;
-    }
-
-    public int getMinHeight() {
-        return minHeight;
-    }
-
-    public int getMaxHeight() {
-        return maxHeight;
     }
 
     public ItemDropUpdateCommand[] getItemDropUpdateCommands() {

@@ -17,11 +17,11 @@
 
 package net.countercraft.movecraft.utils;
 
-import net.countercraft.movecraft.api.MovecraftLocation;
+import net.countercraft.movecraft.api.BlockVec;
 
 public final class BoundingBoxUtils {
 
-    public static int[][][] formBoundingBox(MovecraftLocation[] blockList, Integer minX, Integer maxX, Integer minZ,
+    public static int[][][] formBoundingBox(BlockVec[] blockList, Integer minX, Integer maxX, Integer minZ,
                                             Integer maxZ)
     {
         int sizeX = (maxX - minX) + 1;
@@ -29,7 +29,7 @@ public final class BoundingBoxUtils {
 
         int[][][] polygonalBox = new int[sizeX][][];
 
-        for (MovecraftLocation l : blockList) {
+        for (BlockVec l : blockList) {
             if (polygonalBox[l.x - minX] == null) {
                 polygonalBox[l.x - minX] = new int[sizeZ][];
             }

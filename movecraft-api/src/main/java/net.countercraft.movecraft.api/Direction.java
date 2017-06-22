@@ -1,5 +1,6 @@
 package net.countercraft.movecraft.api;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import org.bukkit.block.Sign;
 
@@ -114,5 +115,18 @@ public final class Direction {
         if (rawData == ((byte) 0x2)) return SOUTH;//south
         if (rawData == ((byte) 0x5)) return WEST;//west
         return OFF;
+    }
+
+    @Override public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Direction direction = (Direction) o;
+        return x == direction.x &&
+               y == direction.y &&
+               z == direction.z;
+    }
+
+    @Override public int hashCode() {
+        return Objects.hashCode(x, y, z);
     }
 }

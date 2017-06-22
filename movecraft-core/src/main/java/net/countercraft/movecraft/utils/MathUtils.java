@@ -17,13 +17,13 @@
 
 package net.countercraft.movecraft.utils;
 
-import net.countercraft.movecraft.api.MovecraftLocation;
+import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Rotation;
 import org.bukkit.Location;
 
 public final class MathUtils {
 
-    public static boolean playerIsWithinBoundingPolygon(int[][][] box, int minX, int minZ, MovecraftLocation l) {
+    public static boolean playerIsWithinBoundingPolygon(int[][][] box, int minX, int minZ, BlockVec l) {
 
         if (l.x >= minX && l.x < (minX + box.length)) {
             // PLayer is within correct X boundary
@@ -48,11 +48,11 @@ public final class MathUtils {
         return false;
     }
 
-    public static MovecraftLocation bukkit2MovecraftLoc(Location l) {
-        return new MovecraftLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+    public static BlockVec bukkit2MovecraftLoc(Location l) {
+        return new BlockVec(l.getBlockX(), l.getBlockY(), l.getBlockZ());
     }
 
-    public static MovecraftLocation rotateVec(Rotation r, MovecraftLocation l) {
+    public static BlockVec rotateVec(Rotation r, BlockVec l) {
         double theta;
         if (r == Rotation.CLOCKWISE) {
             theta = 0.5 * Math.PI;
@@ -63,7 +63,7 @@ public final class MathUtils {
         int x = (int) Math.round((l.x * Math.cos(theta)) + (l.z * (-1 * Math.sin(theta))));
         int z = (int) Math.round((l.x * Math.sin(theta)) + (l.z * Math.cos(theta)));
 
-        return new MovecraftLocation(x, l.y, z);
+        return new BlockVec(x, l.y, z);
     }
 
     public static double[] rotateVec(Rotation r, double x, double z) {

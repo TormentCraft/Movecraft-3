@@ -17,9 +17,9 @@
 
 package net.countercraft.movecraft.craft;
 
-import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.api.BlockVec;
+import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.api.MovecraftLocation;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -28,10 +28,12 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,18 +47,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public final class CraftManager implements net.countercraft.movecraft.api.CraftManager {
-    private static final CraftManager ourInstance = new CraftManager();
+    private final Settings settings;
+    private final I18nSupport i18nSupport;
+    private final Plugin plugin;
     private CraftType[] craftTypes;
+
     private final Map<World, Set<Craft>> craftList = new ConcurrentHashMap<>();
     private final Map<Player, Craft> craftPlayerIndex = new HashMap<>();
     private final Map<Player, BukkitTask> releaseEvents = new HashMap<>();
 
-    public static CraftManager getInstance() {
-        return ourInstance;
-    }
-
-    private CraftManager() {
-        initCraftTypes();
+    public CraftManager(Settings settings, I18nSupport i18nSupport, Plugin plugin) {
+        this.settings = settings;
+        this.i18nSupport = i18nSupport;
+        this.plugin = plugin;
     }
 
     public CraftType[] getCraftTypes() {
@@ -64,20 +67,20 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     }
 
     public void initCraftTypes() {
-        File craftsFile = new File(Movecraft.getInstance().getDataFolder().getAbsolutePath() + "/types");
+        File craftsFile = new File(plugin.getDataFolder().getAbsolutePath() + "/types");
 
         if (!craftsFile.exists()) {
             craftsFile.mkdirs();
-            Movecraft.getInstance().saveResource("types/airship.craft", false);
-            Movecraft.getInstance().saveResource("types/airskiff.craft", false);
-            Movecraft.getInstance().saveResource("types/BigAirship.craft", false);
-            Movecraft.getInstance().saveResource("types/BigSubAirship.craft", false);
-            Movecraft.getInstance().saveResource("types/elevator.craft", false);
-            Movecraft.getInstance().saveResource("types/LaunchTorpedo.craft", false);
-            Movecraft.getInstance().saveResource("types/Ship.craft", false);
-            Movecraft.getInstance().saveResource("types/SubAirship.craft", false);
-            Movecraft.getInstance().saveResource("types/Submarine.craft", false);
-            Movecraft.getInstance().saveResource("types/Turret.craft", false);
+            plugin.saveResource("types/airship.craft", false);
+            plugin.saveResource("types/airskiff.craft", false);
+            plugin.saveResource("types/BigAirship.craft", false);
+            plugin.saveResource("types/BigSubAirship.craft", false);
+            plugin.saveResource("types/elevator.craft", false);
+            plugin.saveResource("types/LaunchTorpedo.craft", false);
+            plugin.saveResource("types/Ship.craft", false);
+            plugin.saveResource("types/SubAirship.craft", false);
+            plugin.saveResource("types/Submarine.craft", false);
+            plugin.saveResource("types/Turret.craft", false);
         }
 
         HashSet<CraftType> craftTypesSet = new HashSet<>();
@@ -88,21 +91,32 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
                 if (file.getName().endsWith(".craft")) {
                     String name = file.getName();
                     String newName = name.substring(0, name.length() - ".craft".length()) + ".yaml";
-                    Movecraft.getInstance().getLogger()
-                             .warning("\"craft\" extension is deprecated, please rename " + name + " to " + newName);
+                    plugin.getLogger()
+                          .warning("\"craft\" extension is deprecated, please rename " + name + " to " + newName);
                 }
 
-                CraftType type = new CraftType(file);
-                craftTypesSet.add(type);
-                foundCraft = true;
+                try {
+                    CraftType type = new CraftType();
+                    type.parseCraftDataFromFile(file, settings.SinkRateTicks);
+                    craftTypesSet.add(type);
+                    foundCraft = true;
+                } catch (FileNotFoundException e) {
+                    plugin.getLogger().log(Level.SEVERE,
+                                           String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
+                                                         file.getAbsolutePath()));
+                } catch (CraftType.ParseException e) {
+                    plugin.getLogger().log(Level.SEVERE,
+                                           String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
+                                                         file.getAbsolutePath()));
+                }
             }
         }
         if (!foundCraft) {
-            Movecraft.getInstance().getLogger().log(Level.SEVERE, "ERROR: NO CRAFTS FOUND!!!");
+            plugin.getLogger().log(Level.SEVERE, "ERROR: NO CRAFTS FOUND!!!");
         }
         craftTypes = craftTypesSet.toArray(new CraftType[1]);
-        Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
-                I18nSupport.getInternationalisedString("Startup - Number of craft files loaded"), craftTypes.length));
+        plugin.getLogger().log(Level.INFO, String.format(i18nSupport.get("Startup - Number of craft files loaded"),
+                                                         craftTypes.length));
     }
 
     public void addCraft(Craft c, Player p) {
@@ -132,17 +146,18 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         craftList.get(c.getW()).remove(c);
         Player pilot = getPlayerFromCraft(c);
         if (pilot != null) {
-            pilot.sendMessage(I18nSupport.getInternationalisedString("Release - Craft has been released message"));
-            Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
-                    I18nSupport.getInternationalisedString("Release - Player has released a craft console"),
-                    c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,
-                    c.getMinX(), c.getMinZ()));
+            pilot.sendMessage(i18nSupport.get("Release - Craft has been released message"));
+            plugin.getLogger().log(Level.INFO,
+                                   String.format(i18nSupport.get("Release - Player has released a craft console"),
+                                                 c.getNotificationPlayer().getName(), c.getType().getCraftName(),
+                                                 c.getBlockList().length, c.getMinX(), c.getMinZ()));
         } else {
-            Movecraft.getInstance().getLogger().log(Level.INFO, String.format(I18nSupport.getInternationalisedString(
-                    "NULL Player has released a craft of type %s with size %d at coordinates : %d x , %d z"),
-                                                                              c.getType().getCraftName(),
-                                                                              c.getBlockList().length, c.getMinX(),
-                                                                              c.getMinZ()));
+            plugin.getLogger().log(Level.INFO, String.format(i18nSupport
+                                                                     .get("NULL Player has released a craft of type " +
+                                                                          "%s with size %d at coordinates : %d x , %d" +
+                                                                          " z"),
+                                                             c.getType().getCraftName(), c.getBlockList().length,
+                                                             c.getMinX(), c.getMinZ()));
         }
         craftPlayerIndex.remove(pilot);
 
@@ -154,16 +169,16 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
             return false;
         }
         BlockBreakEvent be = new BlockBreakEvent(block, pilot);
-        Movecraft.getInstance().getServer().getPluginManager().callEvent(be);
+        plugin.getServer().getPluginManager().callEvent(be);
         return !be.isCancelled();
     }
 
     private void destroySnowOnPilot(Player pilot, Craft craft) {
         if (pilot == null || !pilot.isOnline()) return;
 
-        Set<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
-        for (MovecraftLocation block : craftBlocks) {
-            MovecraftLocation test = new MovecraftLocation(block.x, block.y + 1, block.z);
+        Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        for (BlockVec block : craftBlocks) {
+            BlockVec test = new BlockVec(block.x, block.y + 1, block.z);
             if (!craftBlocks.contains(test)) {
                 Block testBlock = craft.getW().getBlockAt(test.x, test.y, test.z);
 
@@ -183,16 +198,16 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
             return;
         }
 
-        Set<MovecraftLocation> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
         int blockedBroken = 0;
-        for (MovecraftLocation block : craftBlocks) {
+        for (BlockVec block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
                         //No diagonals
                         if ((z != 0 && x != 0) || (x == 0 && y == 0 && z == 0)) continue;
 
-                        MovecraftLocation test = new MovecraftLocation(block.x + x, block.y + y, block.z + z);
+                        BlockVec test = new BlockVec(block.x + x, block.y + y, block.z + z);
                         if (!craftBlocks.contains(test)) {
                             Block testBlock = craft.getW().getBlockAt(test.x, test.y, test.z);
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||
@@ -265,12 +280,11 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     public void removePlayerFromCraft(Craft c) {
         if (getPlayerFromCraft(c) != null) {
             removeReleaseTask(c);
-            getPlayerFromCraft(c)
-                    .sendMessage(I18nSupport.getInternationalisedString("Release - Craft has been released message"));
-            Movecraft.getInstance().getLogger().log(Level.INFO, String.format(
-                    I18nSupport.getInternationalisedString("Release - Player has released a craft console"),
-                    c.getNotificationPlayer().getName(), c.getType().getCraftName(), c.getBlockList().length,
-                    c.getMinX(), c.getMinZ()));
+            getPlayerFromCraft(c).sendMessage(i18nSupport.get("Release - Craft has been released message"));
+            plugin.getLogger().log(Level.INFO,
+                                   String.format(i18nSupport.get("Release - Player has released a craft console"),
+                                                 c.getNotificationPlayer().getName(), c.getType().getCraftName(),
+                                                 c.getBlockList().length, c.getMinX(), c.getMinZ()));
             Player p = getPlayerFromCraft(c);
             craftPlayerIndex.put(null, c);
             craftPlayerIndex.remove(p);
@@ -284,13 +298,13 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     public void addReleaseTask(final Craft c) {
         Player p = getPlayerFromCraft(c);
         if (!getReleaseEvents().containsKey(p)) {
-            p.sendMessage(I18nSupport.getInternationalisedString("Release - Player has left craft"));
+            p.sendMessage(i18nSupport.get("Release - Player has left craft"));
             BukkitTask releaseTask = new BukkitRunnable() {
                 @Override public void run() {
                     removeCraft(c);
                 }
-            }.runTaskLater(Movecraft.getInstance(), (20 * 15));
-            CraftManager.getInstance().getReleaseEvents().put(p, releaseTask);
+            }.runTaskLater(plugin, (20 * 15));
+            getReleaseEvents().put(p, releaseTask);
         }
     }
 
