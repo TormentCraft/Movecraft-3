@@ -90,13 +90,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.palmergames</groupId>
-            <artifactId>Towny</artifactId>
-            <version>LATEST</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/Towny.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>com.mewin</groupId>
             <artifactId>WGCustomFlags</artifactId>
             <version>LATEST</version>

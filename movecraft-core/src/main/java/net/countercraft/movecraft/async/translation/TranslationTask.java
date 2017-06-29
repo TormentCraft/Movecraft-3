@@ -17,9 +17,6 @@
 
 package net.countercraft.movecraft.async.translation;
 
-import com.palmergames.bukkit.towny.object.Town;
-import com.palmergames.bukkit.towny.object.TownBlock;
-import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
@@ -35,8 +32,6 @@ import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.utils.TownyUtils;
-import net.countercraft.movecraft.utils.TownyWorldHeightLimits;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.apache.commons.collections.ListUtils;
 import org.bukkit.Location;
@@ -301,25 +296,6 @@ public class TranslationTask extends AsyncTask {
         boolean townyEnabled = plugin.getTownyPlugin() != null;
         boolean validateTownyExplosion = false;
 
-        Set<TownBlock> townBlockSet = new HashSet<>();
-        TownyWorld townyWorld = null;
-        TownyWorldHeightLimits townyWorldHeightLimits = null;
-
-        if (townyEnabled && settings.TownyBlockMoveOnSwitchPerm) {
-            townyWorld = TownyUtils.getTownyWorld(getCraft().getW());
-            if (townyWorld != null) {
-                townyEnabled = townyWorld.isUsingTowny();
-                if (townyEnabled) {
-                    townyWorldHeightLimits = TownyUtils.getWorldLimits(settings, getCraft().getW());
-                    if (getCraft().getType().getCollisionExplosion() != 0.0F) {
-                        validateTownyExplosion = true;
-                    }
-                }
-            }
-        } else {
-            townyEnabled = false;
-        }
-
         int craftMinY = 0;
         int craftMaxY = 0;
         boolean clearNewData = false;
@@ -365,67 +341,6 @@ public class TranslationTask extends AsyncTask {
                         fail(String.format(i18n.get("WGCustomFlags - Translation Failed") + " @ %d,%d,%d", oldLoc.x,
                                            oldLoc.y, oldLoc.z));
                         break;
-                    }
-                }
-                if (townyEnabled) {
-                    TownBlock townBlock = TownyUtils.getTownBlock(plugLoc);
-                    if (townBlock != null && !townBlockSet.contains(townBlock)) {
-                        if (validateTownyExplosion) {
-                            if (!explosionBlockedByTowny) {
-                                if (!TownyUtils.validateExplosion(townBlock)) {
-                                    explosionBlockedByTowny = true;
-                                }
-                            }
-                        }
-                        if (TownyUtils.validateCraftMoveEvent(plugin.getTownyPlugin(), p, plugLoc, townyWorld)) {
-                            townBlockSet.add(townBlock);
-                        } else {
-                            int y = plugLoc.getBlockY();
-                            boolean oChange = false;
-                            if (craftMinY > y) {
-                                craftMinY = y;
-                                oChange = true;
-                            }
-                            if (craftMaxY < y) {
-                                craftMaxY = y;
-                                oChange = true;
-                            }
-                            if (oChange) {
-                                Town town = TownyUtils.getTown(townBlock);
-                                if (town != null) {
-                                    Location locSpawn = TownyUtils.getTownSpawn(townBlock);
-                                    boolean failed = false;
-                                    if (locSpawn != null) {
-                                        if (!townyWorldHeightLimits.validate(y, locSpawn.getBlockY())) {
-                                            failed = true;
-                                        }
-                                    } else {
-                                        failed = true;
-                                    }
-                                    if (failed) {
-                                        if (plugin.getWorldGuardPlugin() != null &&
-                                            plugin.getWGCustomFlagsPlugin() != null &&
-                                            settings.WGCustomFlagsUsePilotFlag) {
-                                            LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
-                                            ApplicableRegionSet regions = plugin.getWorldGuardPlugin()
-                                                                                .getRegionManager(plugLoc.getWorld())
-                                                                                .getApplicableRegions(plugLoc);
-                                            if (regions.size() != 0) {
-                                                if (WGCustomFlagsUtils
-                                                        .validateFlag(plugin.getWorldGuardPlugin(), plugLoc,
-                                                                      plugin.FLAG_MOVE, lp)) {
-                                                    failed = false;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (failed) {
-                                        townName = town.getName();
-                                        moveBlockedByTowny = true;
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -731,7 +646,6 @@ public class TranslationTask extends AsyncTask {
                 data.setCollisionExplosion(false);
                 explosionSet.clear();
                 clearNewData = false;
-                townBlockSet.clear();
                 craftMinY = 0;
                 craftMaxY = 0;
             }

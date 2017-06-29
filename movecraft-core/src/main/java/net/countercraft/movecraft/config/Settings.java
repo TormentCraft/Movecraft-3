@@ -17,18 +17,9 @@
 
 package net.countercraft.movecraft.config;
 
-import net.countercraft.movecraft.utils.TownyWorldHeightLimits;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public final class Settings {
     public boolean IGNORE_RESET = false;
     public boolean Debug = false;
-    public int THREAD_POOL_SIZE = 5;
-    public List<Integer> DATA_BLOCKS;
     public String LOCALE;
     public int PilotTool = 280;
     public boolean CompatibilityMode = false;
@@ -54,19 +45,4 @@ public final class Settings {
     public boolean WGCustomFlagsUseMoveFlag = false;
     public boolean WGCustomFlagsUseRotateFlag = false;
     public boolean WGCustomFlagsUseSinkFlag = false;
-    public boolean TownyBlockMoveOnSwitchPerm = false;
-    public boolean TownyBlockSinkOnNoPVP = false;
-    public Map<String, TownyWorldHeightLimits> TownProtectionHeightLimits;
-
-    public Set<String> SiegeName;
-    public Map<String, String> SiegeRegion;
-    public Map<String, ArrayList<String>> SiegeCraftsToWin;
-    public Map<String, Integer> SiegeCost;
-    public Map<String, Boolean> SiegeDoubleCost;
-    public Map<String, Integer> SiegeIncome;
-    public Map<String, Integer> SiegeScheduleStart;
-    public Map<String, Integer> SiegeScheduleEnd;
-    public Map<String, String> SiegeControlRegion;
-    public Map<String, Integer> SiegeDelay;
-    public Map<String, Integer> SiegeDuration;
 }

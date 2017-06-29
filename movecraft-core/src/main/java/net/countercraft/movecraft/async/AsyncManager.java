@@ -19,8 +19,6 @@ package net.countercraft.movecraft.async;
 
 import at.pavlov.cannons.cannon.Cannon;
 import com.google.common.base.Optional;
-import com.palmergames.bukkit.towny.object.TownBlock;
-import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -47,7 +45,6 @@ import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateManager;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.apache.commons.collections.ListUtils;
 import org.bukkit.Bukkit;
@@ -638,34 +635,11 @@ public final class AsyncManager extends BukkitRunnable {
         }
     }
 
-    private Location isTownyPlotPVPEnabled(BlockVec loc, World w, Set<TownBlock> townBlockSet) {
-        Location plugLoc = new Location(w, loc.x, loc.y, loc.z);
-        TownBlock townBlock = TownyUtils.getTownBlock(plugLoc);
-        if (townBlock != null && !townBlockSet.contains(townBlock)) {
-            if (TownyUtils.validatePVP(townBlock)) {
-                townBlockSet.add(townBlock);
-                return null;
-            } else {
-                return plugLoc;
-            }
-        } else {
-            return null;
-        }
-    }
-
     public void processSinking() {
         for (World w : Bukkit.getWorlds()) {
             if (w != null && craftManager.getCraftsInWorld(w) != null) {
-                boolean townyEnabled = false;
-                if (plugin.getTownyPlugin() != null && settings.TownyBlockSinkOnNoPVP) {
-                    TownyWorld townyWorld = TownyUtils.getTownyWorld(w);
-                    if (townyWorld != null) {
-                        townyEnabled = townyWorld.isUsingTowny();
-                    }
-                }
                 // check every few seconds for every craft to see if it should be sinking
                 for (Craft pcraft : craftManager.getCraftsInWorld(w)) {
-                    Set<TownBlock> townBlockSet = new HashSet<>();
                     if (pcraft != null && !pcraft.getSinking()) {
                         if (pcraft.getType().getSinkPercent() != 0.0 && pcraft.isNotProcessing()) {
                             long ticksElapsed = (System.currentTimeMillis() - pcraft.getLastBlockCheck()) / 50;
@@ -683,12 +657,6 @@ public final class AsyncManager extends BukkitRunnable {
                                 for (BlockVec l : pcraft.getBlockList()) {
                                     if (isRegionBlockedPVP(l, w)) regionPVPBlocked = true;
                                     if (!isRegionFlagSinkAllowed(l, w)) sinkingForbiddenByFlag = true;
-                                    if (townyLoc == null && townyEnabled && settings.TownyBlockSinkOnNoPVP) {
-                                        townyLoc = isTownyPlotPVPEnabled(l, w, townBlockSet);
-                                        if (townyLoc != null) {
-                                            sinkingForbiddenByTowny = true;
-                                        }
-                                    }
                                     Integer blockID = w.getBlockAt(l.x, l.y, l.z).getTypeId();
                                     for (MaterialDataPredicate flyBlockDef : pcraft.getType().getFlyBlocks().keySet()) {
                                         if (flyBlockDef.checkBlock(w.getBlockAt(l.x, l.y, l.z))) {
@@ -1128,109 +1096,6 @@ public final class AsyncManager extends BukkitRunnable {
         }
     }
 
-    public void processSiege() {
-        if (plugin.currentSiegeName != null) {
-            long secsElapsed = (System.currentTimeMillis() - lastSiegeNotification) / 1000;
-            if (secsElapsed > 180) {
-                lastSiegeNotification = System.currentTimeMillis();
-                boolean siegeLeaderPilotingShip = false;
-                Player siegeLeader = plugin.getServer().getPlayer(plugin.currentSiegePlayer);
-                if (siegeLeader != null) {
-                    if (craftManager.getCraftByPlayer(siegeLeader) != null) {
-                        for (String tTypeName : settings.SiegeCraftsToWin.get(plugin.currentSiegeName)) {
-                            if (tTypeName.equalsIgnoreCase(
-                                    craftManager.getCraftByPlayer(siegeLeader).getType().getCraftName())) {
-                                siegeLeaderPilotingShip = true;
-                            }
-                        }
-                    }
-                }
-                boolean siegeLeaderShipInRegion = false;
-                int midX = 0;
-                int midY = 0;
-                int midZ = 0;
-                if (siegeLeaderPilotingShip) {
-                    midX = (craftManager.getCraftByPlayer(siegeLeader).getMaxX() +
-                            craftManager.getCraftByPlayer(siegeLeader).getMinX()) / 2;
-                    midY = (craftManager.getCraftByPlayer(siegeLeader).getMaxY() +
-                            craftManager.getCraftByPlayer(siegeLeader).getMinY()) / 2;
-                    midZ = (craftManager.getCraftByPlayer(siegeLeader).getMaxZ() +
-                            craftManager.getCraftByPlayer(siegeLeader).getMinZ()) / 2;
-                    if (plugin.getWorldGuardPlugin().getRegionManager(siegeLeader.getWorld())
-                              .getRegion(settings.SiegeRegion.get(plugin.currentSiegeName))
-                              .contains(midX, midY, midZ)) {
-                        siegeLeaderShipInRegion = true;
-                    }
-                }
-                long timeLapsed = (System.currentTimeMillis() - plugin.currentSiegeStartTime) / 1000;
-                int timeLeft = (int) (settings.SiegeDuration.get(plugin.currentSiegeName) - timeLapsed);
-                if (timeLeft > 10) {
-                    if (siegeLeaderShipInRegion) {
-                        Bukkit.getServer().broadcastMessage(String.format(
-                                "The Siege of %s is under way. The Siege Flagship is a %s of size %d under the " +
-                                "command of %s at %d, %d, %d. Siege will end in %d minutes", plugin.currentSiegeName,
-                                craftManager.getCraftByPlayer(siegeLeader).getType().getCraftName(),
-                                craftManager.getCraftByPlayer(siegeLeader).getOrigBlockCount(),
-                                siegeLeader.getDisplayName(), midX, midY, midZ, timeLeft / 60));
-                    } else {
-                        Bukkit.getServer().broadcastMessage(String.format(
-                                "The Siege of %s is under way. The Siege Leader, %s, is not in command of a Flagship " +
-                                "within the Siege Region! If they are still not when the duration expires, the siege " +
-                                "will fail! Siege will end in %d minutes", plugin.currentSiegeName,
-                                siegeLeader.getDisplayName(), timeLeft / 60));
-                    }
-                } else {
-                    if (siegeLeaderShipInRegion) {
-                        Bukkit.getServer().broadcastMessage(
-                                String.format("The Siege of %s has succeeded! The forces of %s have been victorious!",
-                                              plugin.currentSiegeName, siegeLeader.getDisplayName()));
-                        ProtectedRegion controlRegion = plugin.getWorldGuardPlugin()
-                                                              .getRegionManager(siegeLeader.getWorld()).getRegion(
-                                        settings.SiegeControlRegion.get(plugin.currentSiegeName));
-                        DefaultDomain newOwner = new DefaultDomain();
-                        newOwner.addPlayer(plugin.currentSiegePlayer);
-                        controlRegion.setOwners(newOwner);
-                        DefaultDomain newMember = new DefaultDomain();
-                        newOwner.addPlayer(plugin.currentSiegePlayer);
-                        controlRegion.setMembers(newMember);
-                    } else {
-                        Bukkit.getServer().broadcastMessage(
-                                String.format("The Siege of %s has failed! The forces of %s have been crushed!",
-                                              plugin.currentSiegeName, siegeLeader.getDisplayName()));
-                    }
-                    plugin.currentSiegeName = null;
-                    plugin.siegeInProgress = false;
-                }
-            }
-        }
-        // and now process payments every morning at 1:01 AM, as long as it has been 23 hours after the last payout
-        long secsElapsed = (System.currentTimeMillis() - lastSiegePayout) / 1000;
-        if (secsElapsed > 23 * 60 * 60) {
-            Calendar rightNow = Calendar.getInstance();
-            int hour = rightNow.get(Calendar.HOUR_OF_DAY);
-            int minute = rightNow.get(Calendar.MINUTE);
-            if ((hour == 1) && (minute == 1)) {
-                lastSiegePayout = System.currentTimeMillis();
-                for (String tSiegeName : settings.SiegeName) {
-                    int payment = settings.SiegeIncome.get(tSiegeName);
-                    for (World tW : plugin.getServer().getWorlds()) {
-                        ProtectedRegion tRegion = plugin.getWorldGuardPlugin().getRegionManager(tW)
-                                                        .getRegion(settings.SiegeControlRegion.get(tSiegeName));
-                        if (tRegion != null) {
-                            for (String tPlayerName : tRegion.getOwners().getPlayers()) {
-                                int share = payment / tRegion.getOwners().getPlayers().size();
-                                plugin.getEconomy().depositPlayer(tPlayerName, share);
-                                plugin.getLogger().log(Level.INFO,
-                                                       String.format("Player %s paid %d for their ownership in %s",
-                                                                     tPlayerName, share, tSiegeName));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     @Override public void run() {
         clearAll();
         processCruise();
@@ -1240,7 +1105,6 @@ public final class AsyncManager extends BukkitRunnable {
         processTNTContactExplosives();
         processFadingBlocks();
         processDetection();
-        //processSiege();
         processAlgorithmQueue();
     }
 

@@ -17,9 +17,6 @@
 
 package net.countercraft.movecraft.async.rotation;
 
-import com.palmergames.bukkit.towny.object.Town;
-import com.palmergames.bukkit.towny.object.TownBlock;
-import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
@@ -34,8 +31,6 @@ import net.countercraft.movecraft.utils.BlockUtils;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MathUtils;
-import net.countercraft.movecraft.utils.TownyUtils;
-import net.countercraft.movecraft.utils.TownyWorldHeightLimits;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.apache.commons.collections.ListUtils;
 import org.bukkit.Location;
@@ -238,20 +233,6 @@ public class RotationTask extends AsyncTask {
         Set<MapUpdateCommand> mapUpdates = new HashSet<>();
         HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<>();
 
-        boolean townyEnabled = plugin.getTownyPlugin() != null;
-        Set<TownBlock> townBlockSet = new HashSet<>();
-        TownyWorld townyWorld = null;
-        TownyWorldHeightLimits townyWorldHeightLimits = null;
-
-        if (townyEnabled && settings.TownyBlockMoveOnSwitchPerm) {
-            townyWorld = TownyUtils.getTownyWorld(getCraft().getW());
-            if (townyWorld != null) {
-                townyEnabled = townyWorld.isUsingTowny();
-                if (townyEnabled) townyWorldHeightLimits = TownyUtils.getWorldLimits(settings, getCraft().getW());
-            }
-        } else {
-            townyEnabled = false;
-        }
         // make the centered block list, and check for a cruise control sign to reset to off
         for (int i = 0; i < blockList.length; i++) {
             centeredBlockList[i] = blockList[i].subtract(originPoint);
@@ -313,62 +294,6 @@ public class RotationTask extends AsyncTask {
                                 .format(i18n.get("WGCustomFlags - Rotation Failed") + " @ %d,%d,%d", blockList[i].x,
                                         blockList[i].y, blockList[i].z);
                         break;
-                    }
-                }
-
-                if (townyEnabled) {
-                    TownBlock townBlock = TownyUtils.getTownBlock(plugLoc);
-                    if (townBlock != null && !townBlockSet.contains(townBlock)) {
-                        if (TownyUtils.validateCraftMoveEvent(plugin.getTownyPlugin(), p, plugLoc, townyWorld)) {
-                            townBlockSet.add(townBlock);
-                        } else {
-                            int y = plugLoc.getBlockY();
-                            boolean oChange = false;
-                            if (craftMinY > y) {
-                                craftMinY = y;
-                                oChange = true;
-                            }
-                            if (craftMaxY < y) {
-                                craftMaxY = y;
-                                oChange = true;
-                            }
-                            if (oChange) {
-                                Town town = TownyUtils.getTown(townBlock);
-                                if (town != null) {
-                                    Location locSpawn = TownyUtils.getTownSpawn(townBlock);
-                                    if (locSpawn != null) {
-                                        if (!townyWorldHeightLimits.validate(y, locSpawn.getBlockY())) {
-                                            failed = true;
-                                        }
-                                    } else {
-                                        failed = true;
-                                    }
-                                    if (failed) {
-                                        if (plugin.getWorldGuardPlugin() != null &&
-                                            plugin.getWGCustomFlagsPlugin() != null &&
-                                            settings.WGCustomFlagsUsePilotFlag) {
-                                            LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
-                                            ApplicableRegionSet regions = plugin.getWorldGuardPlugin()
-                                                                                .getRegionManager(plugLoc.getWorld())
-                                                                                .getApplicableRegions(plugLoc);
-                                            if (regions.size() != 0) {
-                                                if (WGCustomFlagsUtils
-                                                        .validateFlag(plugin.getWorldGuardPlugin(), plugLoc,
-                                                                      plugin.FLAG_ROTATE, lp)) {
-                                                    failed = false;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (failed) {
-                                        failMessage = String
-                                                .format(i18n.get("Towny - Rotation Failed") + " %s @ %d,%d,%d",
-                                                        town.getName(), blockList[i].x, blockList[i].y, blockList[i].z);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }

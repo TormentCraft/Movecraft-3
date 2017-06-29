@@ -36,20 +36,14 @@ import net.countercraft.movecraft.listener.PlayerListener;
 import net.countercraft.movecraft.listener.WorldEditInteractListener;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.MapUpdateManager;
-import net.countercraft.movecraft.utils.TownyUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -132,47 +126,6 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
         settings.TNTContactExplosives = getConfig().getBoolean("TNTContactExplosives", true);
         settings.FadeWrecksAfter = getConfig().getInt("FadeWrecksAfter", 0);
 
-        //load the sieges.yml file
-        File siegesFile = new File(getDataFolder().getAbsolutePath() + "/sieges.yml");
-        InputStream input = null;
-        try {
-            input = new FileInputStream(siegesFile);
-        } catch (FileNotFoundException e) {
-            settings.SiegeName = null;
-            input = null;
-        }
-        if (input != null) {
-            Yaml yaml = new Yaml();
-            Map data = (Map) yaml.load(input);
-            Map<String, Map> siegesMap = (Map<String, Map>) data.get("sieges");
-            settings.SiegeName = siegesMap.keySet();
-
-            settings.SiegeRegion = new HashMap<>();
-            settings.SiegeCraftsToWin = new HashMap<>();
-            settings.SiegeCost = new HashMap<>();
-            settings.SiegeDoubleCost = new HashMap<>();
-            settings.SiegeIncome = new HashMap<>();
-            settings.SiegeScheduleStart = new HashMap<>();
-            settings.SiegeScheduleEnd = new HashMap<>();
-            settings.SiegeControlRegion = new HashMap<>();
-            settings.SiegeDelay = new HashMap<>();
-            settings.SiegeDuration = new HashMap<>();
-            for (Map.Entry<String, Map> entry : siegesMap.entrySet()) {
-                final Map siegeInfo = entry.getValue();
-                final String siegeName = entry.getKey();
-                settings.SiegeRegion.put(siegeName, (String) siegeInfo.get("SiegeRegion"));
-                settings.SiegeCraftsToWin.put(siegeName, (ArrayList<String>) siegeInfo.get("CraftsToWin"));
-                settings.SiegeCost.put(siegeName, (Integer) siegeInfo.get("CostToSiege"));
-                settings.SiegeDoubleCost.put(siegeName, (Boolean) siegeInfo.get("DoubleCostPerOwnedSiegeRegion"));
-                settings.SiegeIncome.put(siegeName, (Integer) siegeInfo.get("DailyIncome"));
-                settings.SiegeScheduleStart.put(siegeName, (Integer) siegeInfo.get("ScheduleStart"));
-                settings.SiegeScheduleEnd.put(siegeName, (Integer) siegeInfo.get("ScheduleEnd"));
-                settings.SiegeControlRegion.put(siegeName, (String) siegeInfo.get("RegionToControl"));
-                settings.SiegeDelay.put(siegeName, (Integer) siegeInfo.get("DelayBeforeStart"));
-                settings.SiegeDuration.put(siegeName, (Integer) siegeInfo.get("SiegeDuration"));
-            }
-            logger.log(Level.INFO, "Siege configuration loaded.");
-        }
         //load up WorldGuard if it's present
 
         //ROK - disable completely since we can't control it.
@@ -184,7 +137,6 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
         if (!(wGPlugin instanceof WorldGuardPlugin)) {
             logger.log(Level.INFO,
                        "Movecraft did not find a compatible version of WorldGuard. Disabling WorldGuard integration");
-            settings.SiegeName = null;
         } else {
             logger.log(Level.INFO, "Found a compatible version of WorldGuard. Enabling WorldGuard integration");
             settings.WorldGuardBlockMoveOnBuildPerm = getConfig().getBoolean("WorldGuardBlockMoveOnBuildPerm", false);
@@ -245,20 +197,6 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
             }
         }
 
-        Plugin tempTownyPlugin = getServer().getPluginManager().getPlugin("Towny");
-        if (tempTownyPlugin instanceof Towny) {
-            logger.log(Level.INFO, "Found a compatible version of Towny. Enabling Towny integration.");
-            townyPlugin = (Towny) tempTownyPlugin;
-            settings.TownProtectionHeightLimits = TownyUtils.loadTownyConfig(getConfig());
-            settings.TownyBlockMoveOnSwitchPerm = getConfig().getBoolean("TownyBlockMoveOnSwitchPerm", false);
-            settings.TownyBlockSinkOnNoPVP = getConfig().getBoolean("TownyBlockSinkOnNoPVP", false);
-            logger.log(Level.INFO, "Settings: TownyBlockMoveOnSwitchPerm - {0}", settings.TownyBlockMoveOnSwitchPerm);
-            logger.log(Level.INFO, "Settings: TownyBlockSinkOnNoPVP - {0}", settings.TownyBlockSinkOnNoPVP);
-        } else {
-            logger.log(Level.INFO,
-                       "Movecraft did not find a compatible version of Towny. Disabling Towny integration.");
-        }
-
         // and now Vault
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
             RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
@@ -269,12 +207,10 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
             } else {
                 logger.log(Level.INFO, "Could not find compatible Vault plugin. Disabling Vault integration.");
                 economy = null;
-                settings.SiegeName = null;
             }
         } else {
             logger.log(Level.INFO, "Could not find compatible Vault plugin. Disabling Vault integration.");
             economy = null;
-            settings.SiegeName = null;
         }
         String[] localisations = {"en", "cz", "nl"};
         for (String s : localisations) {

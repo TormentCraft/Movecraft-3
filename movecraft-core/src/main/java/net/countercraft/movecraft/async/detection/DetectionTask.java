@@ -19,9 +19,6 @@ package net.countercraft.movecraft.async.detection;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.palmergames.bukkit.towny.object.Town;
-import com.palmergames.bukkit.towny.object.TownBlock;
-import com.palmergames.bukkit.towny.object.TownyWorld;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
@@ -35,8 +32,6 @@ import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockNames;
 import net.countercraft.movecraft.utils.BoundingBoxUtils;
-import net.countercraft.movecraft.utils.TownyUtils;
-import net.countercraft.movecraft.utils.TownyWorldHeightLimits;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -74,10 +69,6 @@ public class DetectionTask extends AsyncTask {
 
     private int craftMinY = 0;
     private int craftMaxY = 0;
-    private boolean townyEnabled = false;
-    Set<TownBlock> townBlockSet = new HashSet<>();
-    TownyWorld townyWorld = null;
-    TownyWorldHeightLimits townyWorldHeightLimits = null;
 
     public DetectionTask(Craft c, BlockVec startLocation, IntRange sizeRange, MaterialDataPredicate allowedBlocks,
                          MaterialDataPredicate forbiddenBlocks, Player player, Player notificationPlayer, World w,
@@ -90,17 +81,6 @@ public class DetectionTask extends AsyncTask {
         this.settings = settings;
         this.i18n = i18n;
         data = new DetectionTaskData(w, player, notificationPlayer, allowedBlocks, forbiddenBlocks);
-
-        this.townyEnabled = plugin.getTownyPlugin() != null;
-        if (townyEnabled && settings.TownyBlockMoveOnSwitchPerm) {
-            this.townyWorld = TownyUtils.getTownyWorld(getCraft().getW());
-            if (townyWorld != null) {
-                this.townyEnabled = townyWorld.isUsingTowny();
-                if (townyEnabled) townyWorldHeightLimits = TownyUtils.getWorldLimits(settings, getCraft().getW());
-            }
-        } else {
-            this.townyEnabled = false;
-        }
     }
 
     @Override public void execute() {
@@ -229,61 +209,6 @@ public class DetectionTask extends AsyncTask {
                         if (!WGCustomFlagsUtils
                                 .validateFlag(plugin.getWorldGuardPlugin(), loc, plugin.FLAG_PILOT, lp)) {
                             fail(String.format(i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d", x, y, z));
-                        }
-                    }
-
-                    if (this.townyEnabled) {
-                        TownBlock townBlock = TownyUtils.getTownBlock(loc);
-                        if (townBlock != null && !this.townBlockSet.contains(townBlock)) {
-                            if (TownyUtils.validateCraftMoveEvent(plugin.getTownyPlugin(), p, loc, this.townyWorld)) {
-                                this.townBlockSet.add(townBlock);
-                            } else {
-                                int tY = loc.getBlockY();
-                                boolean oChange = false;
-                                if (this.craftMinY > tY) {
-                                    this.craftMinY = tY;
-                                    oChange = true;
-                                }
-                                if (this.craftMaxY < tY) {
-                                    this.craftMaxY = tY;
-                                    oChange = true;
-                                }
-                                if (oChange) {
-                                    Town town = TownyUtils.getTown(townBlock);
-                                    if (town != null) {
-                                        Location locSpawn = TownyUtils.getTownSpawn(townBlock);
-                                        boolean failed = false;
-                                        if (locSpawn != null) {
-                                            if (!this.townyWorldHeightLimits.validate(y, locSpawn.getBlockY())) {
-                                                failed = true;
-                                            }
-                                        } else {
-                                            failed = true;
-                                        }
-                                        if (failed) {
-                                            if (plugin.getWorldGuardPlugin() != null &&
-                                                plugin.getWGCustomFlagsPlugin() != null &&
-                                                settings.WGCustomFlagsUsePilotFlag) {
-                                                LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
-                                                ApplicableRegionSet regions = plugin.getWorldGuardPlugin()
-                                                                                    .getRegionManager(loc.getWorld())
-                                                                                    .getApplicableRegions(loc);
-                                                if (regions.size() != 0) {
-                                                    if (WGCustomFlagsUtils
-                                                            .validateFlag(plugin.getWorldGuardPlugin(), loc,
-                                                                          plugin.FLAG_PILOT, lp)) {
-                                                        failed = false;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (failed) {
-                                            fail(String.format(i18n.get("Towny - Detection Failed") + " %s @ %d,%d,%d",
-                                                               town.getName(), x, y, z));
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 }
