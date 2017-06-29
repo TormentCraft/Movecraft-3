@@ -293,15 +293,11 @@ public class TranslationTask extends AsyncTask {
         boolean hoverUseGravity = getCraft().getType().getUseGravity();
         boolean checkHover = (data.getDx() != 0 || data.getDz() != 0);// we want to check only horizontal moves
         boolean canHoverOverWater = getCraft().getType().getCanHoverOverWater();
-        boolean townyEnabled = plugin.getTownyPlugin() != null;
-        boolean validateTownyExplosion = false;
 
         int craftMinY = 0;
         int craftMaxY = 0;
         boolean clearNewData = false;
-        boolean explosionBlockedByTowny = false;
-        boolean moveBlockedByTowny = false;
-        String townName = "";
+
         for (int i = 0; i < blocksList.length; i++) {
             BlockVec oldLoc = blocksList[i];
             BlockVec newLoc = oldLoc.translate(data.getDx(), data.getDy(), data.getDz());
@@ -408,7 +404,7 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
-            if (blockObstructed || moveBlockedByTowny) {
+            if (blockObstructed) {
                 if (hoverCraft && checkHover) {
                     //we check one up ever, if it is hovercraft and one down if it's using gravity
                     if (hoverOver == 0 && newLoc.y + 1 <= data.heightRange.max) {
@@ -474,7 +470,7 @@ public class TranslationTask extends AsyncTask {
                 } else {
                     // handle sinking ship collisions
                     if (getCraft().getSinking()) {
-                        if (getCraft().getType().getExplodeOnCrash() != 0.0F && !explosionBlockedByTowny) {
+                        if (getCraft().getType().getExplodeOnCrash() != 0.0F) {
                             int explosionKey = (int) (0 - (getCraft().getType().getExplodeOnCrash() * 100));
                             if (getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType() != Material.AIR) {
                                 explosionSet.add(new MapUpdateCommand(oldLoc, explosionKey, (byte) 0, getCraft()));
@@ -492,24 +488,13 @@ public class TranslationTask extends AsyncTask {
                         // Explode if the craft is set to have a CollisionExplosion. Also keep moving for spectacular
                         // ramming collisions
                         if (getCraft().getType().getCollisionExplosion() == 0.0F) {
-                            if (moveBlockedByTowny) {
-                                fail(String.format(i18n.get("Towny - Translation Failed") + " %s @ %d,%d,%d", townName,
-                                                   oldLoc.x, oldLoc.y, oldLoc.z));
-                            } else {
-                                fail(String.format(
-                                        i18n.get("Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s",
-                                        oldLoc.x, oldLoc.y, oldLoc.z,
-                                        getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
-                                                  .toString()));
-                                getCraft().setCruising(false);
-                            }
+                            fail(String.format(
+                                    i18n.get("Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s",
+                                    oldLoc.x, oldLoc.y, oldLoc.z,
+                                    getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
+                                              .toString()));
+                            getCraft().setCruising(false);
                             break;
-                        } else if (explosionBlockedByTowny) {
-                            if (getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType() != Material.AIR) {
-                                int explosionKey = 0 - 1;
-                                explosionSet.add(new MapUpdateCommand(oldLoc, explosionKey, (byte) 0, getCraft()));
-                                data.setCollisionExplosion(true);
-                            }
                         } else {
                             int explosionKey = (int) (0 - (getCraft().getType().getCollisionExplosion() * 100));
                             if (getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType() != Material.AIR) {
@@ -677,7 +662,7 @@ public class TranslationTask extends AsyncTask {
                 // if the craft is sinking, remove all solid blocks above the one that hit the ground from the craft
                 // for smoothing sinking
                 if (getCraft().getSinking() &&
-                    (getCraft().getType().getExplodeOnCrash() == 0.0 || explosionBlockedByTowny)) {
+                    (getCraft().getType().getExplodeOnCrash() == 0.0 || false)) {
                     int posy = m.getNewBlockLocation().y + 1;
                     int testID = getCraft().getW()
                                            .getBlockAt(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z)

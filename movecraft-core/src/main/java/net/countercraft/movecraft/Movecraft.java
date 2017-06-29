@@ -19,7 +19,6 @@ package net.countercraft.movecraft;
 
 import at.pavlov.cannons.Cannons;
 import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
-import com.palmergames.bukkit.towny.Towny;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.StateFlag;
@@ -56,7 +55,6 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
     private WGCustomFlagsPlugin wgCustomFlagsPlugin = null;
     private Economy economy;
     private Cannons cannonsPlugin = null;
-    private Towny townyPlugin = null;
     public StateFlag FLAG_PILOT = null; //new StateFlag("movecraft-pilot", true);
     public StateFlag FLAG_MOVE = null; //new StateFlag("movecraft-move", true);
     public StateFlag FLAG_ROTATE = null; //new StateFlag("movecraft-rotate", true);
@@ -291,10 +289,6 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
 
     public WGCustomFlagsPlugin getWGCustomFlagsPlugin() {
         return wgCustomFlagsPlugin;
-    }
-
-    public Towny getTownyPlugin() {
-        return townyPlugin;
     }
 
     @Override public net.countercraft.movecraft.api.CraftManager getCraftManager() {
