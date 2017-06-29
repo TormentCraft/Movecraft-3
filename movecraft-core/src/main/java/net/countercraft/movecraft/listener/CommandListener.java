@@ -102,9 +102,9 @@ public class CommandListener implements CommandExecutor {
                 }
             }
         }
-        int telX = craft.getMinX() + (maxDX / 2);
-        int telZ = craft.getMinZ() + (maxDZ / 2);
-        int telY = maxY;
+        double telX = craft.getMinX() + (maxDX / 2.0);
+        double telZ = craft.getMinZ() + (maxDZ / 2.0);
+        double telY = maxY + 1.0;
         return new Location(w, telX, telY, telZ);
     }
 
