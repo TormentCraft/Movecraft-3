@@ -2,8 +2,8 @@ package net.countercraft.movecraft.utils;
 
 import com.google.common.collect.ImmutableSet;
 import net.countercraft.movecraft.api.MaterialDataPredicate;
-import net.minecraft.server.v1_10_R1.Item;
-import net.minecraft.server.v1_10_R1.ItemStack;
+import net.minecraft.server.v1_12_R1.Item;
+import net.minecraft.server.v1_12_R1.ItemStack;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
 

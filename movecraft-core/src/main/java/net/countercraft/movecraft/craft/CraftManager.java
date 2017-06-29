@@ -71,16 +71,16 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
 
         if (!craftsFile.exists()) {
             craftsFile.mkdirs();
-            plugin.saveResource("types/airship.craft", false);
-            plugin.saveResource("types/airskiff.craft", false);
-            plugin.saveResource("types/BigAirship.craft", false);
-            plugin.saveResource("types/BigSubAirship.craft", false);
-            plugin.saveResource("types/elevator.craft", false);
-            plugin.saveResource("types/LaunchTorpedo.craft", false);
-            plugin.saveResource("types/Ship.craft", false);
-            plugin.saveResource("types/SubAirship.craft", false);
-            plugin.saveResource("types/Submarine.craft", false);
-            plugin.saveResource("types/Turret.craft", false);
+            plugin.saveResource("types/airship.yaml", false);
+            plugin.saveResource("types/airskiff.yaml", false);
+            plugin.saveResource("types/BigAirship.yaml", false);
+            plugin.saveResource("types/BigSubAirship.yaml", false);
+            plugin.saveResource("types/elevator.yaml", false);
+            plugin.saveResource("types/LaunchTorpedo.yaml", false);
+            plugin.saveResource("types/Ship.yaml", false);
+            plugin.saveResource("types/SubAirship.yaml", false);
+            plugin.saveResource("types/Submarine.yaml", false);
+            plugin.saveResource("types/Turret.yaml", false);
         }
 
         HashSet<CraftType> craftTypesSet = new HashSet<>();

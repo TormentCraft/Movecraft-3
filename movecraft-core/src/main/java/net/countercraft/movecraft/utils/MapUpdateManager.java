@@ -40,8 +40,8 @@ import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Sign;
-import org.bukkit.craftbukkit.v1_10_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_10_R1.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
@@ -75,7 +75,7 @@ public final class MapUpdateManager extends BukkitRunnable {
     }
 
     private void updateBlock(MapUpdateCommand m, World w, Map<BlockVec, TransferData> dataMap,
-                             Set<net.minecraft.server.v1_10_R1.Chunk> chunks, Set<Chunk> cmChunks,
+                             Set<net.minecraft.server.v1_12_R1.Chunk> chunks, Set<Chunk> cmChunks,
                              HashMap<BlockVec, Byte> origLightMap, boolean placeDispensers)
     {
         BlockVec workingL = m.getNewBlockLocation();
@@ -93,7 +93,7 @@ public final class MapUpdateManager extends BukkitRunnable {
 
         Chunk chunk = w.getBlockAt(x, y, z).getChunk();
 
-        net.minecraft.server.v1_10_R1.Chunk c = null;
+        net.minecraft.server.v1_12_R1.Chunk c = null;
         Chunk cmC = null;
         if (settings.CompatibilityMode) {
             cmC = chunk;
@@ -157,7 +157,7 @@ public final class MapUpdateManager extends BukkitRunnable {
                 cmChunks.add(cmC);
             }
         } else {
-            net.minecraft.server.v1_10_R1.BlockPosition position = new net.minecraft.server.v1_10_R1.BlockPosition(x, y,
+            net.minecraft.server.v1_12_R1.BlockPosition position = new net.minecraft.server.v1_12_R1.BlockPosition(x, y,
                                                                                                                    z);
 
             boolean success = false;
@@ -321,7 +321,7 @@ Changed for 1.8, and quite possibly wrong:
 
     private void runQueue(final ArrayList<MapUpdateCommand> queuedMapUpdateCommands,
                           final ArrayList<Boolean> queuedPlaceDispensers, final World w,
-                          final Set<net.minecraft.server.v1_10_R1.Chunk> chunks, final Set<Chunk> cmChunks,
+                          final Set<net.minecraft.server.v1_12_R1.Chunk> chunks, final Set<Chunk> cmChunks,
                           final HashMap<BlockVec, Byte> origLightMap, final Map<BlockVec, TransferData> dataMap,
                           final List<MapUpdateCommand> updatesInWorld,
                           final Map<BlockVec, List<EntityUpdateCommand>> entityMap)
@@ -427,7 +427,7 @@ Changed for 1.8, and quite possibly wrong:
                 Map<BlockVec, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
                 Map<BlockVec, TransferData> dataMap = new HashMap<>();
                 HashMap<BlockVec, Byte> origLightMap = new HashMap<>();
-                Set<net.minecraft.server.v1_10_R1.Chunk> chunks = null;
+                Set<net.minecraft.server.v1_12_R1.Chunk> chunks = null;
                 Set<Chunk> cmChunks = null;
                 ArrayList<MapUpdateCommand> queuedMapUpdateCommands = new ArrayList<>();
                 ArrayList<Boolean> queuedPlaceDispensers = new ArrayList<>();

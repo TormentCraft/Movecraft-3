@@ -109,7 +109,7 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
         settings.CompatibilityMode = getConfig().getBoolean("CompatibilityMode", false);
         if (!settings.CompatibilityMode) {
             try {
-                Class.forName("net.minecraft.server.v1_10_R1.Chunk");
+                Class.forName("net.minecraft.server.v1_12_R1.Chunk");
             } catch (ClassNotFoundException e) {
                 settings.CompatibilityMode = true;
                 logger.log(Level.INFO,
