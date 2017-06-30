@@ -237,11 +237,11 @@ public class RotationTask extends AsyncTask {
         for (int i = 0; i < blockList.length; i++) {
             centeredBlockList[i] = blockList[i].subtract(originPoint);
         }
-        if (getCraft().getCruising()) {
-            getCraft().resetSigns(true, true, true);
-        }
+//        if (getCraft().getCruising()) {
+//            getCraft().resetSigns(true, true, true);
+//        }
 
-        getCraft().setCruising(false);
+        // getCraft().setCruising(false);
 
         int craftMinY = 0;
         int craftMaxY = 0;

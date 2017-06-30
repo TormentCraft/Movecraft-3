@@ -195,6 +195,8 @@ public final class AsyncManager extends BukkitRunnable {
             }
         }
 
+        craft.setCruiseDirection(craft.getCruiseDirection().rotateXZ(rotation));
+
         submitTask(new RotationTask(craft, plugin, settings, i18n, craftManager, originPoint, craft.getBlockList(),
                                     rotation, craft.getW()), craft);
     }

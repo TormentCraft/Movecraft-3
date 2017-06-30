@@ -1,12 +1,12 @@
 package net.countercraft.movecraft.api;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import org.bukkit.block.Sign;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Craft movement direction.
@@ -71,12 +71,24 @@ public final class Direction {
         this.z = Math.min(Math.max(z, -1), 1);
     }
 
+    public Direction rotateXZ(Rotation rotation) {
+        if (rotation == Rotation.NONE) return this;
+
+        int cos = 0;
+        int sin = (rotation == Rotation.CLOCKWISE) ? 1 : -1;
+
+        int x = (this.x * cos) + (this.z * -sin);
+        int z = (this.x * sin) + (this.z * cos);
+
+        return new Direction(x, y, z);
+    }
+
     public Direction combine(Direction that) {
         return new Direction(this.x + that.x, this.y + that.y, this.z + that.z);
     }
 
     public static Optional<Direction> named(String s) {
-        return Optional.fromNullable(NAME_MAP.get(s.toLowerCase()));
+        return Optional.ofNullable(NAME_MAP.get(s.toLowerCase()));
     }
 
     public static Direction namedOr(String s, Direction defaultValue) {
