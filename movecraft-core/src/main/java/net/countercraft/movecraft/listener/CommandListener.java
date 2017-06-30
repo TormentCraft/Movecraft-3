@@ -17,10 +17,6 @@
 
 package net.countercraft.movecraft.listener;
 
-import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Direction;
 import net.countercraft.movecraft.api.Rotation;
@@ -33,19 +29,14 @@ import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.MathUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Calendar;
 import java.util.Objects;
-import java.util.TimeZone;
-import java.util.logging.Level;
+import java.util.Optional;
 
 public class CommandListener implements CommandExecutor {
     private final Settings settings;
@@ -59,16 +50,6 @@ public class CommandListener implements CommandExecutor {
         this.i18n = i18n;
         this.craftManager = craftManager;
         this.asyncManager = asyncManager;
-    }
-
-    private CraftType getCraftTypeFromString(String s) {
-        for (CraftType t : craftManager.getCraftTypes()) {
-            if (s.equalsIgnoreCase(t.getCraftName())) {
-                return t;
-            }
-        }
-
-        return null;
     }
 
     private Location getCraftTeleportPoint(Craft craft, World w) {
@@ -173,14 +154,21 @@ public class CommandListener implements CommandExecutor {
             if (args.length > 0) {
                 if (player.hasPermission("movecraft." + args[0] + ".pilot")) {
                     BlockVec startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
-                    Craft c = new Craft(getCraftTypeFromString(args[0]), player.getWorld());
+                    Optional<CraftType> ct = craftManager.getCraftTypeFromString(args[0]);
 
-                    if (playerCraft == null) {
-                        asyncManager.detect(c, player, player, startPoint);
+                    if (ct.isPresent()) {
+                        Craft c = new Craft(ct.get(), player.getWorld());
+
+                        if (playerCraft == null) {
+                            asyncManager.detect(c, player, player, startPoint);
+                        } else {
+                            craftManager.removeCraft(playerCraft);
+                            asyncManager.detect(c, player, player, startPoint);
+                        }
                     } else {
-                        craftManager.removeCraft(playerCraft);
-                        asyncManager.detect(c, player, player, startPoint);
+                        player.sendMessage(i18n.get("Unknown craft type."));
                     }
+
                 } else {
                     player.sendMessage(i18n.get("Insufficient Permissions"));
                 }

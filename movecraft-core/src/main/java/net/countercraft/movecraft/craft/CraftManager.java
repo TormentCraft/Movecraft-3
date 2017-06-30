@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -61,6 +62,16 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         this.settings = settings;
         this.i18nSupport = i18nSupport;
         this.plugin = plugin;
+    }
+
+    public @Nonnull Optional<CraftType> getCraftTypeFromString(String s) {
+        for (CraftType t : getCraftTypes()) {
+            if (s.equalsIgnoreCase(t.getCraftName())) {
+                return Optional.of(t);
+            }
+        }
+
+        return Optional.empty();
     }
 
     public CraftType[] getCraftTypes() {

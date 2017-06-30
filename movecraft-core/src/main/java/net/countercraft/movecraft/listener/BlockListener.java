@@ -24,7 +24,6 @@ import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
-import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.MathUtils;
 import org.bukkit.Bukkit;
@@ -167,23 +166,13 @@ public class BlockListener implements Listener {
         }
     }
 
-    private CraftType getCraftTypeFromString(String s) {
-        for (CraftType t : craftManager.getCraftTypes()) {
-            if (s.equalsIgnoreCase(t.getCraftName())) {
-                return t;
-            }
-        }
-
-        return null;
-    }
-
     @SuppressWarnings("unused")
     @EventHandler(priority = EventPriority.NORMAL) public void onSignChange(SignChangeEvent event) {
         Player p = event.getPlayer();
         if (p == null) return;
         String signText = org.bukkit.ChatColor.stripColor(event.getLine(0));
         // did the player try to create a craft command sign?
-        if (getCraftTypeFromString(signText) != null) {
+        if (craftManager.getCraftTypeFromString(signText) != null) {
             if (!settings.RequireCreatePerm) {
                 return;
             }
