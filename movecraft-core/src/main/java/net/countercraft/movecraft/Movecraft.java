@@ -38,6 +38,7 @@ import net.countercraft.movecraft.utils.MapUpdateManager;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.World;
+import org.bukkit.command.Command;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -239,12 +240,13 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
                         new WorldEditInteractListener(this, settings, i18nSupport, mapUpdateManager, craftManager),
                         this);
             }
-//			getServer().getPluginManager().registerEvents(
-//					new CommandListener(), this);
+
             CommandListener commandListener = new CommandListener(settings, i18nSupport, craftManager,
                                                                   asyncManager);
+
+            this.getCommand("pilot").setExecutor(commandListener);
             this.getCommand("release").setExecutor(commandListener);
-            //this.getCommand("pilot").setExecutor(commandListener);
+
             this.getCommand("rotateleft").setExecutor(commandListener);
             this.getCommand("rotateright").setExecutor(commandListener);
             this.getCommand("rotate").setExecutor(commandListener);
@@ -253,7 +255,6 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
             this.getCommand("craftreport").setExecutor(commandListener);
             this.getCommand("manoverboard").setExecutor(commandListener);
             this.getCommand("contacts").setExecutor(commandListener);
-            //this.getCommand("siege").setExecutor(new CommandListener());
             this.getCommand("craft").setExecutor(new CraftHelpListener(craftManager));
 
             getServer().getPluginManager()
