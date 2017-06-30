@@ -73,13 +73,13 @@ public class CraftHelpListener implements CommandExecutor {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("&6==========[ &f" + c.getCraftName() + "&6 ]==========\n");
-        sb.append("\n&6Size: &7" + c.getSizeRange().min + " to " + c.getSizeRange().max);
-        sb.append("\n&6Speed: &7" + Math.round(20.0 / c.getTickCooldown()) + " to " +
-                  (Math.round(20.0 / c.getCruiseTickCooldown()) * c.getCruiseSkipBlocks()));
-        sb.append("\n&6Altitude: &7" + c.getHeightRange().min + " to " + c.getHeightRange().max);
+        sb.append("&6==========[ &f").append(c.getCraftName()).append("&6 ]==========\n");
+        sb.append("\n&6Size: &7").append(c.getSizeRange().min).append(" to ").append(c.getSizeRange().max);
+        sb.append("\n&6Speed: &7").append(Math.round(20.0 / c.getTickCooldown())).append(" to ")
+          .append(Math.round(20.0 / c.getCruiseTickCooldown()) * c.getCruiseSkipBlocks());
+        sb.append("\n&6Altitude: &7").append(c.getHeightRange().min).append(" to ").append(c.getHeightRange().max);
         if (c.getFuelBurnRate() > 0) {
-            sb.append("\n&6Fuel Use: &7" + c.getFuelBurnRate());
+            sb.append("\n&6Fuel Use: &7").append(c.getFuelBurnRate());
         }
         if (c.getRequireWaterContact()) {
             sb.append("\n&6Requires Water: &7YES");
@@ -88,10 +88,10 @@ public class CraftHelpListener implements CommandExecutor {
         List<String> limit = new ArrayList<>();
         appendFlyBlocks(req, limit, c.getFlyBlocks());
         if (!req.isEmpty()) {
-            sb.append("\n&6Requirements: &7" + Joiner.on(", ").join(req));
+            sb.append("\n&6Requirements: &7").append(Joiner.on(", ").join(req));
         }
         if (!limit.isEmpty()) {
-            sb.append("\n&6Constraints: &7" + Joiner.on(", ").join(limit));
+            sb.append("\n&6Constraints: &7").append(Joiner.on(", ").join(limit));
         }
 
         sb.append("\n&6Allowed Blocks: &7");
