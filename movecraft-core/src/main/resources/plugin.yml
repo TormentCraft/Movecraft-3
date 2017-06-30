@@ -8,7 +8,7 @@ website: http://www.youtube.com/BaccaYarro
 main: net.countercraft.movecraft.Movecraft
 database: false
 commands:
-  release:
+  pilot:
     description: Pilot a craft.
     usage: /pilot <type>
   release:

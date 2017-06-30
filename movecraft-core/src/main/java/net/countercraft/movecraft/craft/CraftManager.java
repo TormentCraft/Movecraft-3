@@ -251,7 +251,9 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     }
 
     public @Nonnull Set<Craft> getCraftsInWorld(World w) {
-        return Collections.unmodifiableSet(craftList.get(w));
+        Set<Craft> result = craftList.get(w);
+        if (result == null) return Collections.emptySet();
+        return Collections.unmodifiableSet(result);
     }
 
     public Craft getCraftByPlayer(Player p) {
