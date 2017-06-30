@@ -37,6 +37,7 @@ import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.MapUpdateManager;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.plugin.Plugin;
@@ -70,13 +71,9 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
 
     private boolean shuttingDown;
     public Map<BlockVec, Long> blockFadeTimeMap = new HashMap<>();
-    public Map<BlockVec, Integer> blockFadeTypeMap = new HashMap<>();
+    public Map<BlockVec, Material> blockFadeTypeMap = new HashMap<>();
     public Map<BlockVec, Boolean> blockFadeWaterMap = new HashMap<>();
     public Map<BlockVec, World> blockFadeWorldMap = new HashMap<>();
-    public boolean siegeInProgress = false;
-    public String currentSiegeName = null;
-    public String currentSiegePlayer = null;
-    public long currentSiegeStartTime = 0;
 
     @Override public void onDisable() {
         // Process the storage crates to disk

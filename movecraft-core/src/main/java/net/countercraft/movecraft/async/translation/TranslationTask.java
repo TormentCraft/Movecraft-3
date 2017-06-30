@@ -17,8 +17,9 @@
 
 package net.countercraft.movecraft.async.translation;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.MaterialDataPredicate;
@@ -33,7 +34,6 @@ import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MathUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
-import org.apache.commons.collections.ListUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -44,6 +44,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,12 +74,18 @@ public class TranslationTask extends AsyncTask {
         this.data = data;
     }
 
+    private final Set<Material> fallThroughBlocks = Sets.newEnumSet(Lists.newArrayList(
+            Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.LAVA, Material.STATIONARY_LAVA,
+            Material.LONG_GRASS, Material.YELLOW_FLOWER, Material.RED_ROSE, Material.BROWN_MUSHROOM,
+            Material.RED_MUSHROOM, Material.TORCH, Material.FIRE, Material.REDSTONE_WIRE, Material.CROPS,
+            Material.SIGN_POST, Material.LADDER, Material.WALL_SIGN, Material.LEVER, Material.STONE_PLATE,
+            Material.WOOD_PLATE, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON, Material.STONE_BUTTON,
+            Material.SNOW, Material.SUGAR_CANE_BLOCK, Material.FENCE, Material.DIODE_BLOCK_OFF,
+            Material.DIODE_BLOCK_ON, Material.WATER_LILY, Material.CARROT, Material.POTATO, Material.WOOD_BUTTON,
+            Material.CARPET), Material.class);
+
     @Override public void execute() {
         BlockVec[] blocksList = data.getBlockList();
-
-        final int[] fallThroughBlocks = new int[]{
-                0, 8, 9, 10, 11, 31, 37, 38, 39, 40, 50, 51, 55, 59, 63, 65, 68, 69, 70, 72, 75, 76, 77, 78, 83, 85, 93,
-                94, 111, 141, 142, 143, 171};
 
         // blockedByWater=false means an ocean-going vessel
         boolean waterCraft = !getCraft().getType().blockedByWater();
@@ -108,15 +115,15 @@ public class TranslationTask extends AsyncTask {
                 }
             }
         }
+        // Safe because if the first x array doesn't have a z array,
+        // then it wouldn't be the first x array.
         int maxX = getCraft().getMinX() + hb.length;
-        int maxZ = getCraft().getMinZ() +
-                   hb[0].length;  // safe because if the first x array doesn't have a z array, then it wouldn't be
-        // the first x array
+        int maxZ = getCraft().getMinZ() + hb[0].length;
         int minX = getCraft().getMinX();
         int minZ = getCraft().getMinZ();
 
-/*		// Load any chunks that you are moving into that are not loaded 
-        for (int posX=minX+data.getDx();posX<=maxX+data.getDx();posX++) {
+		// Load any chunks that you are moving into that are not loaded
+        /*for (int posX=minX+data.getDx();posX<=maxX+data.getDx();posX++) {
 			for (int posZ=minZ+data.getDz();posZ<=maxZ+data.getDz();posZ++) {
 				if(getCraft().getW().isChunkLoaded(posX>>4, posZ>>4) == false) {
 					getCraft().getW().loadChunk(posX>>4, posZ>>4);
@@ -128,7 +135,7 @@ public class TranslationTask extends AsyncTask {
         if (getCraft().getSinking()) {
             waterCraft = true;
             hoverCraft = false;
-//			Movecraft.getInstance().getLogger().log( Level.INFO, "Translation task at: "+System.currentTimeMillis() );
+			// Movecraft.getInstance().getLogger().log( Level.INFO, "Translation task at: "+System.currentTimeMillis() );
         }
 
         // check the maxheightaboveground limitation, move 1 down if that limit is exceeded
@@ -142,7 +149,7 @@ public class TranslationTask extends AsyncTask {
             boolean done = false;
             while (!done) {
                 cy = cy - 1;
-                if (getCraft().getW().getBlockTypeIdAt(x, cy, z) != 0) done = true;
+                if (getCraft().getW().getBlockAt(x, cy, z).getType() != Material.AIR) done = true;
                 if (cy <= 1) done = true;
             }
             if (y - cy > getCraft().getType().getMaxHeightAboveGround()) {
@@ -161,27 +168,27 @@ public class TranslationTask extends AsyncTask {
                     int posZ = minZ - 1;
                     int posX;
                     for (posX = minX - 1; (posX <= maxX + 1) && (waterLine == 0); posX++) {
-                        int typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId();
-                        if (typeID == 9) numWater++;
-                        if (typeID == 0) numAir++;
+                        Material typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getType();
+                        if (typeID == Material.STATIONARY_WATER) numWater++;
+                        if (typeID == Material.AIR) numAir++;
                     }
                     posZ = maxZ + 1;
                     for (posX = minX - 1; (posX <= maxX + 1) && (waterLine == 0); posX++) {
-                        int typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId();
-                        if (typeID == 9) numWater++;
-                        if (typeID == 0) numAir++;
+                        Material typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getType();
+                        if (typeID == Material.STATIONARY_WATER) numWater++;
+                        if (typeID == Material.AIR) numAir++;
                     }
                     posX = minX - 1;
                     for (posZ = minZ; (posZ <= maxZ) && (waterLine == 0); posZ++) {
-                        int typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId();
-                        if (typeID == 9) numWater++;
-                        if (typeID == 0) numAir++;
+                        Material typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getType();
+                        if (typeID == Material.STATIONARY_WATER) numWater++;
+                        if (typeID == Material.AIR) numAir++;
                     }
                     posX = maxX + 1;
                     for (posZ = minZ; (posZ <= maxZ) && (waterLine == 0); posZ++) {
-                        int typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId();
-                        if (typeID == 9) numWater++;
-                        if (typeID == 0) numAir++;
+                        Material typeID = getCraft().getW().getBlockAt(posX, posY, posZ).getType();
+                        if (typeID == Material.STATIONARY_WATER) numWater++;
+                        if (typeID == Material.AIR) numAir++;
                     }
                     if (numWater > numAir) {
                         waterLine = posY;
@@ -195,13 +202,13 @@ public class TranslationTask extends AsyncTask {
 
             // now add all the air blocks found within the craft's hitbox immediately above the waterline and below
             // to the craft blocks so they will be translated
-            HashSet<BlockVec> newHSBlockList = new HashSet<>(Arrays.asList(blocksList));
+            HashSet<BlockVec> newHSBlockList = Sets.newHashSet(blocksList);
             int posY = waterLine + 1;
             for (int posX = minX; posX < maxX; posX++) {
                 for (int posZ = minZ; posZ < maxZ; posZ++) {
                     if (hb[posX - minX] != null) {
                         if (hb[posX - minX][posZ - minZ] != null) {
-                            if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 0 &&
+                            if (getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.AIR &&
                                 posY > hb[posX - minX][posZ - minZ][0] && posY < hb[posX - minX][posZ - minZ][1]) {
                                 BlockVec l = new BlockVec(posX, posY, posZ);
                                 newHSBlockList.add(l);
@@ -214,7 +221,7 @@ public class TranslationTask extends AsyncTask {
             for (posY = waterLine; posY >= minY; posY--) {
                 for (int posX = minX; posX < maxX; posX++) {
                     for (int posZ = minZ; posZ < maxZ; posZ++) {
-                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 0) {
+                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.AIR) {
                             BlockVec l = new BlockVec(posX, posY, posZ);
                             newHSBlockList.add(l);
                         }
@@ -225,10 +232,10 @@ public class TranslationTask extends AsyncTask {
             blocksList = newHSBlockList.toArray(new BlockVec[newHSBlockList.size()]);
         }
 
-        // check for fuel, burn some from a furnace if needed. Blocks of coal are supported, in addition to coal and
-        // charcoal
+        // Check for fuel, burn some from a furnace if needed.
+        // Blocks of coal are supported, in addition to coal and charcoal.
         double fuelBurnRate = getCraft().getType().getFuelBurnRate();
-        // going down doesn't require fuel
+        // Going down doesn't require fuel.
         if (data.getDy() == -1 && data.getDx() == 0 && data.getDz() == 0) fuelBurnRate = 0.0;
 
         if (fuelBurnRate != 0.0 && !getCraft().getSinking()) {
@@ -236,10 +243,10 @@ public class TranslationTask extends AsyncTask {
                 Block fuelHolder = null;
                 for (BlockVec bTest : blocksList) {
                     Block b = getCraft().getW().getBlockAt(bTest.x, bTest.y, bTest.z);
-                    if (b.getTypeId() == 61) {
+                    if (b.getType() == Material.FURNACE) {
                         InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
-                        if (inventoryHolder.getInventory().contains(263) ||
-                            inventoryHolder.getInventory().contains(173)) {
+                        if (inventoryHolder.getInventory().contains(Material.COAL) ||
+                            inventoryHolder.getInventory().contains(Material.COAL_BLOCK)) {
                             fuelHolder = b;
                         }
                     }
@@ -248,9 +255,9 @@ public class TranslationTask extends AsyncTask {
                     fail(i18n.get("Translation - Failed Craft out of fuel"));
                 } else {
                     InventoryHolder inventoryHolder = (InventoryHolder) fuelHolder.getState();
-                    if (inventoryHolder.getInventory().contains(263)) {
+                    if (inventoryHolder.getInventory().contains(Material.COAL)) {
                         ItemStack iStack = inventoryHolder.getInventory()
-                                                          .getItem(inventoryHolder.getInventory().first(263));
+                                                          .getItem(inventoryHolder.getInventory().first(Material.COAL));
                         int amount = iStack.getAmount();
                         if (amount == 1) {
                             inventoryHolder.getInventory().remove(iStack);
@@ -260,7 +267,7 @@ public class TranslationTask extends AsyncTask {
                         getCraft().setBurningFuel(getCraft().getBurningFuel() + 7.0);
                     } else {
                         ItemStack iStack = inventoryHolder.getInventory()
-                                                          .getItem(inventoryHolder.getInventory().first(173));
+                                                          .getItem(inventoryHolder.getInventory().first(Material.COAL_BLOCK));
                         int amount = iStack.getAmount();
                         if (amount == 1) {
                             inventoryHolder.getInventory().remove(iStack);
@@ -294,8 +301,6 @@ public class TranslationTask extends AsyncTask {
         boolean checkHover = (data.getDx() != 0 || data.getDz() != 0);// we want to check only horizontal moves
         boolean canHoverOverWater = getCraft().getType().getCanHoverOverWater();
 
-        int craftMinY = 0;
-        int craftMaxY = 0;
         boolean clearNewData = false;
 
         for (int i = 0; i < blocksList.length; i++) {
@@ -341,11 +346,11 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
-            //check for chests around
+            // Check for chests around.
             Material testMaterial = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getType();
             if (testMaterial == Material.CHEST || testMaterial == Material.TRAPPED_CHEST) {
                 if (!checkChests(testMaterial, newLoc, existingBlockSet)) {
-                    //prevent chests collision
+                    // Prevent chests collision.
                     fail(String.format(i18n.get("Translation - Failed Craft is obstructed") + " @ %d,%d,%d,%s",
                                        newLoc.x, newLoc.y, newLoc.z,
                                        getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType()
@@ -354,11 +359,10 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
-            boolean blockObstructed = false;
+            boolean blockObstructed;
             if (getCraft().getSinking()) {
-                int testID = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getTypeId();
-                blockObstructed =
-                        !(Arrays.binarySearch(fallThroughBlocks, testID) >= 0) && !existingBlockSet.contains(newLoc);
+                Material testID = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
+                blockObstructed = !fallThroughBlocks.contains(testID) && !existingBlockSet.contains(newLoc);
             } else if (!waterCraft) {
                 // New block is not air or a piston head and is not part of the existing ship
                 testMaterial = getCraft().getW().getBlockAt(newLoc.x, newLoc.y, newLoc.z).getType();
@@ -386,7 +390,7 @@ public class TranslationTask extends AsyncTask {
             boolean bladeOK = true;
             if (blockObstructed) {
                 if (hoverCraft || !harvestBlocks.isTrivial()) {
-                    // New block is not harvested block
+                    // New block is not harvested block.
                     if (harvestBlocks.checkBlock(newLocBlock) && !existingBlockSet.contains(newLoc)) {
                         if (!harvesterBladeBlocks.isTrivial()) {
                             if (!harvesterBladeBlocks.checkBlock(oldLocBlock)) {
@@ -506,22 +510,24 @@ public class TranslationTask extends AsyncTask {
                 }
             } else {
                 //block not obstructed
-                int oldID = getCraft().getW().getBlockTypeIdAt(oldLoc.x, oldLoc.y, oldLoc.z);
-                byte oldData = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getData();
+                MaterialData oldData = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getState().getData();
+                Material oldID = oldData.getItemType();
+                //byte oldData = getCraft().getW().getBlockAt(oldLoc.x, oldLoc.y, oldLoc.z).getData();
                 // remove water from sinking crafts
                 if (getCraft().getSinking()) {
-                    if ((oldID == 8 || oldID == 9) && oldLoc.y > waterLine) oldID = 0;
+                    if ((oldID == Material.WATER || oldID == Material.STATIONARY_WATER) && oldLoc.y > waterLine)
+                        oldID = Material.AIR;
                 }
 
                 if (!ignoreBlock) {
-                    updateSet.add(new MapUpdateCommand(oldLoc, newLoc, oldID, oldData, getCraft()));
+                    updateSet.add(new MapUpdateCommand(oldLoc, newLoc, oldID.getId(), oldData.getData(), getCraft()));
                     tempBlockList.add(newLoc);
                 }
 
                 if (i == blocksList.length - 1) {
                     if ((hoverCraft && hoverUseGravity) ||
                         (hoverUseGravity && newLoc.y > data.heightRange.max && hoverOver == 0)) {
-                        //hovecraft using gravity or something else using gravity and flying over its limit
+                        // Hovercraft using gravity or something else using gravity and flying over its limit.
                         int iFreeSpace = 0;
                         //canHoverOverWater adds 1 to dY for better check water under craft
                         // best way should be expand selected region to each first blocks under craft
@@ -631,8 +637,6 @@ public class TranslationTask extends AsyncTask {
                 data.setCollisionExplosion(false);
                 explosionSet.clear();
                 clearNewData = false;
-                craftMinY = 0;
-                craftMaxY = 0;
             }
         } //END OF: for ( int i = 0; i < blocksList.length; i++ ) {
 
@@ -644,9 +648,9 @@ public class TranslationTask extends AsyncTask {
                 if (existingBlockSet.contains(m.getNewBlockLocation())) {
                     existingBlockSet.remove(m.getNewBlockLocation());
                     if (settings.FadeWrecksAfter > 0) {
-                        int typeID = getCraft().getW().getBlockAt(m.getNewBlockLocation().x, m.getNewBlockLocation().y,
-                                                                  m.getNewBlockLocation().z).getTypeId();
-                        if (typeID != 0 && typeID != 9) {
+                        Material typeID = getCraft().getW().getBlockAt(m.getNewBlockLocation().x, m.getNewBlockLocation().y,
+                                                                  m.getNewBlockLocation().z).getType();
+                        if (typeID != Material.AIR && typeID != Material.STATIONARY_WATER) {
                             plugin.blockFadeTimeMap.put(m.getNewBlockLocation(), System.currentTimeMillis());
                             plugin.blockFadeTypeMap.put(m.getNewBlockLocation(), typeID);
                             if (m.getNewBlockLocation().y <= waterLine) {
@@ -664,17 +668,17 @@ public class TranslationTask extends AsyncTask {
                 if (getCraft().getSinking() &&
                     (getCraft().getType().getExplodeOnCrash() == 0.0)) {
                     int posy = m.getNewBlockLocation().y + 1;
-                    int testID = getCraft().getW()
+                    Material testID = getCraft().getW()
                                            .getBlockAt(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z)
-                                           .getTypeId();
+                                           .getType();
 
-                    while (posy <= maxY && !(Arrays.binarySearch(fallThroughBlocks, testID) >= 0)) {
+                    while (posy <= maxY && !fallThroughBlocks.contains(testID)) {
                         BlockVec testLoc = new BlockVec(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z);
                         if (existingBlockSet.contains(testLoc)) {
                             existingBlockSet.remove(testLoc);
                             if (settings.FadeWrecksAfter > 0) {
-                                int typeID = getCraft().getW().getBlockAt(testLoc.x, testLoc.y, testLoc.z).getTypeId();
-                                if (typeID != 0 && typeID != 9) {
+                                Material typeID = getCraft().getW().getBlockAt(testLoc.x, testLoc.y, testLoc.z).getType();
+                                if (typeID != Material.AIR && typeID != Material.STATIONARY_WATER) {
                                     plugin.blockFadeTimeMap.put(testLoc, System.currentTimeMillis());
                                     plugin.blockFadeTypeMap.put(testLoc, typeID);
                                     if (testLoc.y <= waterLine) {
@@ -689,7 +693,7 @@ public class TranslationTask extends AsyncTask {
                         posy = posy + 1;
                         testID = getCraft().getW()
                                            .getBlockAt(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z)
-                                           .getTypeId();
+                                           .getType();
                     }
                 }
             }
@@ -772,8 +776,8 @@ public class TranslationTask extends AsyncTask {
                 if (posY > waterLine) {
                     for (posX = minX - 1; posX <= maxX + 1; posX++) {
                         for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
-                            if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
-                                getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
+                            if (getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
+                                getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
                                 BlockVec loc = new BlockVec(posX, posY, posZ);
                                 updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                             }
@@ -783,32 +787,32 @@ public class TranslationTask extends AsyncTask {
                 for (posY = maxY + 1; (posY >= minY - 1) && (posY > waterLine); posY--) {
                     posZ = minZ - 1;
                     for (posX = minX - 1; posX <= maxX + 1; posX++) {
-                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
-                            getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
+                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
+                            getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
                             BlockVec loc = new BlockVec(posX, posY, posZ);
                             updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                         }
                     }
                     posZ = maxZ + 1;
                     for (posX = minX - 1; posX <= maxX + 1; posX++) {
-                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
-                            getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
+                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
+                            getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
                             BlockVec loc = new BlockVec(posX, posY, posZ);
                             updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                         }
                     }
                     posX = minX - 1;
                     for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
-                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
-                            getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
+                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
+                            getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
                             BlockVec loc = new BlockVec(posX, posY, posZ);
                             updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                         }
                     }
                     posX = maxX + 1;
                     for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
-                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 9 ||
-                            getCraft().getW().getBlockAt(posX, posY, posZ).getTypeId() == 8) {
+                        if (getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
+                            getCraft().getW().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
                             BlockVec loc = new BlockVec(posX, posY, posZ);
                             updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, getCraft()));
                         }
@@ -816,28 +820,8 @@ public class TranslationTask extends AsyncTask {
                 }
             }
 
-            //Set blocks that are no longer craft to air
-
-//
-// /**********************************************************************************************************
-//                        *   I had problems with ListUtils (I tried commons-collections 3.2.1. and 4.0 without
-// success)
-//                        *   so I replaced Lists with Sets
-//                        * 
-//                        *   Caused by: java.lang.NoClassDefFoundError: org/apache/commons/collections/ListUtils
-//                        *   at net.countercraft.movecraft.async.translation.TranslationTask.execute
-// (TranslationTask.java:716)
-//                        *
-// mwkaicz 24-02-2015
-//
-// ***********************************************************************************************************/
-//                        Set<BlockVec> setA = new HashSet(Arrays.asList(blocksList));
-//                        Set<BlockVec> setB = new HashSet(Arrays.asList(newBlockList));
-//                        setA.removeAll(setB);
-//                        BlockVec[] arrA = new BlockVec[0];
-//                        arrA = setA.toArray(arrA);
-//                        List<BlockVec> airLocation = Arrays.asList(arrA);
-            List<BlockVec> airLocation = ListUtils.subtract(Arrays.asList(blocksList), Arrays.asList(newBlockList));
+            //Set blocks that are no longer craft to air.
+            Set<BlockVec> airLocation = Sets.difference(Sets.newHashSet(blocksList), Sets.newHashSet(newBlockList));
 
             for (BlockVec l1 : airLocation) {
                 // for watercraft, fill blocks below the waterline with water
@@ -848,7 +832,7 @@ public class TranslationTask extends AsyncTask {
                         while (existingBlockSet.contains(testAir)) {
                             testAir = new BlockVec(l1.x, testAir.y - 1, l1.z);
                         }
-                        if (getCraft().getW().getBlockAt(testAir.x, testAir.y, testAir.z).getTypeId() == 0) {
+                        if (getCraft().getW().getBlockAt(testAir.x, testAir.y, testAir.z).getType() == Material.AIR) {
                             if (getCraft().getSinking()) {
                                 updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null,
                                                                    getCraft().getType().getSmokeOnSink()));
@@ -1051,8 +1035,7 @@ public class TranslationTask extends AsyncTask {
                             if (blocks == null) {
                                 blocks = new ArrayList<>();
                             }
-                            if (blocks.contains(b)) {
-                            } else {
+                            if (!blocks.contains(b)) {
                                 blocks.add(b);
                             }
                             crates.put(mat, blocks);
@@ -1109,7 +1092,6 @@ public class TranslationTask extends AsyncTask {
         }
 
         Material mat = stack.getType();
-        ItemStack retStack = null;
 
         if (chests.get(mat) != null) {
             for (Block b : chests.get(mat)) {
@@ -1131,9 +1113,8 @@ public class TranslationTask extends AsyncTask {
                     if (leftover.isEmpty()) {
                         return null;
                     }
-                    for (int i = 0; i < leftover.size(); i++) {
-                        stack = leftover.get(i);
-                        break;
+                    if (0 < leftover.size()) {
+                        stack = leftover.get(0);
                     }
                 } else {
                     return null;
@@ -1161,8 +1142,8 @@ public class TranslationTask extends AsyncTask {
                             chests.remove(mat); //remove  array of chests with this material 
                         }
                     }
-                    for (int i = 0; i < leftover.size(); i++) {
-                        return leftover.get(i);
+                    if (0 < leftover.size()) {
+                        return leftover.get(0);
                     }
                 } else {
                     //create new stack for this material
