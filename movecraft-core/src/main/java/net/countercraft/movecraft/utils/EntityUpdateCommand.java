@@ -20,36 +20,22 @@ package net.countercraft.movecraft.utils;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
+import javax.annotation.Nullable;
+
 /**
  * Class that stores the data about a single blocks changes to the map in an unspecified world. The world is
  * retrieved contextually from the submitting craft.
  */
 public class EntityUpdateCommand {
-    private Location location;
-    private final Location newLocation;
-    private final Entity entity;
+    @Nullable
+    public final Location location;
+    public final Location newLocation;
+    public final Entity entity;
 
-    public EntityUpdateCommand(Location blockLocation, Location newLocation, Entity entity) {
+    public EntityUpdateCommand(final Location blockLocation, final Location newLocation, final Entity entity) {
         this.location = blockLocation;
         this.newLocation = newLocation;
         this.entity = entity;
-    }
-
-    public EntityUpdateCommand(Location newLocation, Entity entity) {
-        this.newLocation = newLocation;
-        this.entity = entity;
-    }
-
-    public Entity getEntity() {
-        return entity;
-    }
-
-    public Location getOldLocation() {
-        return location;
-    }
-
-    public Location getNewLocation() {
-        return newLocation;
     }
 }
 

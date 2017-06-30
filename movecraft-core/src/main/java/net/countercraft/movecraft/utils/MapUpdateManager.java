@@ -269,11 +269,11 @@ Changed for 1.8, and quite possibly wrong:
                     final BlockState bs = w.getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).getState();
                     if (bs instanceof Sign) {
                         final Sign sign = (Sign) bs;
-                        for (int i = 0; i < signData.getLines().length; i++) {
-                            sign.setLine(i, signData.getLines()[i]);
+                        for (int i = 0; i < signData.lines.length; i++) {
+                            sign.setLine(i, signData.lines[i]);
                         }
-                        if (this.settings.AllowCrewSigns && signData.getLines()[0].equalsIgnoreCase("Crew:")) {
-                            final String crewName = signData.getLines()[1];
+                        if (this.settings.AllowCrewSigns && signData.lines[0].equalsIgnoreCase("Crew:")) {
+                            final String crewName = signData.lines[1];
                             final Player crewPlayer = this.plugin.getServer().getPlayer(crewName);
                             if (crewPlayer != null) {
                                 Location loc = sign.getLocation();
@@ -301,16 +301,16 @@ Changed for 1.8, and quite possibly wrong:
                     final InventoryTransferHolder invData = (InventoryTransferHolder) transferData;
                     final InventoryHolder inventoryHolder = (InventoryHolder) w
                             .getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).getState();
-                    inventoryHolder.getInventory().setContents(invData.getInventory());
+                    inventoryHolder.getInventory().setContents(invData.inventory);
                 } else if (transferData instanceof CommandBlockTransferHolder) {
                     final CommandBlockTransferHolder cbData = (CommandBlockTransferHolder) transferData;
                     final CommandBlock cblock = (CommandBlock) w
                             .getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).getState();
-                    cblock.setCommand(cbData.getText());
-                    cblock.setName(cbData.getName());
+                    cblock.setCommand(cbData.commandText);
+                    cblock.setName(cbData.commandName);
                     cblock.update();
                 }
-                w.getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).setData(transferData.getData());
+                w.getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).setData(transferData.data);
             } catch (final IndexOutOfBoundsException | IllegalArgumentException e) {
                 this.plugin.getLogger().log(Level.SEVERE, "Severe error in map updater");
             }
@@ -489,9 +489,9 @@ Changed for 1.8, and quite possibly wrong:
                 if (entityUpdatesInWorld != null) {
                     for (final EntityUpdateCommand command : entityUpdatesInWorld) {
                         if (command != null) {
-                            final BlockVec entityLoc = new BlockVec(command.getNewLocation().getBlockX(),
-                                                                    command.getNewLocation().getBlockY() - 1,
-                                                                    command.getNewLocation().getBlockZ());
+                            final BlockVec entityLoc = new BlockVec(command.newLocation.getBlockX(),
+                                                                    command.newLocation.getBlockY() - 1,
+                                                                    command.newLocation.getBlockZ());
                             if (entityMap.containsKey(entityLoc)) {
                                 final List<EntityUpdateCommand> entUpdateList = entityMap.get(entityLoc);
                                 entUpdateList.add(command);
@@ -500,13 +500,15 @@ Changed for 1.8, and quite possibly wrong:
                                 entUpdateList.add(command);
                                 entityMap.put(entityLoc, entUpdateList);
                             }
-                            if (command.getEntity() instanceof Player) {
+                            if (command.entity instanceof Player) {
                                 // send the blocks around the player first
-                                final Player p = (Player) command.getEntity();
+                                final Player p = (Player) command.entity;
                                 for (final MapUpdateCommand muc : updatesInWorld) {
-                                    final int disty = Math.abs(muc.newBlockLocation.y - command.getNewLocation().getBlockY());
-                                    final int distx = Math.abs(muc.newBlockLocation.x - command.getNewLocation().getBlockX());
-                                    final int distz = Math.abs(muc.newBlockLocation.z - command.getNewLocation().getBlockZ());
+                                    final int disty = Math.abs(muc.newBlockLocation.y - command.newLocation.getBlockY());
+
+                                    final int distx = Math.abs(muc.newBlockLocation.x - command.newLocation.getBlockX
+                                            ());
+                                    final int distz = Math.abs(muc.newBlockLocation.z - command.newLocation.getBlockZ());
                                     if (disty < 2 && distx < 2 && distz < 2) {
                                         this.updateBlock(muc, entry.getKey(), dataMap, chunks, cmChunks, origLightMap,
                                                          false);
@@ -517,7 +519,7 @@ Changed for 1.8, and quite possibly wrong:
                                     }
                                 }
                             }
-                            command.getEntity().teleport(command.getNewLocation());
+                            command.entity.teleport(command.newLocation);
                         }
                     }
                 }
@@ -584,9 +586,9 @@ Changed for 1.8, and quite possibly wrong:
                         if (entityMap.containsKey(command.newBlockLocation) && !this.settings.CompatibilityMode) {
                             final List<EntityUpdateCommand> mapUpdateList = entityMap.get(command.newBlockLocation);
                             for (final EntityUpdateCommand entityUpdate : mapUpdateList) {
-                                final Entity entity = entityUpdate.getEntity();
+                                final Entity entity = entityUpdate.entity;
 
-                                entity.teleport(entityUpdate.getNewLocation());
+                                entity.teleport(entityUpdate.newLocation);
                             }
                             entityMap.remove(command.newBlockLocation);
                         }
@@ -751,9 +753,9 @@ Changed for 1.8, and quite possibly wrong:
                     for (final ItemDropUpdateCommand i : itemDropUpdatesInWorld) {
                         if (i != null) {
                             final World world = entry.getKey();
-                            final Location loc = i.getLocation();
-                            final ItemStack stack = i.getItemStack();
-                            if (i.getItemStack() != null) {
+                            final Location loc = i.location;
+                            final ItemStack stack = i.itemStack;
+                            if (i.itemStack != null) {
                                 // drop Item
                                 final BukkitTask dropTask = new BukkitRunnable() {
                                     @Override public void run() {
