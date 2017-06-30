@@ -116,6 +116,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
                     plugin.getLogger().log(Level.SEVERE,
                                            String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
                                                          file.getAbsolutePath()));
+                    e.printStackTrace();
                 }
             }
         }
