@@ -172,7 +172,7 @@ public class BlockListener implements Listener {
         if (p == null) return;
         String signText = org.bukkit.ChatColor.stripColor(event.getLine(0));
         // did the player try to create a craft command sign?
-        if (craftManager.getCraftTypeFromString(signText) != null) {
+        if (craftManager.getCraftTypeFromString(signText).isPresent()) {
             if (!settings.RequireCreatePerm) {
                 return;
             }
