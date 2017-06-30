@@ -78,6 +78,7 @@ public class WorldEditInteractListener implements Listener {
         this.craftManager = craftManager;
     }
 
+    @SuppressWarnings("unused")
     @EventHandler public void WEOnPlayerInteract(PlayerInteractEvent event) {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK) {
@@ -217,11 +218,7 @@ public class WorldEditInteractListener implements Listener {
             CuboidClipboard cc;
             try {
                 cc = sf.load(file);
-            } catch (com.sk89q.worldedit.data.DataException e) {
-                player.sendMessage(i18n.get("REPAIR STATE NOT FOUND"));
-                e.printStackTrace();
-                return;
-            } catch (IOException e) {
+            } catch (com.sk89q.worldedit.data.DataException | IOException e) {
                 player.sendMessage(i18n.get("REPAIR STATE NOT FOUND"));
                 e.printStackTrace();
                 return;

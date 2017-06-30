@@ -756,7 +756,7 @@ Changed for 1.8, and quite possibly wrong:
                             final World world = entry.getKey();
                             final Location loc = i.getLocation();
                             final ItemStack stack = i.getItemStack();
-                            if (i.getItemStack() instanceof ItemStack) {
+                            if (i.getItemStack() != null) {
                                 // drop Item
                                 BukkitTask dropTask = new BukkitRunnable() {
                                     @Override public void run() {

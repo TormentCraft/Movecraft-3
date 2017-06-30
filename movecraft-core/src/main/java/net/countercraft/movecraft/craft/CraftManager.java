@@ -32,6 +32,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -100,11 +101,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
                     type.parseCraftDataFromFile(file, settings.SinkRateTicks);
                     craftTypesSet.add(type);
                     foundCraft = true;
-                } catch (FileNotFoundException e) {
-                    plugin.getLogger().log(Level.SEVERE,
-                                           String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
-                                                         file.getAbsolutePath()));
-                } catch (CraftType.ParseException e) {
+                } catch (FileNotFoundException | CraftType.ParseException e) {
                     plugin.getLogger().log(Level.SEVERE,
                                            String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
                                                          file.getAbsolutePath()));
@@ -234,7 +231,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         }
     }
 
-    public List<net.countercraft.movecraft.api.Craft> getCrafts() {
+    public @Nonnull List<net.countercraft.movecraft.api.Craft> getCrafts() {
         List<net.countercraft.movecraft.api.Craft> result = new ArrayList<>();
         for (Map.Entry<World, Set<Craft>> entry : craftList.entrySet()) {
             result.addAll(entry.getValue());
@@ -242,13 +239,8 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         return Collections.unmodifiableList(result);
     }
 
-    public Craft[] getCraftsInWorld(World w) {
-        Set<Craft> crafts = craftList.get(w);
-        if (crafts == null || crafts.isEmpty()) {
-            return null;
-        } else {
-            return craftList.get(w).toArray(new Craft[1]);
-        }
+    public @Nonnull Set<Craft> getCraftsInWorld(World w) {
+        return Collections.unmodifiableSet(craftList.get(w));
     }
 
     public Craft getCraftByPlayer(Player p) {

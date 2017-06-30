@@ -52,6 +52,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Set;
 
 public class BlockListener implements Listener {
     private final Movecraft plugin;
@@ -66,24 +67,24 @@ public class BlockListener implements Listener {
         this.craftManager = craftManager;
     }
 
+    @SuppressWarnings("unused")
     @EventHandler public void onStopSnowForming(BlockFormEvent event) {
         BlockState info = event.getNewState();
         if (info.getType() == Material.SNOW) {
             Block below = event.getBlock().getRelative(BlockFace.DOWN);
             BlockVec mloc = new BlockVec(below.getX(), below.getY(), below.getZ());
             boolean blockInCraft = false;
-            Craft[] crafts = craftManager.getCraftsInWorld(info.getWorld());
-            if (crafts != null) {
-                for (Craft craft : crafts) {
-                    if (craft != null && craft.isCraftBlock(mloc)) {
-                        event.setCancelled(true);
-                        return;
-                    }
+            Set<Craft> crafts = craftManager.getCraftsInWorld(info.getWorld());
+            for (Craft craft : crafts) {
+                if (craft != null && craft.isCraftBlock(mloc)) {
+                    event.setCancelled(true);
+                    return;
                 }
             }
         }
     }
 
+    @SuppressWarnings("unused")
     @EventHandler(priority = EventPriority.HIGHEST) public void onBlockBreak(final BlockBreakEvent e) {
         if (e.isCancelled()) {
             return;
@@ -91,14 +92,13 @@ public class BlockListener implements Listener {
         if (settings.ProtectPilotedCrafts) {
             BlockVec mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
             boolean blockInCraft = false;
-            if (craftManager.getCraftsInWorld(e.getBlock().getWorld()) != null)
-                for (Craft craft : craftManager.getCraftsInWorld(e.getBlock().getWorld())) {
-                    if (craft != null) {
-                        for (BlockVec tloc : craft.getBlockList()) {
-                            if (tloc.x == mloc.x && tloc.y == mloc.y && tloc.z == mloc.z) blockInCraft = true;
-                        }
+            for (Craft craft : craftManager.getCraftsInWorld(e.getBlock().getWorld())) {
+                if (craft != null) {
+                    for (BlockVec tloc : craft.getBlockList()) {
+                        if (tloc.x == mloc.x && tloc.y == mloc.y && tloc.z == mloc.z) blockInCraft = true;
                     }
                 }
+            }
             if (blockInCraft) {
                 e.getPlayer().sendMessage(i18n.get("BLOCK IS PART OF A PILOTED CRAFT"));
                 e.setCancelled(true);
@@ -107,15 +107,33 @@ public class BlockListener implements Listener {
     }
 
     // prevent items from dropping from moving crafts
+    @SuppressWarnings("unused")
     @EventHandler(priority = EventPriority.HIGHEST) public void onItemSpawn(final ItemSpawnEvent e) {
         if (e.isCancelled()) {
             return;
         }
-        if (craftManager.getCraftsInWorld(e.getLocation().getWorld()) != null) {
-            for (Craft tcraft : craftManager.getCraftsInWorld(e.getLocation().getWorld())) {
+        for (Craft tcraft : craftManager.getCraftsInWorld(e.getLocation().getWorld())) {
+            if ((!tcraft.isNotProcessing()) && MathUtils
+                    .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
+                                                   MathUtils.bukkit2MovecraftLoc(e.getLocation()))) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    // prevent water from spreading on moving crafts
+    @SuppressWarnings("unused")
+    @EventHandler(priority = EventPriority.HIGHEST) public void onBlockFromTo(BlockFromToEvent e) {
+        if (e.isCancelled()) {
+            return;
+        }
+        Block block = e.getToBlock();
+        if (block.getType() == Material.WATER) {
+            for (Craft tcraft : craftManager.getCraftsInWorld(block.getWorld())) {
                 if ((!tcraft.isNotProcessing()) && MathUtils
                         .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
-                                                       MathUtils.bukkit2MovecraftLoc(e.getLocation()))) {
+                                                       MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
                     e.setCancelled(true);
                     return;
                 }
@@ -123,27 +141,8 @@ public class BlockListener implements Listener {
         }
     }
 
-    // prevent water from spreading on moving crafts
-    @EventHandler(priority = EventPriority.HIGHEST) public void onBlockFromTo(BlockFromToEvent e) {
-        if (e.isCancelled()) {
-            return;
-        }
-        Block block = e.getToBlock();
-        if (block.getType() == Material.WATER) {
-            if (craftManager.getCraftsInWorld(block.getWorld()) != null) {
-                for (Craft tcraft : craftManager.getCraftsInWorld(block.getWorld())) {
-                    if ((!tcraft.isNotProcessing()) && MathUtils
-                            .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
-                                                           MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
-                        e.setCancelled(true);
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
     // prevent fragile items from dropping on moving crafts
+    @SuppressWarnings("unused")
     @EventHandler(priority = EventPriority.HIGHEST) public void onPhysics(BlockPhysicsEvent event) {
         if (event.isCancelled()) {
             return;
@@ -152,19 +151,17 @@ public class BlockListener implements Listener {
         final int[] fragileBlocks = new int[]{
                 26, 34, 50, 55, 63, 64, 65, 68, 69, 70, 71, 72, 75, 76, 77, 93, 94, 96, 131, 132, 143, 147, 148, 149,
                 150, 151, 171, 193, 194, 195, 196, 197};
-        if (craftManager.getCraftsInWorld(block.getWorld()) != null) {
-            for (Craft tcraft : craftManager.getCraftsInWorld(block.getWorld())) {
-                if ((!tcraft.isNotProcessing()) && MathUtils
-                        .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
-                                                       MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
-                    boolean isFragile = (Arrays.binarySearch(fragileBlocks, block.getTypeId()) >= 0);
-                    if (isFragile) {
+        for (Craft tcraft : craftManager.getCraftsInWorld(block.getWorld())) {
+            if ((!tcraft.isNotProcessing()) && MathUtils
+                    .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
+                                                   MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
+                boolean isFragile = (Arrays.binarySearch(fragileBlocks, block.getTypeId()) >= 0);
+                if (isFragile) {
 //						BlockFace face = ((Attachable) block).getAttachedFace();
 //					    if (!event.getBlock().getRelative(face).getType().isSolid()) {
-                        event.setCancelled(true);
-                        return;
+                    event.setCancelled(true);
+                    return;
 //					    }
-                    }
                 }
             }
         }
@@ -180,6 +177,7 @@ public class BlockListener implements Listener {
         return null;
     }
 
+    @SuppressWarnings("unused")
     @EventHandler(priority = EventPriority.NORMAL) public void onSignChange(SignChangeEvent event) {
         Player p = event.getPlayer();
         if (p == null) return;
@@ -210,6 +208,7 @@ public class BlockListener implements Listener {
         }
     }
 
+    @SuppressWarnings("unused")
     @EventHandler(priority = EventPriority.LOW) public void onBlockIgnite(BlockIgniteEvent event) {
         if (!settings.FireballPenetration) return;
         if (event.isCancelled()) return;
@@ -250,6 +249,7 @@ public class BlockListener implements Listener {
 			e.setNewCurrent(0);
 	}*/
 
+    @SuppressWarnings("unused")
     @EventHandler(priority = EventPriority.NORMAL) public void explodeEvent(EntityExplodeEvent e) {
         // Remove any blocks from the list that were adjacent to water, to prevent spillage
         Iterator<Block> i = e.blockList().iterator();

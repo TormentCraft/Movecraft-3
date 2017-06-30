@@ -662,7 +662,7 @@ public class TranslationTask extends AsyncTask {
                 // if the craft is sinking, remove all solid blocks above the one that hit the ground from the craft
                 // for smoothing sinking
                 if (getCraft().getSinking() &&
-                    (getCraft().getType().getExplodeOnCrash() == 0.0 || false)) {
+                    (getCraft().getType().getExplodeOnCrash() == 0.0)) {
                     int posy = m.getNewBlockLocation().y + 1;
                     int testID = getCraft().getW()
                                            .getBlockAt(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z)

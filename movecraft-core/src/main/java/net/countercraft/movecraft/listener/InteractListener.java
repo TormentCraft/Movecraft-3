@@ -63,6 +63,7 @@ public class InteractListener implements Listener {
         this.asyncManager = asyncManager;
     }
 
+    @SuppressWarnings("unused")
     @EventHandler public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK) {
             Material m = event.getClickedBlock().getType();
@@ -77,14 +78,13 @@ public class InteractListener implements Listener {
                 if (firstLine.equalsIgnoreCase("Remote Sign")) {
                     BlockVec sourceLocation = MathUtils.bukkit2MovecraftLoc(event.getClickedBlock().getLocation());
                     Craft foundCraft = null;
-                    if (craftManager.getCraftsInWorld(event.getClickedBlock().getWorld()) != null)
-                        for (Craft tcraft : craftManager.getCraftsInWorld(event.getClickedBlock().getWorld())) {
-                            if (MathUtils.playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(),
-                                                                        tcraft.getMinZ(), sourceLocation)) {
-                                // don't use a craft with a null player. This is mostly to avoid trying to use subcrafts
-                                if (craftManager.getPlayerFromCraft(tcraft) != null) foundCraft = tcraft;
-                            }
+                    for (Craft tcraft : craftManager.getCraftsInWorld(event.getClickedBlock().getWorld())) {
+                        if (MathUtils.playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(),
+                                                                    tcraft.getMinZ(), sourceLocation)) {
+                            // don't use a craft with a null player. This is mostly to avoid trying to use subcrafts
+                            if (craftManager.getPlayerFromCraft(tcraft) != null) foundCraft = tcraft;
                         }
+                    }
 
                     if (foundCraft == null) {
                         event.getPlayer()
@@ -254,6 +254,7 @@ public class InteractListener implements Listener {
         }
     }
 
+    @SuppressWarnings("unused")
     private void onSignRightClick(PlayerInteractEvent event) {
         Sign sign = (Sign) event.getClickedBlock().getState();
         final String firstLine = ChatColor.stripColor(sign.getLine(0));
@@ -598,6 +599,7 @@ public class InteractListener implements Listener {
         return null;
     }
 
+    @SuppressWarnings("unused")
     @EventHandler public void onPlayerInteractStick(PlayerInteractEvent event) {
         final Craft craft = craftManager.getCraftByPlayer(event.getPlayer());
         // if not in command of craft, don't process pilot tool clicks
@@ -697,7 +699,6 @@ public class InteractListener implements Listener {
                     craft.setPilotLocked(false);
                     event.getPlayer().sendMessage(i18n.get("Leaving Direct Control Mode"));
                     event.setCancelled(true);
-                    return;
                 } else {
                     if (event.getPlayer().hasPermission("movecraft." + craft.getType().getCraftName() + ".move") &&
                         craft.getType().getCanDirectControl()) {
@@ -707,7 +708,6 @@ public class InteractListener implements Listener {
                         craft.setPilotLockedZ(event.getPlayer().getLocation().getBlockZ() + 0.5);
                         event.getPlayer().sendMessage(i18n.get("Entering Direct Control Mode"));
                         event.setCancelled(true);
-                        return;
                     } else {
                         event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
                     }

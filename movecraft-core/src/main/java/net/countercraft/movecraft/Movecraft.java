@@ -241,7 +241,7 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
             }
 //			getServer().getPluginManager().registerEvents(
 //					new CommandListener(), this);
-            CommandListener commandListener = new CommandListener(this, settings, i18nSupport, craftManager,
+            CommandListener commandListener = new CommandListener(settings, i18nSupport, craftManager,
                                                                   asyncManager);
             this.getCommand("release").setExecutor(commandListener);
             //this.getCommand("pilot").setExecutor(commandListener);

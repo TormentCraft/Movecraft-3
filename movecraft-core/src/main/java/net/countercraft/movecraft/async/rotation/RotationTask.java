@@ -523,7 +523,7 @@ public class RotationTask extends AsyncTask {
                     }
                 }
 
-                Craft[] craftsInWorld = craftManager.getCraftsInWorld(getCraft().getW());
+                Set<Craft> craftsInWorld = craftManager.getCraftsInWorld(getCraft().getW());
                 for (Craft craft : craftsInWorld) {
                     if (BlockUtils.arrayContainsOverlap(craft.getBlockList(), originalBlockList) &&
                         craft != getCraft()) {

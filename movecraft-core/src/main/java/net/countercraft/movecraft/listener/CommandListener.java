@@ -49,16 +49,13 @@ import java.util.logging.Level;
 
 //public class CommandListener implements Listener {
 public class CommandListener implements CommandExecutor {
-    private final Movecraft plugin;
     private final Settings settings;
     private final I18nSupport i18n;
     private final CraftManager craftManager;
     private final AsyncManager asyncManager;
 
-    public CommandListener(Movecraft plugin, Settings settings, I18nSupport i18n, CraftManager craftManager,
-                           AsyncManager asyncManager)
+    public CommandListener(Settings settings, I18nSupport i18n, CraftManager craftManager, AsyncManager asyncManager)
     {
-        this.plugin = plugin;
         this.settings = settings;
         this.i18n = i18n;
         this.craftManager = craftManager;
@@ -142,8 +139,6 @@ public class CommandListener implements CommandExecutor {
     }
 
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-//	public void onCommand( PlayerCommandPreprocessEvent e ) {
-
         if (!(sender instanceof Player)) {
             sender.sendMessage("This command can only be run by a player.");
             return false;
@@ -200,14 +195,15 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
 
-            if (playerCraft == null) {
-            } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                BlockVec midPoint = getCraftMidPoint(playerCraft);
-                Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left")) ? Rotation.ANTICLOCKWISE
-                                                                                          : Rotation.CLOCKWISE;
-                asyncManager.rotate(playerCraft, rotation, midPoint);
-            } else {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+            if (playerCraft != null) {
+                if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
+                    BlockVec midPoint = getCraftMidPoint(playerCraft);
+                    Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left")) ? Rotation.ANTICLOCKWISE
+                                                                                              : Rotation.CLOCKWISE;
+                    asyncManager.rotate(playerCraft, rotation, midPoint);
+                } else {
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                }
             }
 
             return true;
@@ -219,12 +215,13 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
 
-            if (playerCraft == null) {
-            } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                BlockVec midPoint = getCraftMidPoint(playerCraft);
-                asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
-            } else {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+            if (playerCraft != null) {
+                if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
+                    BlockVec midPoint = getCraftMidPoint(playerCraft);
+                    asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
+                } else {
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                }
             }
 
             return true;
@@ -237,12 +234,13 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
 
-            if (playerCraft == null) {
-            } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                BlockVec midPoint = getCraftMidPoint(playerCraft);
-                asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
-            } else {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+            if (playerCraft != null) {
+                if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
+                    BlockVec midPoint = getCraftMidPoint(playerCraft);
+                    asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
+                } else {
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                }
             }
 
             return true;
@@ -304,22 +302,21 @@ public class CommandListener implements CommandExecutor {
             }
 
             boolean noCraftsFound = true;
-            if (craftManager.getCraftsInWorld(player.getWorld()) != null)
-                for (Craft craft : craftManager.getCraftsInWorld(player.getWorld())) {
-                    if (craft != null) {
-                        String output = new String();
-                        if (craft.getNotificationPlayer() != null) {
-                            output = craft.getType().getCraftName() + " " + craft.getNotificationPlayer().getName() +
-                                     " " + craft.getBlockList().length + " @ " + craft.getMinX() + "," +
-                                     craft.getMinY() + "," + craft.getMinZ();
-                        } else {
-                            output = craft.getType().getCraftName() + " NULL " + craft.getBlockList().length + " @ " +
-                                     craft.getMinX() + "," + craft.getMinY() + "," + craft.getMinZ();
-                        }
-                        player.sendMessage(output);
-                        noCraftsFound = false;
+            for (Craft craft : craftManager.getCraftsInWorld(player.getWorld())) {
+                if (craft != null) {
+                    String output;
+                    if (craft.getNotificationPlayer() != null) {
+                        output = craft.getType().getCraftName() + " " + craft.getNotificationPlayer().getName() +
+                                 " " + craft.getBlockList().length + " @ " + craft.getMinX() + "," +
+                                 craft.getMinY() + "," + craft.getMinZ();
+                    } else {
+                        output = craft.getType().getCraftName() + " NULL " + craft.getBlockList().length + " @ " +
+                                 craft.getMinX() + "," + craft.getMinY() + "," + craft.getMinZ();
                     }
+                    player.sendMessage(output);
+                    noCraftsFound = false;
                 }
+            }
             if (noCraftsFound) {
                 player.sendMessage("No crafts found");
             }
@@ -391,15 +388,14 @@ public class CommandListener implements CommandExecutor {
                 player.teleport(telPoint);
             } else {
                 for (World w : Bukkit.getWorlds()) {
-                    if (craftManager.getCraftsInWorld(w) != null)
-                        for (Craft tcraft : craftManager.getCraftsInWorld(w)) {
-                            if (tcraft.getMovedPlayers().containsKey(player))
-                                if ((System.currentTimeMillis() - tcraft.getMovedPlayers().get(player)) / 1000 <
-                                    settings.ManOverBoardTimeout) {
-                                    Location telPoint = getCraftTeleportPoint(tcraft, w);
-                                    player.teleport(telPoint);
-                                }
-                        }
+                    for (Craft tcraft : craftManager.getCraftsInWorld(w)) {
+                        if (tcraft.getMovedPlayers().containsKey(player))
+                            if ((System.currentTimeMillis() - tcraft.getMovedPlayers().get(player)) / 1000 <
+                                settings.ManOverBoardTimeout) {
+                                Location telPoint = getCraftTeleportPoint(tcraft, w);
+                                player.teleport(telPoint);
+                            }
+                    }
                 }
             }
             return true;

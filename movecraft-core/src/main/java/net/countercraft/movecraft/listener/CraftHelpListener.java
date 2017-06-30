@@ -47,6 +47,7 @@ public class CraftHelpListener implements CommandExecutor {
         return null;
     }
 
+    @SuppressWarnings("unused")
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 0 || args[0].isEmpty()) {
             args = new String[]{"list"};

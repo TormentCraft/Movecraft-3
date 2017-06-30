@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+
 public class PlayerListener implements Listener {
     private final Plugin plugin;
     private final Settings settings;
@@ -80,6 +81,7 @@ public class PlayerListener implements Listener {
         return null;
     }
 
+    @SuppressWarnings("unused")
     @EventHandler public void onPLayerLogout(PlayerQuitEvent e) {
         Craft c = craftManager.getCraftByPlayer(e.getPlayer());
 
@@ -95,6 +97,7 @@ public class PlayerListener implements Listener {
 		}
 	}*/
 
+    @SuppressWarnings("unused")
     @EventHandler public void onPlayerDeath(EntityDamageByEntityEvent e)
     {  // changed to death so when you shoot up an airship and hit the pilot, it still sinks
         if (e instanceof Player) {
@@ -103,6 +106,7 @@ public class PlayerListener implements Listener {
         }
     }
 
+    @SuppressWarnings("unused")
     @EventHandler public void onPlayerMove(PlayerMoveEvent event) {
         final Player player = event.getPlayer();
         final Craft craft = craftManager.getCraftByPlayer(player);
