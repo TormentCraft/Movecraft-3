@@ -21,15 +21,16 @@ import net.countercraft.movecraft.api.BlockVec;
 
 public final class BoundingBoxUtils {
 
-    public static int[][][] formBoundingBox(BlockVec[] blockList, Integer minX, Integer maxX, Integer minZ,
-                                            Integer maxZ)
+    public static int[][][] formBoundingBox(final BlockVec[] blockList,
+                                            final Integer minX, final Integer maxX, final Integer minZ,
+                                            final Integer maxZ)
     {
-        int sizeX = (maxX - minX) + 1;
-        int sizeZ = (maxZ - minZ) + 1;
+        final int sizeX = (maxX - minX) + 1;
+        final int sizeZ = (maxZ - minZ) + 1;
 
-        int[][][] polygonalBox = new int[sizeX][][];
+        final int[][][] polygonalBox = new int[sizeX][][];
 
-        for (BlockVec l : blockList) {
+        for (final BlockVec l : blockList) {
             if (polygonalBox[l.x - minX] == null) {
                 polygonalBox[l.x - minX] = new int[sizeZ][];
             }
@@ -40,8 +41,8 @@ public final class BoundingBoxUtils {
                 polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
                 polygonalBox[l.x - minX][l.z - minZ][1] = l.y;
             } else {
-                int minY = polygonalBox[l.x - minX][l.z - minZ][0];
-                int maxY = polygonalBox[l.x - minX][l.z - minZ][1];
+                final int minY = polygonalBox[l.x - minX][l.z - minZ][0];
+                final int maxY = polygonalBox[l.x - minX][l.z - minZ][1];
 
                 if (l.y < minY) {
                     polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
@@ -55,8 +56,8 @@ public final class BoundingBoxUtils {
         return polygonalBox;
     }
 
-    public static int[][][] translateBoundingBoxVertically(int[][][] hitbox, int dy) {
-        int[][][] newHitbox = new int[hitbox.length][][];
+    public static int[][][] translateBoundingBoxVertically(final int[][][] hitbox, final int dy) {
+        final int[][][] newHitbox = new int[hitbox.length][][];
 
         for (int x = 0; x < hitbox.length; x++) {
             newHitbox[x] = new int[hitbox[x].length][];

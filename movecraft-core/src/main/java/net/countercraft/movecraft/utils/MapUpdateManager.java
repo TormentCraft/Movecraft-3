@@ -194,10 +194,10 @@ public final class MapUpdateManager extends BukkitRunnable {
 									linearDist+=Math.abs(posy-centerY);
 									linearDist+=Math.abs(posz-centerZ);
 									if(linearDist<=15) {
-//										((CraftWorld) w).getHandle().b(EnumSkyBlock.BLOCK, x, y, z, lightLevel);
+//										((CraftWorld) world).getHandle().b(EnumSkyBlock.BLOCK, x, y, z, lightLevel);
 Changed for 1.8, and quite possibly wrong:
 										BlockVec positioni = new BlockVec(posx, posy, posz);
-										((CraftWorld) w).getHandle().b(EnumSkyBlock.BLOCK, positioni);
+										((CraftWorld) world).getHandle().b(EnumSkyBlock.BLOCK, positioni);
 									}
 								}
 						}
@@ -381,17 +381,17 @@ Changed for 1.8, and quite possibly wrong:
 //					c.initLighting();
 //				}
 /*				for(BlockVec mloc : origLightMap.keySet()) {
-                    Location loc=new Location(w, mloc.getX(), mloc.getY(), mloc.getZ());
-					for ( Player p : w.getPlayers() ) {
+                    Location loc=new Location(world, mloc.getX(), mloc.getY(), mloc.getZ());
+					for ( Player p : world.getPlayers() ) {
 						Chunk c=p.getLocation().getChunk();
 						int playerChunkX=p.getLocation().getBlockX()>>4;
 						int playerChunkZ=p.getLocation().getBlockZ()>>4;
 
 						if(Math.abs(playerChunkX-c.getX())<Bukkit.getServer().getViewDistance())
 							if(Math.abs(playerChunkZ-c.getZ())<Bukkit.getServer().getViewDistance())
-								p.sendBlockChange(loc, w.getBlockTypeIdAt(loc), w.getBlockAt(loc).getData());
+								p.sendBlockChange(loc, world.getBlockTypeIdAt(loc), world.getBlockAt(loc).getData());
 					}
-					w.getBlockAt(loc).getState().update();
+					world.getBlockAt(loc).getState().update();
 				}*/
             }
 
@@ -462,7 +462,7 @@ Changed for 1.8, and quite possibly wrong:
                             queuedMapUpdateCommands.add(blankCommand);
                             queuedPlaceDispensers.add(false);
 //							} else 
-//								updateBlock(blankCommand, w, dataMap, chunks, cmChunks, origLightMap, false);
+//								updateBlock(blankCommand, world, dataMap, chunks, cmChunks, origLightMap, false);
                         }
                         //remove redstone blocks and replace them with stone to prevent redstone activation during
                         // reconstruction
@@ -472,7 +472,7 @@ Changed for 1.8, and quite possibly wrong:
                             queuedMapUpdateCommands.add(blankCommand);
                             queuedPlaceDispensers.add(false);
 //							} else 
-//								updateBlock(blankCommand, w, dataMap, chunks, cmChunks, origLightMap, false);
+//								updateBlock(blankCommand, world, dataMap, chunks, cmChunks, origLightMap, false);
                         }
                         //remove water and lava blocks and replace them with stone to prevent spillage during
                         // reconstruction
@@ -538,7 +538,7 @@ Changed for 1.8, and quite possibly wrong:
                                 queuedMapUpdateCommands.add(i);
                                 queuedPlaceDispensers.add(false);
 //								} else 
-//									updateBlock(i, w, dataMap, chunks, cmChunks, origLightMap, false);
+//									updateBlock(i, world, dataMap, chunks, cmChunks, origLightMap, false);
                             }
                             if (prevIsFragile && isFragile) {
                                 final MapUpdateCommand blankCommand = new MapUpdateCommand(i.newBlockLocation, 0,
@@ -547,7 +547,7 @@ Changed for 1.8, and quite possibly wrong:
                                 queuedMapUpdateCommands.add(blankCommand);
                                 queuedPlaceDispensers.add(false);
 //								} else 
-//									updateBlock(blankCommand, w, dataMap, chunks, cmChunks, origLightMap, false);
+//									updateBlock(blankCommand, world, dataMap, chunks, cmChunks, origLightMap, false);
                             }
                         }
                     }
@@ -568,7 +568,7 @@ Changed for 1.8, and quite possibly wrong:
                                                                       command.newBlockLocation.y + 0.5,
                                                                       command.newBlockLocation.z);
                                     this.createExplosion(loc, explosionPower);
-                                    //w.createExplosion(command.getNewBlockLocation().getX()+0.5, command.getNewBlockLocation()
+                                    //world.createExplosion(command.getNewBlockLocation().getX()+0.5, command.getNewBlockLocation()
                                     // .getY()+0.5, command.getNewBlockLocation().getZ()+0.5, explosionPower);
                                 }
                             } else {
@@ -576,7 +576,7 @@ Changed for 1.8, and quite possibly wrong:
                                 queuedMapUpdateCommands.add(command);
                                 queuedPlaceDispensers.add(false);
                                 //							} else
-                                //								updateBlock(command, w, dataMap, chunks, cmChunks,
+                                //								updateBlock(command, world, dataMap, chunks, cmChunks,
                                 // origLightMap, false);
                             }
                         }
@@ -604,7 +604,7 @@ Changed for 1.8, and quite possibly wrong:
                             queuedMapUpdateCommands.add(command);
                             queuedPlaceDispensers.add(false);
                             //					} else
-                            //						updateBlock(command, w, dataMap, chunks, cmChunks, origLightMap, false);
+                            //						updateBlock(command, world, dataMap, chunks, cmChunks, origLightMap, false);
                         }
                     }
                 }
@@ -617,7 +617,7 @@ Changed for 1.8, and quite possibly wrong:
                             queuedMapUpdateCommands.add(command);
                             queuedPlaceDispensers.add(true);
                             //					} else
-                            //						updateBlock(command, w, dataMap, chunks, cmChunks, origLightMap, true);
+                            //						updateBlock(command, world, dataMap, chunks, cmChunks, origLightMap, true);
                         }
                     }
                 }
@@ -630,7 +630,7 @@ Changed for 1.8, and quite possibly wrong:
 								queuedMapUpdateCommands.add(i);
 								queuedPlaceDispensers.add(true);
 							} else 
-								updateBlock(i, w, dataMap, chunks, cmChunks, origLightMap, true);					
+								updateBlock(i, world, dataMap, chunks, cmChunks, origLightMap, true);
 						}
 						
 					}
@@ -644,7 +644,7 @@ Changed for 1.8, and quite possibly wrong:
                             queuedMapUpdateCommands.add(command);
                             queuedPlaceDispensers.add(true);
                             //					} else
-                            //						updateBlock(command, w, dataMap, chunks, cmChunks, origLightMap, true);
+                            //						updateBlock(command, world, dataMap, chunks, cmChunks, origLightMap, true);
                         }
                     }
                 }
@@ -658,7 +658,7 @@ Changed for 1.8, and quite possibly wrong:
                             queuedMapUpdateCommands.add(command);
                             queuedPlaceDispensers.add(true);
                             //					} else
-                            //						updateBlock(command, w, dataMap, chunks, cmChunks, origLightMap, true);
+                            //						updateBlock(command, world, dataMap, chunks, cmChunks, origLightMap, true);
                         }
                     }
                 }
@@ -700,14 +700,14 @@ Changed for 1.8, and quite possibly wrong:
                 }
 /*				} else {
 					// update signs, inventories, other special data
-					updateData(dataMap, w);
+					updateData(dataMap, world);
 					
 					for ( net.minecraft.server.v1_8_R3.Chunk c : chunks ) {
 //						c.initLighting();
 						ChunkCoordIntPair ccip = new ChunkCoordIntPair( c.locX, c.locZ ); // changed from c.x to c
 						.locX and c.locZ
 
-						for ( Player p : w.getPlayers() ) {
+						for ( Player p : world.getPlayers() ) {
 							List<ChunkCoordIntPair> chunkCoordIntPairQueue = ( List<ChunkCoordIntPair> ) ( (
 							CraftPlayer ) p ).getHandle().chunkCoordIntPairQueue;
 							int playerChunkX=p.getLocation().getBlockX()>>4;
@@ -726,7 +726,7 @@ Changed for 1.8, and quite possibly wrong:
 						}
 					}
 					
-					if(CraftManager.getInstance().getCraftsInWorld(w)!=null) {
+					if(CraftManager.getInstance().getCraftsInWorld(world)!=null) {
 						
 						// and set all crafts that were updated to not processing
 						for ( MapUpdateCommand c : updatesInWorld ) {

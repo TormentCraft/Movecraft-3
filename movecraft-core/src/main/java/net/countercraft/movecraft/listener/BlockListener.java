@@ -59,7 +59,7 @@ public class BlockListener implements Listener {
     private final I18nSupport i18n;
     private final CraftManager craftManager;
 
-    public BlockListener(Movecraft plugin, Settings settings, I18nSupport i18n, CraftManager craftManager) {
+    public BlockListener(final Movecraft plugin, final Settings settings, final I18nSupport i18n, final CraftManager craftManager) {
         this.plugin = plugin;
         this.settings = settings;
         this.i18n = i18n;
@@ -67,14 +67,14 @@ public class BlockListener implements Listener {
     }
 
     @SuppressWarnings("unused")
-    @EventHandler public void onStopSnowForming(BlockFormEvent event) {
-        BlockState info = event.getNewState();
+    @EventHandler public void onStopSnowForming(final BlockFormEvent event) {
+        final BlockState info = event.getNewState();
         if (info.getType() == Material.SNOW) {
-            Block below = event.getBlock().getRelative(BlockFace.DOWN);
-            BlockVec mloc = new BlockVec(below.getX(), below.getY(), below.getZ());
-            boolean blockInCraft = false;
-            Set<Craft> crafts = craftManager.getCraftsInWorld(info.getWorld());
-            for (Craft craft : crafts) {
+            final Block below = event.getBlock().getRelative(BlockFace.DOWN);
+            final BlockVec mloc = new BlockVec(below.getX(), below.getY(), below.getZ());
+            final boolean blockInCraft = false;
+            final Set<Craft> crafts = this.craftManager.getCraftsInWorld(info.getWorld());
+            for (final Craft craft : crafts) {
                 if (craft != null && craft.isCraftBlock(mloc)) {
                     event.setCancelled(true);
                     return;
@@ -88,18 +88,18 @@ public class BlockListener implements Listener {
         if (e.isCancelled()) {
             return;
         }
-        if (settings.ProtectPilotedCrafts) {
-            BlockVec mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
+        if (this.settings.ProtectPilotedCrafts) {
+            final BlockVec mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
             boolean blockInCraft = false;
-            for (Craft craft : craftManager.getCraftsInWorld(e.getBlock().getWorld())) {
+            for (final Craft craft : this.craftManager.getCraftsInWorld(e.getBlock().getWorld())) {
                 if (craft != null) {
-                    for (BlockVec tloc : craft.getBlockList()) {
+                    for (final BlockVec tloc : craft.getBlockList()) {
                         if (tloc.x == mloc.x && tloc.y == mloc.y && tloc.z == mloc.z) blockInCraft = true;
                     }
                 }
             }
             if (blockInCraft) {
-                e.getPlayer().sendMessage(i18n.get("BLOCK IS PART OF A PILOTED CRAFT"));
+                e.getPlayer().sendMessage(this.i18n.get("BLOCK IS PART OF A PILOTED CRAFT"));
                 e.setCancelled(true);
             }
         }
@@ -111,7 +111,7 @@ public class BlockListener implements Listener {
         if (e.isCancelled()) {
             return;
         }
-        for (Craft tcraft : craftManager.getCraftsInWorld(e.getLocation().getWorld())) {
+        for (final Craft tcraft : this.craftManager.getCraftsInWorld(e.getLocation().getWorld())) {
             if ((!tcraft.isNotProcessing()) && MathUtils
                     .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
                                                    MathUtils.bukkit2MovecraftLoc(e.getLocation()))) {
@@ -123,13 +123,13 @@ public class BlockListener implements Listener {
 
     // prevent water from spreading on moving crafts
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.HIGHEST) public void onBlockFromTo(BlockFromToEvent e) {
+    @EventHandler(priority = EventPriority.HIGHEST) public void onBlockFromTo(final BlockFromToEvent e) {
         if (e.isCancelled()) {
             return;
         }
-        Block block = e.getToBlock();
+        final Block block = e.getToBlock();
         if (block.getType() == Material.WATER) {
-            for (Craft tcraft : craftManager.getCraftsInWorld(block.getWorld())) {
+            for (final Craft tcraft : this.craftManager.getCraftsInWorld(block.getWorld())) {
                 if ((!tcraft.isNotProcessing()) && MathUtils
                         .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
                                                        MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
@@ -142,19 +142,19 @@ public class BlockListener implements Listener {
 
     // prevent fragile items from dropping on moving crafts
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.HIGHEST) public void onPhysics(BlockPhysicsEvent event) {
+    @EventHandler(priority = EventPriority.HIGHEST) public void onPhysics(final BlockPhysicsEvent event) {
         if (event.isCancelled()) {
             return;
         }
-        Block block = event.getBlock();
+        final Block block = event.getBlock();
         final int[] fragileBlocks = new int[]{
                 26, 34, 50, 55, 63, 64, 65, 68, 69, 70, 71, 72, 75, 76, 77, 93, 94, 96, 131, 132, 143, 147, 148, 149,
                 150, 151, 171, 193, 194, 195, 196, 197};
-        for (Craft tcraft : craftManager.getCraftsInWorld(block.getWorld())) {
+        for (final Craft tcraft : this.craftManager.getCraftsInWorld(block.getWorld())) {
             if ((!tcraft.isNotProcessing()) && MathUtils
                     .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
                                                    MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
-                boolean isFragile = (Arrays.binarySearch(fragileBlocks, block.getTypeId()) >= 0);
+                final boolean isFragile = (Arrays.binarySearch(fragileBlocks, block.getTypeId()) >= 0);
                 if (isFragile) {
 //						BlockFace face = ((Attachable) block).getAttachedFace();
 //					    if (!event.getBlock().getRelative(face).getType().isSolid()) {
@@ -167,30 +167,30 @@ public class BlockListener implements Listener {
     }
 
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.NORMAL) public void onSignChange(SignChangeEvent event) {
-        Player p = event.getPlayer();
+    @EventHandler(priority = EventPriority.NORMAL) public void onSignChange(final SignChangeEvent event) {
+        final Player p = event.getPlayer();
         if (p == null) return;
-        String signText = org.bukkit.ChatColor.stripColor(event.getLine(0));
+        final String signText = org.bukkit.ChatColor.stripColor(event.getLine(0));
         // did the player try to create a craft command sign?
-        if (craftManager.getCraftTypeFromString(signText).isPresent()) {
-            if (!settings.RequireCreatePerm) {
+        if (this.craftManager.getCraftTypeFromString(signText).isPresent()) {
+            if (!this.settings.RequireCreatePerm) {
                 return;
             }
             if (!p.hasPermission("movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create")) {
-                p.sendMessage(i18n.get("Insufficient Permissions"));
+                p.sendMessage(this.i18n.get("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Cruise: OFF") || signText.equalsIgnoreCase("Cruise: ON")) {
-            if (!p.hasPermission("movecraft.cruisesign") && settings.RequireCreatePerm) {
-                p.sendMessage(i18n.get("Insufficient Permissions"));
+            if (!p.hasPermission("movecraft.cruisesign") && this.settings.RequireCreatePerm) {
+                p.sendMessage(this.i18n.get("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
         if (signText.equalsIgnoreCase("Crew:")) {
-            String crewName = org.bukkit.ChatColor.stripColor(event.getLine(1));
+            final String crewName = org.bukkit.ChatColor.stripColor(event.getLine(1));
             if (!p.getName().equalsIgnoreCase(crewName)) {
-                p.sendMessage(i18n.get("You can only create a Crew: sign for yourself"));
+                p.sendMessage(this.i18n.get("You can only create a Crew: sign for yourself"));
                 event.setLine(1, p.getName());
 //				event.setCancelled(true);
             }
@@ -198,8 +198,8 @@ public class BlockListener implements Listener {
     }
 
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.LOW) public void onBlockIgnite(BlockIgniteEvent event) {
-        if (!settings.FireballPenetration) return;
+    @EventHandler(priority = EventPriority.LOW) public void onBlockIgnite(final BlockIgniteEvent event) {
+        if (!this.settings.FireballPenetration) return;
         if (event.isCancelled()) return;
         // replace blocks with fire occasionally, to prevent fast craft from simply ignoring fire
         if (event.getCause() == BlockIgniteEvent.IgniteCause.FIREBALL) {
@@ -211,10 +211,10 @@ public class BlockListener implements Listener {
             if (testBlock.getType().isBurnable()) {
                 boolean isBurnAllowed = true;
                 // check to see if fire spread is allowed, don't check if worldguard integration is not enabled
-                if (plugin.getWorldGuardPlugin() != null &&
-                    (settings.WorldGuardBlockMoveOnBuildPerm || settings.WorldGuardBlockSinkOnPVPPerm)) {
-                    ApplicableRegionSet set = plugin.getWorldGuardPlugin().getRegionManager(testBlock.getWorld())
-                                                    .getApplicableRegions(testBlock.getLocation());
+                if (this.plugin.getWorldGuardPlugin() != null &&
+                    (this.settings.WorldGuardBlockMoveOnBuildPerm || this.settings.WorldGuardBlockSinkOnPVPPerm)) {
+                    final ApplicableRegionSet set = this.plugin.getWorldGuardPlugin().getRegionManager(testBlock.getWorld())
+                                                               .getApplicableRegions(testBlock.getLocation());
                     if (!set.allows(DefaultFlag.FIRE_SPREAD)) {
                         isBurnAllowed = false;
                     }
@@ -239,11 +239,11 @@ public class BlockListener implements Listener {
 	}*/
 
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.NORMAL) public void explodeEvent(EntityExplodeEvent e) {
+    @EventHandler(priority = EventPriority.NORMAL) public void explodeEvent(final EntityExplodeEvent e) {
         // Remove any blocks from the list that were adjacent to water, to prevent spillage
-        Iterator<Block> i = e.blockList().iterator();
-        if (!settings.DisableSpillProtection) while (i.hasNext()) {
-            Block b = i.next();
+        final Iterator<Block> i = e.blockList().iterator();
+        if (!this.settings.DisableSpillProtection) while (i.hasNext()) {
+            final Block b = i.next();
             boolean isNearWater = false;
             if (b.getY() > b.getWorld().getSeaLevel()) for (int mx = -1; mx <= 1; mx++) {
                 for (int mz = -1; mz <= 1; mz++) {
@@ -259,11 +259,11 @@ public class BlockListener implements Listener {
         }
 
         if (e.getEntity() == null) return;
-        for (Player p : e.getEntity().getWorld().getPlayers()) {
-            org.bukkit.entity.Entity tnt = e.getEntity();
+        for (final Player p : e.getEntity().getWorld().getPlayers()) {
+            final org.bukkit.entity.Entity tnt = e.getEntity();
 
-            if (e.getEntityType() == EntityType.PRIMED_TNT && settings.TracerRateTicks != 0) {
-                long minDistSquared = 60 * 60;
+            if (e.getEntityType() == EntityType.PRIMED_TNT && this.settings.TracerRateTicks != 0) {
+                final long minDistSquared = 60 * 60;
                 long maxDistSquared = Bukkit.getServer().getViewDistance() * 16;
                 maxDistSquared = maxDistSquared - 16;
                 maxDistSquared = maxDistSquared * maxDistSquared;
@@ -276,17 +276,17 @@ public class BlockListener implements Listener {
                     final World fw = e.getEntity().getWorld();
                     // then make a glowstone to look like the explosion, place it a little later so it isn't right in
                     // the middle of the volley
-                    BukkitTask placeCobweb = new BukkitRunnable() {
+                    final BukkitTask placeCobweb = new BukkitRunnable() {
                         @Override public void run() {
                             fp.sendBlockChange(loc, 89, (byte) 0);
                         }
-                    }.runTaskLater(plugin, 5);
+                    }.runTaskLater(this.plugin, 5);
                     // then remove it
-                    BukkitTask removeCobweb = new BukkitRunnable() {
+                    final BukkitTask removeCobweb = new BukkitRunnable() {
                         @Override public void run() {
                             fp.sendBlockChange(loc, 0, (byte) 0);
                         }
-                    }.runTaskLater(plugin, 160);
+                    }.runTaskLater(this.plugin, 160);
                 }
             }
         }

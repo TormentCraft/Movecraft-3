@@ -67,239 +67,237 @@ public class DetectionTask extends AsyncTask {
     private Map<MaterialDataPredicate, List<CraftType.Constraint>> dFlyBlocks;
     private final DetectionTaskData data;
 
-    public DetectionTask(Craft c, BlockVec startLocation, IntRange sizeRange, MaterialDataPredicate allowedBlocks,
-                         MaterialDataPredicate forbiddenBlocks, Player player, Player notificationPlayer, World w,
-                         Movecraft plugin, Settings settings, I18nSupport i18n)
+    public DetectionTask(final Craft craft, final BlockVec startLocation, final IntRange sizeRange, final MaterialDataPredicate allowedBlocks,
+                         final MaterialDataPredicate forbiddenBlocks, final Player player, final Player notificationPlayer, final World w,
+                         final Movecraft plugin, final Settings settings, final I18nSupport i18n)
     {
-        super(c);
+        super(craft);
         this.startLocation = startLocation;
         this.sizeRange = sizeRange;
         this.plugin = plugin;
         this.settings = settings;
         this.i18n = i18n;
-        data = new DetectionTaskData(w, player, notificationPlayer, allowedBlocks, forbiddenBlocks);
+        this.data = new DetectionTaskData(w, player, notificationPlayer, allowedBlocks, forbiddenBlocks);
     }
 
     @Override public void execute() {
-        Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks = getCraft().getType().getFlyBlocks();
-        dFlyBlocks = flyBlocks;
+        final Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks = this.getCraft().getType().getFlyBlocks();
+        this.dFlyBlocks = flyBlocks;
 
-        blockStack.push(startLocation);
+        this.blockStack.push(this.startLocation);
 
         do {
-            detectSurrounding(blockStack.pop());
-        } while (!blockStack.isEmpty());
+            this.detectSurrounding(this.blockStack.pop());
+        } while (!this.blockStack.isEmpty());
 
-        if (data.failed()) {
+        if (this.data.failed()) {
             return;
         }
 
-        if (isWithinLimit(blockList.size(), sizeRange, false)) {
+        if (this.isWithinLimit(this.blockList.size(), this.sizeRange, false)) {
 
-            data.setBlockList(finaliseBlockList(blockList));
+            this.data.setBlockList(this.finaliseBlockList(this.blockList));
 
-            if (confirmStructureRequirements(flyBlocks, blockTypeCount, data.getBlockList().length)) {
-                data.setHitBox(BoundingBoxUtils
-                                       .formBoundingBox(data.getBlockList(), data.getMinX(), maxX, data.getMinZ(),
-                                                        maxZ));
+            if (this.confirmStructureRequirements(flyBlocks, this.blockTypeCount, this.data.getBlockList().length)) {
+                this.data.setHitBox(BoundingBoxUtils
+                                       .formBoundingBox(this.data.getBlockList(), this.data.getMinX(), this.maxX, this.data.getMinZ(),
+                                                        this.maxZ));
             }
         }
     }
 
-    private void detectBlock(int x, int y, int z) {
-        BlockVec workingLocation = new BlockVec(x, y, z);
+    private void detectBlock(final int x, final int y, final int z) {
+        final BlockVec workingLocation = new BlockVec(x, y, z);
 
-        if (notVisited(workingLocation, visited)) {
-            Block testBlock;
-            Material testMaterial;
-            MaterialData materialData;
+        if (this.notVisited(workingLocation, this.visited)) {
+            final Block testBlock;
+            final Material testMaterial;
+            final MaterialData materialData;
             try {
-                testBlock = data.getWorld().getBlockAt(x, y, z);
+                testBlock = this.data.getWorld().getBlockAt(x, y, z);
                 materialData = testBlock.getState().getData();
                 testMaterial = materialData.getItemType();
-            } catch (Exception e) {
-                fail(String.format(i18n.get("Detection - Craft too large"), sizeRange.max));
+            } catch (final Exception e) {
+                this.fail(String.format(this.i18n.get("Detection - Craft too large"), this.sizeRange.max));
                 return;
             }
 
             if ((testMaterial == Material.WATER) || (testMaterial == Material.STATIONARY_WATER)) {
-                data.setWaterContact(true);
+                this.data.setWaterContact(true);
             }
             if (testMaterial == Material.WALL_SIGN || testMaterial == Material.SIGN_POST) {
-                BlockState state = data.getWorld().getBlockAt(x, y, z).getState();
+                final BlockState state = this.data.getWorld().getBlockAt(x, y, z).getState();
                 if (state instanceof Sign) {
-                    Sign s = (Sign) state;
-                    if (s.getLine(0).equalsIgnoreCase("Pilot:") && data.getPlayer() != null) {
-                        String playerName = data.getPlayer().getName();
+                    final Sign s = (Sign) state;
+                    if (s.getLine(0).equalsIgnoreCase("Pilot:") && this.data.getPlayer() != null) {
+                        final String playerName = this.data.getPlayer().getName();
                         boolean foundPilot = false;
                         if (s.getLine(1).equalsIgnoreCase(playerName) || s.getLine(2).equalsIgnoreCase(playerName) ||
                             s.getLine(3).equalsIgnoreCase(playerName)) {
                             foundPilot = true;
                         }
-                        if (!foundPilot && (!data.getPlayer().hasPermission("movecraft.bypasslock"))) {
-                            fail(i18n.get("Not one of the registered pilots on this craft"));
+                        if (!foundPilot && (!this.data.getPlayer().hasPermission("movecraft.bypasslock"))) {
+                            this.fail(this.i18n.get("Not one of the registered pilots on this craft"));
                         }
                     }
                 }
             }
 
-            if (isForbiddenBlock(materialData)) {
-                fail(i18n.get("Detection - Forbidden block found") +
-                     String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(materialData),
+            if (this.isForbiddenBlock(materialData)) {
+                this.fail(this.i18n.get("Detection - Forbidden block found") +
+                          String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(materialData),
                                    x, y, z));
-            } else if (isAllowedBlock(materialData)) {
+            } else if (this.isAllowedBlock(materialData)) {
                 // Check for double chests.
-                Set<Material> chestTypes = Sets.immutableEnumSet(Material.CHEST, Material.TRAPPED_CHEST);
+                final Set<Material> chestTypes = Sets.immutableEnumSet(Material.CHEST, Material.TRAPPED_CHEST);
                 if (chestTypes.contains(testMaterial)) {
-                    World w = data.getWorld();
-                    boolean foundDoubleChest =
+                    final World w = this.data.getWorld();
+                    final boolean foundDoubleChest =
                             (w.getBlockAt(x - 1, y, z).getType() == testMaterial) ||
                             (w.getBlockAt(x + 1, y, z).getType() == testMaterial) ||
                             (w.getBlockAt(x, y, z - 1).getType() == testMaterial) ||
                             (w.getBlockAt(x, y, z + 1).getType() == testMaterial);
                     if (foundDoubleChest) {
-                        fail(i18n.get("Detection - ERROR: Double chest found"));
+                        this.fail(this.i18n.get("Detection - ERROR: Double chest found"));
                     }
                 }
 
-                Location loc = new Location(data.getWorld(), x, y, z);
-                Player p;
-                if (data.getPlayer() == null) {
-                    p = data.getNotificationPlayer();
+                final Location loc = new Location(this.data.getWorld(), x, y, z);
+                final Player p;
+                if (this.data.getPlayer() == null) {
+                    p = this.data.getNotificationPlayer();
                 } else {
-                    p = data.getPlayer();
+                    p = this.data.getPlayer();
                 }
                 if (p != null) {
-                    if (plugin.getWorldGuardPlugin() != null &&
-                        plugin.getWGCustomFlagsPlugin() != null &&
-                        settings.WGCustomFlagsUsePilotFlag) {
-                        LocalPlayer lp = plugin.getWorldGuardPlugin().wrapPlayer(p);
+                    if (this.plugin.getWorldGuardPlugin() != null && this.plugin.getWGCustomFlagsPlugin() != null && this.settings.WGCustomFlagsUsePilotFlag) {
+                        final LocalPlayer lp = this.plugin.getWorldGuardPlugin().wrapPlayer(p);
                         if (!WGCustomFlagsUtils
-                                .validateFlag(plugin.getWorldGuardPlugin(), loc, plugin.FLAG_PILOT, lp)) {
-                            fail(String.format(i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d", x, y, z));
+                                .validateFlag(this.plugin.getWorldGuardPlugin(), loc, this.plugin.FLAG_PILOT, lp)) {
+                            this.fail(String.format(this.i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d", x, y, z));
                         }
                     }
                 }
 
-                addToBlockList(workingLocation);
-                for (MaterialDataPredicate flyBlockDef : dFlyBlocks.keySet()) {
+                this.addToBlockList(workingLocation);
+                for (final MaterialDataPredicate flyBlockDef : this.dFlyBlocks.keySet()) {
                     if (flyBlockDef.checkBlock(testBlock)) {
-                        addToBlockCount(flyBlockDef);
+                        this.addToBlockCount(flyBlockDef);
                     } else {
-                        addToBlockCount(null);
+                        this.addToBlockCount(null);
                     }
                 }
 
-                if (isWithinLimit(blockList.size(), new IntRange(0, sizeRange.max), true)) {
+                if (this.isWithinLimit(this.blockList.size(), new IntRange(0, this.sizeRange.max), true)) {
 
-                    addToDetectionStack(workingLocation);
+                    this.addToDetectionStack(workingLocation);
 
-                    calculateBounds(workingLocation);
+                    this.calculateBounds(workingLocation);
                 }
             }
         }
     }
 
-    private boolean isAllowedBlock(MaterialData test) {
-        return data.getAllowedBlocks().check(test);
+    private boolean isAllowedBlock(final MaterialData test) {
+        return this.data.getAllowedBlocks().check(test);
     }
 
-    private boolean isForbiddenBlock(MaterialData test) {
-        return data.getForbiddenBlocks().check(test);
+    private boolean isForbiddenBlock(final MaterialData test) {
+        return this.data.getForbiddenBlocks().check(test);
     }
 
     public DetectionTaskData getData() {
-        return data;
+        return this.data;
     }
 
-    private boolean notVisited(BlockVec l, Set<BlockVec> locations) {
-        if (locations.contains(l)) {
+    private boolean notVisited(final BlockVec vec, final Set<BlockVec> locations) {
+        if (locations.contains(vec)) {
             return false;
         } else {
-            locations.add(l);
+            locations.add(vec);
             return true;
         }
     }
 
-    private void addToBlockList(BlockVec l) {
-        blockList.add(l);
+    private void addToBlockList(final BlockVec l) {
+        this.blockList.add(l);
     }
 
-    private void addToDetectionStack(BlockVec l) {
-        blockStack.push(l);
+    private void addToDetectionStack(final BlockVec l) {
+        this.blockStack.push(l);
     }
 
-    private void addToBlockCount(MaterialDataPredicate id) {
-        int count = Optional.ofNullable(blockTypeCount.get(id)).orElse(0);
-        blockTypeCount.put(id, count + 1);
+    private void addToBlockCount(final MaterialDataPredicate id) {
+        final int count = Optional.ofNullable(this.blockTypeCount.get(id)).orElse(0);
+        this.blockTypeCount.put(id, count + 1);
     }
 
-    private void detectSurrounding(BlockVec l) {
-        int x = l.x;
-        int y = l.y;
-        int z = l.z;
+    private void detectSurrounding(final BlockVec l) {
+        final int x = l.x;
+        final int y = l.y;
+        final int z = l.z;
 
         for (int xMod = -1; xMod < 2; xMod += 2) {
             for (int yMod = -1; yMod < 2; yMod++) {
-                detectBlock(x + xMod, y + yMod, z);
+                this.detectBlock(x + xMod, y + yMod, z);
             }
         }
 
         for (int zMod = -1; zMod < 2; zMod += 2) {
             for (int yMod = -1; yMod < 2; yMod++) {
-                detectBlock(x, y + yMod, z + zMod);
+                this.detectBlock(x, y + yMod, z + zMod);
             }
         }
 
         for (int yMod = -1; yMod < 2; yMod += 2) {
-            detectBlock(x, y + yMod, z);
+            this.detectBlock(x, y + yMod, z);
         }
     }
 
-    private void calculateBounds(BlockVec l) {
-        if (maxX == null || l.x > maxX) {
-            maxX = l.x;
+    private void calculateBounds(final BlockVec l) {
+        if (this.maxX == null || l.x > this.maxX) {
+            this.maxX = l.x;
         }
-        if (maxY == null || l.y > maxY) {
-            maxY = l.y;
+        if (this.maxY == null || l.y > this.maxY) {
+            this.maxY = l.y;
         }
-        if (maxZ == null || l.z > maxZ) {
-            maxZ = l.z;
+        if (this.maxZ == null || l.z > this.maxZ) {
+            this.maxZ = l.z;
         }
-        if (data.getMinX() == null || l.x < data.getMinX()) {
-            data.setMinX(l.x);
+        if (this.data.getMinX() == null || l.x < this.data.getMinX()) {
+            this.data.setMinX(l.x);
         }
-        if (minY == null || l.y < minY) {
-            minY = l.y;
+        if (this.minY == null || l.y < this.minY) {
+            this.minY = l.y;
         }
-        if (data.getMinZ() == null || l.z < data.getMinZ()) {
-            data.setMinZ(l.z);
+        if (this.data.getMinZ() == null || l.z < this.data.getMinZ()) {
+            this.data.setMinZ(l.z);
         }
     }
 
-    private boolean isWithinLimit(int size, IntRange sizeRange, boolean continueOver) {
+    private boolean isWithinLimit(final int size, final IntRange sizeRange, final boolean continueOver) {
         if (size < sizeRange.min) {
-            fail(String.format(i18n.get("Detection - Craft too small"), sizeRange.min) +
-                 String.format("\nBlocks found: %d", size));
+            this.fail(String.format(this.i18n.get("Detection - Craft too small"), sizeRange.min) +
+                      String.format("\nBlocks found: %d", size));
             return false;
         } else if ((!continueOver && size > sizeRange.max) || (continueOver && size > (sizeRange.max + 1000))) {
-            fail(String.format(i18n.get("Detection - Craft too large"), sizeRange.max) +
-                 String.format("\nBlocks found: %d", size));
+            this.fail(String.format(this.i18n.get("Detection - Craft too large"), sizeRange.max) +
+                      String.format("\nBlocks found: %d", size));
             return false;
         } else {
             return true;
         }
     }
 
-    private BlockVec[] finaliseBlockList(Set<BlockVec> blockSet) {
+    private BlockVec[] finaliseBlockList(final Set<BlockVec> blockSet) {
         //BlockVec[] finalList=blockSet.toArray( new BlockVec[1] );
-        ArrayList<BlockVec> finalList = new ArrayList<>();
+        final ArrayList<BlockVec> finalList = new ArrayList<>();
 
         // Sort the blocks from the bottom up to minimize lower altitude block updates
-        for (int posx = data.getMinX(); posx <= this.maxX; posx++) {
-            for (int posz = data.getMinZ(); posz <= this.maxZ; posz++) {
+        for (int posx = this.data.getMinX(); posx <= this.maxX; posx++) {
+            for (int posz = this.data.getMinZ(); posz <= this.maxZ; posz++) {
                 for (int posy = this.minY; posy <= this.maxY; posy++) {
-                    BlockVec test = new BlockVec(posx, posy, posz);
+                    final BlockVec test = new BlockVec(posx, posy, posz);
                     if (blockSet.contains(test)) finalList.add(test);
                 }
             }
@@ -307,42 +305,42 @@ public class DetectionTask extends AsyncTask {
         return finalList.toArray(new BlockVec[1]);
     }
 
-    private boolean confirmStructureRequirements(Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks,
-                                                 Map<MaterialDataPredicate, Integer> countData, int total)
+    private boolean confirmStructureRequirements(final Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks,
+                                                 final Map<MaterialDataPredicate, Integer> countData, final int total)
     {
-        if (getCraft().getType().getRequireWaterContact()) {
-            if (!data.getWaterContact()) {
-                fail(i18n.get("Detection - Failed - Water contact required but not found"));
+        if (this.getCraft().getType().getRequireWaterContact()) {
+            if (!this.data.getWaterContact()) {
+                this.fail(this.i18n.get("Detection - Failed - Water contact required but not found"));
                 return false;
             }
         }
 
-        for (Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
-            MaterialDataPredicate predicate = entry.getKey();
-            List<CraftType.Constraint> constraints = entry.getValue();
-            int count = Optional.ofNullable(countData.get(predicate)).orElse(0);
-            double percentage = ((double) count / total) * 100;
-            String name = Joiner.on(' ').join(BlockNames.materialDataPredicateNames(entry.getKey()));
+        for (final Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
+            final MaterialDataPredicate predicate = entry.getKey();
+            final List<CraftType.Constraint> constraints = entry.getValue();
+            final int count = Optional.ofNullable(countData.get(predicate)).orElse(0);
+            final double percentage = ((double) count / total) * 100;
+            final String name = Joiner.on(' ').join(BlockNames.materialDataPredicateNames(entry.getKey()));
 
-            for (CraftType.Constraint constraint : constraints) {
-                int exactBound = constraint.bound.asExact(total);
-                double ratioBound = constraint.bound.asRatio(total);
+            for (final CraftType.Constraint constraint : constraints) {
+                final int exactBound = constraint.bound.asExact(total);
+                final double ratioBound = constraint.bound.asRatio(total);
 
                 if (!constraint.isSatisfiedBy(count, total)) {
                     if (constraint.isUpper) {
                         if (constraint.bound.isExact()) {
-                            fail(String.format(i18n.get("Not enough flyblock") + " (%d < %d) : %s", count, exactBound,
-                                               name));
+                            this.fail(String.format(this.i18n.get("Not enough flyblock") + " (%d < %d) : %s", count, exactBound,
+                                                    name));
                         } else {
-                            fail(String.format(i18n.get("Not enough flyblock") + " (%.2f%% < %.2f%%) : %s", percentage,
+                            this.fail(String.format(this.i18n.get("Not enough flyblock") + " (%.2f%% < %.2f%%) : %s", percentage,
                                                ratioBound * 100.0));
                         }
                     } else {
                         if (constraint.bound.isExact()) {
-                            fail(String.format(i18n.get("Too much flyblock") + " (%d > %d) : %s", count, exactBound,
-                                               name));
+                            this.fail(String.format(this.i18n.get("Too much flyblock") + " (%d > %d) : %s", count, exactBound,
+                                                    name));
                         } else {
-                            fail(String.format(i18n.get("Too much flyblock") + " (%.2f%% > %.2f%%) : %s", percentage,
+                            this.fail(String.format(this.i18n.get("Too much flyblock") + " (%.2f%% > %.2f%%) : %s", percentage,
                                                ratioBound * 100.0));
                         }
                     }
@@ -354,8 +352,8 @@ public class DetectionTask extends AsyncTask {
         return true;
     }
 
-    private void fail(String message) {
-        data.setFailed(true);
-        data.setFailMessage(message);
+    private void fail(final String message) {
+        this.data.setFailed(true);
+        this.data.setFailMessage(message);
     }
 }

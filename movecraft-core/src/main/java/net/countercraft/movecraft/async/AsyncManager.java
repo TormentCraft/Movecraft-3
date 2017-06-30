@@ -19,10 +19,8 @@ package net.countercraft.movecraft.async;
 
 import at.pavlov.cannons.cannon.Cannon;
 import com.google.common.base.Optional;
-import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.countercraft.movecraft.Events;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockVec;
@@ -60,7 +58,6 @@ import org.bukkit.util.Vector;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -104,7 +101,7 @@ public final class AsyncManager extends BukkitRunnable {
 
     public void detect(Craft craft, Player player, Player notificationPlayer, BlockVec startPoint) {
         submitTask(new DetectionTask(craft, startPoint, craft.type.getSizeRange(), craft.type.getAllowedBlocks(),
-                                     craft.type.getForbiddenBlocks(), player, notificationPlayer, craft.w, plugin,
+                                     craft.type.getForbiddenBlocks(), player, notificationPlayer, craft.world, plugin,
                                      settings, i18n),
 
                    craft);
@@ -150,8 +147,8 @@ public final class AsyncManager extends BukkitRunnable {
         // load all chunks that will be needed to translate this craft
         for (int posX = cminX - 1; posX <= cmaxX + 1; posX++) {
             for (int posZ = cminZ - 1; posZ <= cmaxZ + 1; posZ++) {
-                if (!craft.getW().isChunkLoaded(posX, posZ)) {
-                    craft.getW().loadChunk(posX, posZ);
+                if (!craft.getWorld().isChunkLoaded(posX, posZ)) {
+                    craft.getWorld().loadChunk(posX, posZ);
                 }
             }
         }
@@ -190,8 +187,8 @@ public final class AsyncManager extends BukkitRunnable {
         // load all chunks that will be needed to rotate this craft
         for (int posX = cminX; posX <= cmaxX; posX++) {
             for (int posZ = cminZ; posZ <= cmaxZ; posZ++) {
-                if (!craft.getW().isChunkLoaded(posX, posZ)) {
-                    craft.getW().loadChunk(posX, posZ);
+                if (!craft.getWorld().isChunkLoaded(posX, posZ)) {
+                    craft.getWorld().loadChunk(posX, posZ);
                 }
             }
         }
@@ -199,12 +196,12 @@ public final class AsyncManager extends BukkitRunnable {
         craft.setCruiseDirection(craft.getCruiseDirection().rotateXZ(rotation));
 
         submitTask(new RotationTask(craft, plugin, settings, i18n, craftManager, originPoint, craft.getBlockList(),
-                                    rotation, craft.getW()), craft);
+                                    rotation, craft.getWorld()), craft);
     }
 
     public void rotate(Craft craft, Rotation rotation, BlockVec originPoint, boolean isSubCraft) {
         submitTask(new RotationTask(craft, plugin, settings, i18n, craftManager, originPoint, craft.getBlockList(),
-                                    rotation, craft.getW(), isSubCraft), craft);
+                                    rotation, craft.getWorld(), isSubCraft), craft);
     }
 
     public void submitTask(final AsyncTask task, Craft c) {
@@ -261,7 +258,7 @@ public final class AsyncManager extends BukkitRunnable {
                         else plugin.getLogger()
                                    .log(Level.INFO, "NULL Player Craft Detection failed:" + data.getFailMessage());
                     } else {
-                        Set<Craft> craftsInWorld = craftManager.getCraftsInWorld(c.getW());
+                        Set<Craft> craftsInWorld = craftManager.getCraftsInWorld(c.getWorld());
                         boolean failed = false;
 
                         if (craftsInWorld != null) {
@@ -382,7 +379,7 @@ public final class AsyncManager extends BukkitRunnable {
                     if (task.getData().collisionExplosion()) {
                         MapUpdateCommand[] updates = task.getData().getUpdates();
                         c.setBlockList(task.getData().getBlockList());
-                        boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, null, null);
+                        boolean failed = mapUpdateManager.addWorldUpdate(c.getWorld(), updates, null, null);
 
                         if (failed) {
                             plugin.getLogger().log(Level.SEVERE, i18n.get("Translation - Craft collision"));
@@ -402,13 +399,13 @@ public final class AsyncManager extends BukkitRunnable {
                         // convert blocklist to location list
                         List<Location> shipLocations = new ArrayList<>();
                         for (BlockVec loc : c.getBlockList()) {
-                            Location tloc = new Location(c.getW(), loc.x, loc.y, loc.z);
+                            Location tloc = new Location(c.getWorld(), loc.x, loc.y, loc.z);
                             shipLocations.add(tloc);
                         }
                         shipCannons = plugin.getCannonsPlugin().getCannonsAPI()
                                             .getCannons(shipLocations, c.getNotificationPlayer().getUniqueId(), true);
                     }
-                    boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, eUpdates, iUpdates);
+                    boolean failed = mapUpdateManager.addWorldUpdate(c.getWorld(), updates, eUpdates, iUpdates);
 
                     if (failed) {
                         plugin.getLogger().log(Level.SEVERE, i18n.get("Translation - Craft collision"));
@@ -452,7 +449,7 @@ public final class AsyncManager extends BukkitRunnable {
                             // convert blocklist to location list
                             List<Location> shipLocations = new ArrayList<>();
                             for (BlockVec loc : c.getBlockList()) {
-                                Location tloc = new Location(c.getW(), loc.x, loc.y, loc.z);
+                                Location tloc = new Location(c.getWorld(), loc.x, loc.y, loc.z);
                                 shipLocations.add(tloc);
                             }
                             shipCannons = plugin.getCannonsPlugin().getCannonsAPI()
@@ -460,7 +457,7 @@ public final class AsyncManager extends BukkitRunnable {
                                                             true);
                         }
 
-                        boolean failed = mapUpdateManager.addWorldUpdate(c.getW(), updates, eUpdates, null);
+                        boolean failed = mapUpdateManager.addWorldUpdate(c.getWorld(), updates, eUpdates, null);
 
                         if (failed) {
                             plugin.getLogger().log(Level.SEVERE, i18n.get("Rotation - Craft Collision"));
@@ -474,7 +471,7 @@ public final class AsyncManager extends BukkitRunnable {
 
                             // rotate any cannons that were present
                             if (plugin.getCannonsPlugin() != null && shipCannons != null) {
-                                Location tloc = new Location(task.getCraft().getW(), task.getOriginPoint().x,
+                                Location tloc = new Location(task.getCraft().getWorld(), task.getOriginPoint().x,
                                                              task.getOriginPoint().y, task.getOriginPoint().z);
                                 for (Cannon can : shipCannons) {
                                     if (task.getRotation() == Rotation.CLOCKWISE) can.rotateRight(tloc.toVector());

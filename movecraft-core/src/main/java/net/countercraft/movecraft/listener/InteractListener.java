@@ -51,10 +51,9 @@ public class InteractListener implements Listener {
     private final CraftManager craftManager;
     private final AsyncManager asyncManager;
     private final Map<Player, Long> timeMap = new HashMap<>();
-    private final Map<Player, Long> repairRightClickTimeMap = new HashMap<>();
 
-    public InteractListener(Plugin plugin, Settings settings, I18nSupport i18n, CraftManager craftManager,
-                            AsyncManager asyncManager)
+    public InteractListener(final Plugin plugin, final Settings settings, final I18nSupport i18n, final CraftManager craftManager,
+                            final AsyncManager asyncManager)
     {
         this.plugin = plugin;
         this.settings = settings;
@@ -64,11 +63,11 @@ public class InteractListener implements Listener {
     }
 
     @SuppressWarnings({"unused", "WeakerAccess"})
-    @EventHandler public void onPlayerInteract(PlayerInteractEvent event) {
+    @EventHandler public void onPlayerInteract(final PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-            Material m = event.getClickedBlock().getType();
-            if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
-                Sign sign = (Sign) event.getClickedBlock().getState();
+            final Material clickedMaterial = event.getClickedBlock().getType();
+            if (clickedMaterial == Material.SIGN_POST || clickedMaterial == Material.WALL_SIGN) {
+                final Sign sign = (Sign) event.getClickedBlock().getState();
                 final String firstLine = ChatColor.stripColor(sign.getLine(0));
 
                 if (firstLine == null) {
@@ -76,33 +75,33 @@ public class InteractListener implements Listener {
                 }
 
                 if (firstLine.equalsIgnoreCase("Remote Sign")) {
-                    BlockVec sourceLocation = MathUtils.bukkit2MovecraftLoc(event.getClickedBlock().getLocation());
+                    final BlockVec sourceLocation = MathUtils.bukkit2MovecraftLoc(event.getClickedBlock().getLocation());
                     Craft foundCraft = null;
-                    for (Craft tcraft : craftManager.getCraftsInWorld(event.getClickedBlock().getWorld())) {
+                    for (final Craft tcraft : this.craftManager.getCraftsInWorld(event.getClickedBlock().getWorld())) {
                         if (MathUtils.playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(),
                                                                     tcraft.getMinZ(), sourceLocation)) {
                             // don't use a craft with a null player. This is mostly to avoid trying to use subcrafts
-                            if (craftManager.getPlayerFromCraft(tcraft) != null) foundCraft = tcraft;
+                            if (this.craftManager.getPlayerFromCraft(tcraft) != null) foundCraft = tcraft;
                         }
                     }
 
                     if (foundCraft == null) {
                         event.getPlayer()
-                             .sendMessage(i18n.get("ERROR: Remote Sign must be a part of a piloted craft!"));
+                             .sendMessage(this.i18n.get("ERROR: Remote Sign must be a part of a piloted craft!"));
                         return;
                     }
 
                     if (!foundCraft.getType().allowRemoteSign()) {
-                        event.getPlayer().sendMessage(i18n.get("ERROR: Remote Signs not allowed on this craft!"));
+                        event.getPlayer().sendMessage(this.i18n.get("ERROR: Remote Signs not allowed on this craft!"));
                         return;
                     }
 
-                    String targetText = org.bukkit.ChatColor.stripColor(sign.getLine(1));
+                    final String targetText = org.bukkit.ChatColor.stripColor(sign.getLine(1));
                     BlockVec foundLoc = null;
-                    for (BlockVec tloc : foundCraft.getBlockList()) {
-                        Block tb = event.getClickedBlock().getWorld().getBlockAt(tloc.x, tloc.y, tloc.z);
+                    for (final BlockVec tloc : foundCraft.getBlockList()) {
+                        final Block tb = event.getClickedBlock().getWorld().getBlockAt(tloc.x, tloc.y, tloc.z);
                         if (tb.getType() == Material.SIGN_POST || tb.getType() == Material.WALL_SIGN) {
-                            Sign ts = (Sign) tb.getState();
+                            final Sign ts = (Sign) tb.getState();
                             if (org.bukkit.ChatColor.stripColor(ts.getLine(0)) != null)
                                 if (org.bukkit.ChatColor.stripColor(ts.getLine(0)) != null)
                                     if (org.bukkit.ChatColor.stripColor(ts.getLine(0)).equalsIgnoreCase(targetText))
@@ -124,15 +123,15 @@ public class InteractListener implements Listener {
                         }
                     }
                     if (foundLoc == null) {
-                        event.getPlayer().sendMessage(i18n.get("ERROR: Could not find target sign!"));
+                        event.getPlayer().sendMessage(this.i18n.get("ERROR: Could not find target sign!"));
                         return;
                     }
 
-                    Block newBlock = event.getClickedBlock().getWorld().getBlockAt(foundLoc.x, foundLoc.y, foundLoc.z);
-                    PlayerInteractEvent newEvent = new PlayerInteractEvent(event.getPlayer(), event.getAction(),
-                                                                           event.getItem(), newBlock,
-                                                                           event.getBlockFace());
-                    onPlayerInteract(newEvent);
+                    final Block newBlock = event.getClickedBlock().getWorld().getBlockAt(foundLoc.x, foundLoc.y, foundLoc.z);
+                    final PlayerInteractEvent newEvent = new PlayerInteractEvent(event.getPlayer(), event.getAction(),
+                                                                                 event.getItem(), newBlock,
+                                                                                 event.getBlockFace());
+                    this.onPlayerInteract(newEvent);
                     event.setCancelled(true);
                     return;
                 }
@@ -140,18 +139,18 @@ public class InteractListener implements Listener {
         }
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Material m = event.getClickedBlock().getType();
+            final Material m = event.getClickedBlock().getType();
             if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
-                onSignRightClick(event);
+                this.onSignRightClick(event);
             }
         } else if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-            Material m = event.getClickedBlock().getType();
+            final Material m = event.getClickedBlock().getType();
             if (m == Material.SIGN_POST || m == Material.WALL_SIGN) {
                 if (event.getClickedBlock() == null) {
                     return;
                 }
-                Sign sign = (Sign) event.getClickedBlock().getState();
-                String signText = org.bukkit.ChatColor.stripColor(sign.getLine(0));
+                final Sign sign = (Sign) event.getClickedBlock().getState();
+                final String signText = org.bukkit.ChatColor.stripColor(sign.getLine(0));
 
                 if (signText == null) {
                     return;
@@ -160,18 +159,18 @@ public class InteractListener implements Listener {
                 if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equals("\\  ||  /") &&
                     org.bukkit.ChatColor.stripColor(sign.getLine(1)).equals("==      ==") &&
                     org.bukkit.ChatColor.stripColor(sign.getLine(2)).equals("/  ||  \\")) {
-                    final Craft playerCraft = craftManager.getCraftByPlayer(event.getPlayer());
+                    final Craft playerCraft = this.craftManager.getCraftByPlayer(event.getPlayer());
                     if (playerCraft != null) {
                         if (event.getPlayer()
                                  .hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
 
-                            Long time = timeMap.get(event.getPlayer());
+                            final Long time = this.timeMap.get(event.getPlayer());
                             if (time != null) {
                                 long ticksElapsed = (System.currentTimeMillis() - time) / 50;
 
                                 // if the craft should go slower underwater, make time pass more slowly there
                                 if (playerCraft.getType().getHalfSpeedUnderwater() &&
-                                    playerCraft.getMinY() < playerCraft.getW().getSeaLevel())
+                                    playerCraft.getMinY() < playerCraft.getWorld().getSeaLevel())
                                     ticksElapsed = ticksElapsed >> 1;
 
                                 if (Math.abs(ticksElapsed) < playerCraft.getType().getTickCooldown()) {
@@ -185,28 +184,28 @@ public class InteractListener implements Listener {
                                                                                 .bukkit2MovecraftLoc(event.getPlayer()
                                                                                                           .getLocation()))) {
                                 if (playerCraft.getType().rotateAtMidpoint()) {
-                                    BlockVec midpoint = new BlockVec(
+                                    final BlockVec midpoint = new BlockVec(
                                             (playerCraft.getMaxX() + playerCraft.getMinX()) / 2,
                                             (playerCraft.getMaxY() + playerCraft.getMinY()) / 2,
                                             (playerCraft.getMaxZ() + playerCraft.getMinZ()) / 2);
-                                    asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midpoint);
+                                    this.asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midpoint);
                                 } else {
-                                    asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE,
-                                                        MathUtils.bukkit2MovecraftLoc(sign.getLocation()));
+                                    this.asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE,
+                                                             MathUtils.bukkit2MovecraftLoc(sign.getLocation()));
                                 }
 
-                                timeMap.put(event.getPlayer(), System.currentTimeMillis());
+                                this.timeMap.put(event.getPlayer(), System.currentTimeMillis());
                                 event.setCancelled(true);
                             }
                         } else {
-                            event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
+                            event.getPlayer().sendMessage(this.i18n.get("Insufficient Permissions"));
                         }
                     }
                 }
                 if (org.bukkit.ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("Subcraft Rotate")) {
                     // rotate subcraft
-                    String craftTypeStr = org.bukkit.ChatColor.stripColor(sign.getLine(1));
-                    if (getCraftTypeFromString(craftTypeStr) != null) {
+                    final String craftTypeStr = org.bukkit.ChatColor.stripColor(sign.getLine(1));
+                    if (this.getCraftTypeFromString(craftTypeStr) != null) {
                         if (ChatColor.stripColor(sign.getLine(2)).isEmpty() &&
                             ChatColor.stripColor(sign.getLine(3)).isEmpty()) {
                             sign.setLine(2, "_\\ /_");
@@ -216,37 +215,38 @@ public class InteractListener implements Listener {
 
                         if (event.getPlayer().hasPermission("movecraft." + craftTypeStr + ".pilot") &&
                             event.getPlayer().hasPermission("movecraft." + craftTypeStr + ".rotate")) {
-                            Long time = timeMap.get(event.getPlayer());
+                            final Long time = this.timeMap.get(event.getPlayer());
                             if (time != null) {
-                                long ticksElapsed = (System.currentTimeMillis() - time) / 50;
-                                if (Math.abs(ticksElapsed) < getCraftTypeFromString(craftTypeStr).getTickCooldown()) {
+                                final long ticksElapsed = (System.currentTimeMillis() - time) / 50;
+                                if (Math.abs(ticksElapsed) < this.getCraftTypeFromString(craftTypeStr).getTickCooldown()) {
                                     event.setCancelled(true);
                                     return;
                                 }
                             }
                             final Location loc = event.getClickedBlock().getLocation();
-                            final Craft c = new Craft(getCraftTypeFromString(craftTypeStr), loc.getWorld());
-                            BlockVec startPoint = new BlockVec(loc.getBlockX(), loc.getBlockY(),
-                                                               loc.getBlockZ());
-                            asyncManager.detect(c, null, event.getPlayer(), startPoint);
-                            BukkitTask releaseTask = new BukkitRunnable() {
+                            final Craft c = new Craft(this.getCraftTypeFromString(craftTypeStr), loc.getWorld());
+                            final BlockVec startPoint = new BlockVec(loc.getBlockX(), loc.getBlockY(),
+                                                                     loc.getBlockZ());
+                            this.asyncManager.detect(c, null, event.getPlayer(), startPoint);
+                            final BukkitTask releaseTask = new BukkitRunnable() {
 
                                 @Override public void run() {
-                                    craftManager.removeCraft(c);
+                                    InteractListener.this.craftManager.removeCraft(c);
                                 }
-                            }.runTaskLater(plugin, (20 * 5));
+                            }.runTaskLater(this.plugin, (20 * 5));
 
-                            BukkitTask rotateTask = new BukkitRunnable() {
+                            final BukkitTask rotateTask = new BukkitRunnable() {
 
                                 @Override public void run() {
-                                    asyncManager.rotate(c, Rotation.ANTICLOCKWISE, MathUtils.bukkit2MovecraftLoc(loc),
-                                                        true);
+                                    InteractListener.this.asyncManager
+                                            .rotate(c, Rotation.ANTICLOCKWISE, MathUtils.bukkit2MovecraftLoc(loc),
+                                                    true);
                                 }
-                            }.runTaskLater(plugin, (10));
-                            timeMap.put(event.getPlayer(), System.currentTimeMillis());
+                            }.runTaskLater(this.plugin, (10));
+                            this.timeMap.put(event.getPlayer(), System.currentTimeMillis());
                             event.setCancelled(true);
                         } else {
-                            event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
+                            event.getPlayer().sendMessage(this.i18n.get("Insufficient Permissions"));
                         }
                     }
                 }
@@ -255,8 +255,8 @@ public class InteractListener implements Listener {
     }
 
     @SuppressWarnings("unused")
-    private void onSignRightClick(PlayerInteractEvent event) {
-        Sign sign = (Sign) event.getClickedBlock().getState();
+    private void onSignRightClick(final PlayerInteractEvent event) {
+        final Sign sign = (Sign) event.getClickedBlock().getState();
         final String firstLine = ChatColor.stripColor(sign.getLine(0));
 
         if (firstLine == null) {
@@ -265,46 +265,46 @@ public class InteractListener implements Listener {
 
         // don't process commands if this is a pilot tool click, do that below
         final Player player = event.getPlayer();
-        final Craft playerCraft = craftManager.getCraftByPlayer(player);
-        if (event.getItem() != null && event.getItem().getTypeId() == settings.PilotTool) {
+        final Craft playerCraft = this.craftManager.getCraftByPlayer(player);
+        if (event.getItem() != null && event.getItem().getTypeId() == this.settings.PilotTool) {
             if (playerCraft != null) return;
         }
 
-        final CraftType craftType = getCraftTypeFromString(ChatColor.stripColor(sign.getLine(0)));
+        final CraftType craftType = this.getCraftTypeFromString(ChatColor.stripColor(sign.getLine(0)));
         if (craftType != null) {
             // Valid sign prompt for ship command.
             if (player.hasPermission("movecraft." + firstLine + ".pilot")) {
                 // Attempt to run detection
-                Location loc = event.getClickedBlock().getLocation();
-                BlockVec startPoint = new BlockVec(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+                final Location loc = event.getClickedBlock().getLocation();
+                final BlockVec startPoint = new BlockVec(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
                 final Craft c = new Craft(craftType, loc.getWorld());
 
                 if (c.getType().getCruiseOnPilot()) {
-                    asyncManager.detect(c, null, player, startPoint);
+                    this.asyncManager.detect(c, null, player, startPoint);
                     c.setCruiseDirection(Direction.fromSignDirection(sign));
                     c.setLastCruiseUpdate(System.currentTimeMillis());
                     c.setCruising(true);
-                    BukkitTask releaseTask = new BukkitRunnable() {
+                    final BukkitTask releaseTask = new BukkitRunnable() {
 
                         @Override public void run() {
-                            craftManager.removeCraft(c);
+                            InteractListener.this.craftManager.removeCraft(c);
                         }
-                    }.runTaskLater(plugin, (20 * 15));
+                    }.runTaskLater(this.plugin, (20 * 15));
 //					CraftManager.getInstance().getReleaseEvents().put( event.getPlayer(), releaseTask );
                 } else {
                     if (playerCraft == null) {
-                        asyncManager.detect(c, player, player, startPoint);
+                        this.asyncManager.detect(c, player, player, startPoint);
                     } else {
                         if (playerCraft.isNotProcessing()) {
-                            craftManager.removeCraft(playerCraft);
-                            asyncManager.detect(c, player, player, startPoint);
+                            this.craftManager.removeCraft(playerCraft);
+                            this.asyncManager.detect(c, player, player, startPoint);
                         }
                     }
                 }
 
                 event.setCancelled(true);
             } else {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+                player.sendMessage(this.i18n.get("Insufficient Permissions"));
             }
         } else if (firstLine.equalsIgnoreCase("[helm]")) {
             sign.setLine(0, "\\  ||  /");
@@ -317,13 +317,13 @@ public class InteractListener implements Listener {
                    org.bukkit.ChatColor.stripColor(sign.getLine(2)).equals("/  ||  \\")) {
             if (playerCraft != null) {
                 if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                    Long time = timeMap.get(player);
+                    final Long time = this.timeMap.get(player);
                     if (time != null) {
                         long ticksElapsed = (System.currentTimeMillis() - time) / 50;
 
                         // if the craft should go slower underwater, make time pass more slowly there
                         if (playerCraft.getType().getHalfSpeedUnderwater() &&
-                            playerCraft.getMinY() < playerCraft.getW().getSeaLevel()) ticksElapsed = ticksElapsed >> 1;
+                            playerCraft.getMinY() < playerCraft.getWorld().getSeaLevel()) ticksElapsed = ticksElapsed >> 1;
 
                         if (Math.abs(ticksElapsed) < playerCraft.getType().getTickCooldown()) {
                             event.setCancelled(true);
@@ -335,27 +335,27 @@ public class InteractListener implements Listener {
                                                                 playerCraft.getMinZ(),
                                                                 MathUtils.bukkit2MovecraftLoc(player.getLocation()))) {
                         if (playerCraft.getType().rotateAtMidpoint()) {
-                            BlockVec midpoint = new BlockVec(
+                            final BlockVec midpoint = new BlockVec(
                                     (playerCraft.getMaxX() + playerCraft.getMinX()) / 2,
                                     (playerCraft.getMaxY() + playerCraft.getMinY()) / 2,
                                     (playerCraft.getMaxZ() + playerCraft.getMinZ()) / 2);
-                            asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midpoint);
+                            this.asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midpoint);
                         } else {
-                            asyncManager.rotate(playerCraft, Rotation.CLOCKWISE,
-                                                MathUtils.bukkit2MovecraftLoc(sign.getLocation()));
+                            this.asyncManager.rotate(playerCraft, Rotation.CLOCKWISE,
+                                                     MathUtils.bukkit2MovecraftLoc(sign.getLocation()));
                         }
 
-                        timeMap.put(player, System.currentTimeMillis());
+                        this.timeMap.put(player, System.currentTimeMillis());
                         event.setCancelled(true);
                     }
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
         } else if (firstLine.equalsIgnoreCase("Subcraft Rotate")) {
             // rotate subcraft
-            String subcraftTypeName = org.bukkit.ChatColor.stripColor(sign.getLine(1));
-            final CraftType subcraftType = getCraftTypeFromString(subcraftTypeName);
+            final String subcraftTypeName = org.bukkit.ChatColor.stripColor(sign.getLine(1));
+            final CraftType subcraftType = this.getCraftTypeFromString(subcraftTypeName);
             if (subcraftType != null) {
                 if (ChatColor.stripColor(sign.getLine(2)).isEmpty() && sign.getLine(3).isEmpty()) {
                     sign.setLine(2, "_\\ /_");
@@ -365,9 +365,9 @@ public class InteractListener implements Listener {
 
                 if (player.hasPermission("movecraft." + subcraftTypeName + ".pilot") &&
                     player.hasPermission("movecraft." + subcraftTypeName + ".rotate")) {
-                    Long time = timeMap.get(player);
+                    final Long time = this.timeMap.get(player);
                     if (time != null) {
-                        long ticksElapsed = (System.currentTimeMillis() - time) / 50;
+                        final long ticksElapsed = (System.currentTimeMillis() - time) / 50;
                         if (Math.abs(ticksElapsed) < subcraftType.getTickCooldown()) {
                             event.setCancelled(true);
                             return;
@@ -375,25 +375,26 @@ public class InteractListener implements Listener {
                     }
                     final Location loc = event.getClickedBlock().getLocation();
                     final Craft c = new Craft(subcraftType, loc.getWorld());
-                    BlockVec startPoint = new BlockVec(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-                    asyncManager.detect(c, null, player, startPoint);
-                    BukkitTask releaseTask = new BukkitRunnable() {
+                    final BlockVec startPoint = new BlockVec(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+                    this.asyncManager.detect(c, null, player, startPoint);
+                    final BukkitTask releaseTask = new BukkitRunnable() {
 
                         @Override public void run() {
-                            craftManager.removeCraft(c);
+                            InteractListener.this.craftManager.removeCraft(c);
                         }
-                    }.runTaskLater(plugin, (20 * 5));
+                    }.runTaskLater(this.plugin, (20 * 5));
 
-                    BukkitTask rotateTask = new BukkitRunnable() {
+                    final BukkitTask rotateTask = new BukkitRunnable() {
 
                         @Override public void run() {
-                            asyncManager.rotate(c, Rotation.CLOCKWISE, MathUtils.bukkit2MovecraftLoc(loc), true);
+                            InteractListener.this.asyncManager
+                                    .rotate(c, Rotation.CLOCKWISE, MathUtils.bukkit2MovecraftLoc(loc), true);
                         }
-                    }.runTaskLater(plugin, (10));
-                    timeMap.put(player, System.currentTimeMillis());
+                    }.runTaskLater(this.plugin, (10));
+                    this.timeMap.put(player, System.currentTimeMillis());
                     event.setCancelled(true);
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
         } else if (firstLine.equalsIgnoreCase("Cruise: OFF")) {
@@ -408,7 +409,7 @@ public class InteractListener implements Listener {
                     playerCraft.setCruising(true);
 
                     if (!playerCraft.getType().getMoveEntities()) {
-                        craftManager.addReleaseTask(playerCraft);
+                        this.craftManager.addReleaseTask(playerCraft);
                     }
                 }
             }
@@ -424,7 +425,7 @@ public class InteractListener implements Listener {
                     playerCraft.setCruising(true);
 
                     if (!playerCraft.getType().getMoveEntities()) {
-                        craftManager.addReleaseTask(playerCraft);
+                        this.craftManager.addReleaseTask(playerCraft);
                     }
                 }
             }
@@ -440,7 +441,7 @@ public class InteractListener implements Listener {
                     playerCraft.setCruising(true);
 
                     if (!playerCraft.getType().getMoveEntities()) {
-                        craftManager.addReleaseTask(playerCraft);
+                        this.craftManager.addReleaseTask(playerCraft);
                     }
                 }
             }
@@ -464,48 +465,48 @@ public class InteractListener implements Listener {
             }
         } else if (firstLine.equalsIgnoreCase("Teleport:")) {
             if (playerCraft != null) {
-                String[] numbers = org.bukkit.ChatColor.stripColor(sign.getLine(1)).split(",");
-                int tX = Integer.parseInt(numbers[0]);
-                int tY = Integer.parseInt(numbers[1]);
-                int tZ = Integer.parseInt(numbers[2]);
+                final String[] numbers = org.bukkit.ChatColor.stripColor(sign.getLine(1)).split(",");
+                final int tX = Integer.parseInt(numbers[0]);
+                final int tY = Integer.parseInt(numbers[1]);
+                final int tZ = Integer.parseInt(numbers[2]);
 
                 if (player.hasPermission("movecraft." +
                                          playerCraft.getType().getCraftName() + ".move")) {
                     if (playerCraft.getType().getCanTeleport()) {
-                        int dx = tX - sign.getX();
-                        int dy = tY - sign.getY();
-                        int dz = tZ - sign.getZ();
-                        asyncManager.translate(playerCraft, dx, dy, dz);
+                        final int dx = tX - sign.getX();
+                        final int dy = tY - sign.getY();
+                        final int dz = tZ - sign.getZ();
+                        this.asyncManager.translate(playerCraft, dx, dy, dz);
                         ;
                     }
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
         } else if (firstLine.equalsIgnoreCase("Release")) {
             if (playerCraft != null) {
-                craftManager.removeCraft(playerCraft);
+                this.craftManager.removeCraft(playerCraft);
             }
         } else if (firstLine.equalsIgnoreCase("Move:")) {
             if (playerCraft != null) {
-                Long time = timeMap.get(player);
+                final Long time = this.timeMap.get(player);
                 if (time != null) {
                     long ticksElapsed = (System.currentTimeMillis() - time) / 50;
 
                     // if the craft should go slower underwater, make time pass more slowly there
                     if (playerCraft.getType().getHalfSpeedUnderwater() &&
-                        playerCraft.getMinY() < playerCraft.getW().getSeaLevel()) ticksElapsed = ticksElapsed >> 1;
+                        playerCraft.getMinY() < playerCraft.getWorld().getSeaLevel()) ticksElapsed = ticksElapsed >> 1;
 
                     if (Math.abs(ticksElapsed) < playerCraft.getType().getTickCooldown()) {
                         event.setCancelled(true);
                         return;
                     }
                 }
-                String[] numbers = org.bukkit.ChatColor.stripColor(sign.getLine(1)).split(",");
+                final String[] numbers = org.bukkit.ChatColor.stripColor(sign.getLine(1)).split(",");
                 int dx = Integer.parseInt(numbers[0]);
                 int dy = Integer.parseInt(numbers[1]);
                 int dz = Integer.parseInt(numbers[2]);
-                int maxMove = playerCraft.getType().maxStaticMove();
+                final int maxMove = playerCraft.getType().maxStaticMove();
 
                 if (dx > maxMove) dx = maxMove;
                 if (dx < 0 - maxMove) dx = 0 - maxMove;
@@ -516,34 +517,34 @@ public class InteractListener implements Listener {
 
                 if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".move")) {
                     if (playerCraft.getType().getCanStaticMove()) {
-                        asyncManager.translate(playerCraft, dx, dy, dz);
-                        timeMap.put(player, System.currentTimeMillis());
+                        this.asyncManager.translate(playerCraft, dx, dy, dz);
+                        this.timeMap.put(player, System.currentTimeMillis());
                         playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     }
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
         } else if (firstLine.equalsIgnoreCase("RMove:")) {
             if (playerCraft != null) {
-                Long time = timeMap.get(player);
+                final Long time = this.timeMap.get(player);
                 if (time != null) {
                     long ticksElapsed = (System.currentTimeMillis() - time) / 50;
 
                     // if the craft should go slower underwater, make time pass more slowly there
                     if (playerCraft.getType().getHalfSpeedUnderwater() &&
-                        playerCraft.getMinY() < playerCraft.getW().getSeaLevel()) ticksElapsed = ticksElapsed >> 1;
+                        playerCraft.getMinY() < playerCraft.getWorld().getSeaLevel()) ticksElapsed = ticksElapsed >> 1;
 
                     if (Math.abs(ticksElapsed) < playerCraft.getType().getTickCooldown()) {
                         event.setCancelled(true);
                         return;
                     }
                 }
-                String[] numbers = org.bukkit.ChatColor.stripColor(sign.getLine(1)).split(",");
+                final String[] numbers = org.bukkit.ChatColor.stripColor(sign.getLine(1)).split(",");
                 int dLeftRight = Integer.parseInt(numbers[0]); // negative = left, positive = right
                 int dy = Integer.parseInt(numbers[1]);
                 int dBackwardForward = Integer.parseInt(numbers[2]); // negative = backwards, positive = forwards
-                int maxMove = playerCraft.getType().maxStaticMove();
+                final int maxMove = playerCraft.getType().maxStaticMove();
 
                 if (dLeftRight > maxMove) dLeftRight = maxMove;
                 if (dLeftRight < 0 - maxMove) dLeftRight = 0 - maxMove;
@@ -578,19 +579,19 @@ public class InteractListener implements Listener {
 
                 if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".move")) {
                     if (playerCraft.getType().getCanStaticMove()) {
-                        asyncManager.translate(playerCraft, dx, dy, dz);
-                        timeMap.put(player, System.currentTimeMillis());
+                        this.asyncManager.translate(playerCraft, dx, dy, dz);
+                        this.timeMap.put(player, System.currentTimeMillis());
                         playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     }
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
         }
     }
 
-    private CraftType getCraftTypeFromString(String s) {
-        for (CraftType t : craftManager.getCraftTypes()) {
+    private CraftType getCraftTypeFromString(final String s) {
+        for (final CraftType t : this.craftManager.getCraftTypes()) {
             if (s.equalsIgnoreCase(t.getCraftName())) {
                 return t;
             }
@@ -600,20 +601,20 @@ public class InteractListener implements Listener {
     }
 
     @SuppressWarnings("unused")
-    @EventHandler public void onPlayerInteractStick(PlayerInteractEvent event) {
-        final Craft craft = craftManager.getCraftByPlayer(event.getPlayer());
+    @EventHandler public void onPlayerInteractStick(final PlayerInteractEvent event) {
+        final Craft craft = this.craftManager.getCraftByPlayer(event.getPlayer());
         // if not in command of craft, don't process pilot tool clicks
         if (craft == null) return;
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (event.getItem() != null && event.getItem().getTypeId() == settings.PilotTool) {
+            if (event.getItem() != null && event.getItem().getTypeId() == this.settings.PilotTool) {
                 event.setCancelled(true);
-                Long time = timeMap.get(event.getPlayer());
+                final Long time = this.timeMap.get(event.getPlayer());
                 if (time != null) {
                     long ticksElapsed = (System.currentTimeMillis() - time) / 50;
 
                     // if the craft should go slower underwater, make time pass more slowly there
-                    if (craft.getType().getHalfSpeedUnderwater() && craft.getMinY() < craft.getW().getSeaLevel())
+                    if (craft.getType().getHalfSpeedUnderwater() && craft.getMinY() < craft.getWorld().getSeaLevel())
                         ticksElapsed = ticksElapsed >> 1;
 
                     if (Math.abs(ticksElapsed) < craft.getType().getTickCooldown()) {
@@ -646,22 +647,22 @@ public class InteractListener implements Listener {
                             }
                             craft.setLastRightClick(System.currentTimeMillis());
 
-                            asyncManager.translate(craft, 0, DY, 0);
-                            timeMap.put(event.getPlayer(), System.currentTimeMillis());
+                            this.asyncManager.translate(craft, 0, DY, 0);
+                            this.timeMap.put(event.getPlayer(), System.currentTimeMillis());
                             craft.setLastCruiseUpdate(System.currentTimeMillis());
                         } else {
                             // Player is onboard craft and right clicking
-                            float rotation = (float) Math.PI * event.getPlayer().getLocation().getYaw() / 180f;
+                            final float rotation = (float) Math.PI * event.getPlayer().getLocation().getYaw() / 180f;
 
-                            float nx = -(float) Math.sin(rotation);
-                            float nz = (float) Math.cos(rotation);
+                            final float nx = -(float) Math.sin(rotation);
+                            final float nz = (float) Math.cos(rotation);
 
                             int dx = (Math.abs(nx) >= 0.5 ? 1 : 0) * (int) Math.signum(nx);
                             int dz = (Math.abs(nz) > 0.5 ? 1 : 0) * (int) Math.signum(nz);
 
-                            float p = event.getPlayer().getLocation().getPitch();
+                            final float p = event.getPlayer().getLocation().getPitch();
 
-                            int dy = -(Math.abs(p) >= 25 ? 1 : 0) * (int) Math.signum(p);
+                            final int dy = -(Math.abs(p) >= 25 ? 1 : 0) * (int) Math.signum(p);
 
                             if (Math.abs(event.getPlayer().getLocation().getPitch()) >= 75) {
                                 dx = 0;
@@ -683,21 +684,21 @@ public class InteractListener implements Listener {
                             }
                             craft.setLastRightClick(System.currentTimeMillis());
 
-                            asyncManager.translate(craft, dx, dy, dz);
-                            timeMap.put(event.getPlayer(), System.currentTimeMillis());
+                            this.asyncManager.translate(craft, dx, dy, dz);
+                            this.timeMap.put(event.getPlayer(), System.currentTimeMillis());
                             craft.setLastCruiseUpdate(System.currentTimeMillis());
                         }
                     } else {
-                        event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
+                        event.getPlayer().sendMessage(this.i18n.get("Insufficient Permissions"));
                     }
                 }
             }
         }
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-            if (event.getItem() != null && event.getItem().getTypeId() == settings.PilotTool) {
+            if (event.getItem() != null && event.getItem().getTypeId() == this.settings.PilotTool) {
                 if (craft.getPilotLocked()) {
                     craft.setPilotLocked(false);
-                    event.getPlayer().sendMessage(i18n.get("Leaving Direct Control Mode"));
+                    event.getPlayer().sendMessage(this.i18n.get("Leaving Direct Control Mode"));
                     event.setCancelled(true);
                 } else {
                     if (event.getPlayer().hasPermission("movecraft." + craft.getType().getCraftName() + ".move") &&
@@ -706,10 +707,10 @@ public class InteractListener implements Listener {
                         craft.setPilotLockedX(event.getPlayer().getLocation().getBlockX() + 0.5);
                         craft.setPilotLockedY(event.getPlayer().getLocation().getY());
                         craft.setPilotLockedZ(event.getPlayer().getLocation().getBlockZ() + 0.5);
-                        event.getPlayer().sendMessage(i18n.get("Entering Direct Control Mode"));
+                        event.getPlayer().sendMessage(this.i18n.get("Entering Direct Control Mode"));
                         event.setCancelled(true);
                     } else {
-                        event.getPlayer().sendMessage(i18n.get("Insufficient Permissions"));
+                        event.getPlayer().sendMessage(this.i18n.get("Insufficient Permissions"));
                     }
                 }
             }

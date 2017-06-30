@@ -15,47 +15,37 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class WGCustomFlagsUtils {
 
-    public static StateFlag getNewStateFlag(String name, boolean def) {
-        Constructor<?> cc = getStateFlagConstructor();
+    public static StateFlag getNewStateFlag(final String name, final boolean def) {
+        final Constructor<?> cc = getStateFlagConstructor();
         if (cc == null) {
             return null;
         }
         try {
-            Object o = cc.newInstance(name, def);
+            final Object o = cc.newInstance(name, def);
             return (StateFlag) o;
-        } catch (InstantiationException ex) {
-            return null;
-        } catch (IllegalAccessException ex) {
-            return null;
-        } catch (IllegalArgumentException ex) {
-            return null;
-        } catch (InvocationTargetException ex) {
+        } catch (InstantiationException | InvocationTargetException | IllegalArgumentException | IllegalAccessException ex) {
             return null;
         }
     }
 
     public static Constructor<?> getStateFlagConstructor() {
         try {
-            Class<?> c = Class.forName("com.sk89q.worldguard.protection.flags.StateFlag");
+            final Class<?> c = Class.forName("com.sk89q.worldguard.protection.flags.StateFlag");
             return c.getConstructor(String.class, boolean.class);
-        } catch (ClassNotFoundException ex) {
-            return null;
-        } catch (NoSuchMethodException ex) {
-            return null;
-        } catch (SecurityException ex) {
+        } catch (ClassNotFoundException | SecurityException | NoSuchMethodException ex) {
             return null;
         }
     }
 
-    public static boolean registerStageFlag(WGCustomFlagsPlugin plugin, Object o) {
+    public static boolean registerStageFlag(final WGCustomFlagsPlugin plugin, final Object o) {
         if (plugin != null) {
-            Constructor<?> cc = getStateFlagConstructor();
+            final Constructor<?> cc = getStateFlagConstructor();
             if (cc == null) {
                 return false;
             }
             try {
                 plugin.addCustomFlag((Flag) o);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return false;
             }
             return true;
@@ -63,27 +53,27 @@ public class WGCustomFlagsUtils {
         return false;
     }
 
-    public static void registerFlags(WGCustomFlagsPlugin plugin, StateFlag... flags) {
-        for (StateFlag flag : flags) {
+    public static void registerFlags(final WGCustomFlagsPlugin plugin, final StateFlag... flags) {
+        for (final StateFlag flag : flags) {
             if (flag != null) registerStageFlag(plugin, flag);
         }
     }
 
-    public static boolean validateFlag(WorldGuardPlugin worldGuardPlugin, Location loc, Object flag) {
+    public static boolean validateFlag(final WorldGuardPlugin worldGuardPlugin, final Location loc, final Object flag) {
         if (flag != null) {
-            StateFlag.State state = (StateFlag.State) worldGuardPlugin.getRegionManager(loc.getWorld())
-                                                                      .getApplicableRegions(loc).getFlag((Flag) flag);
+            final StateFlag.State state = (StateFlag.State) worldGuardPlugin.getRegionManager(loc.getWorld())
+                                                                            .getApplicableRegions(loc).getFlag((Flag) flag);
             return state != null && state == StateFlag.State.ALLOW;
         } else {
             return true;
         }
     }
 
-    public static boolean validateFlag(WorldGuardPlugin worldGuardPlugin, Location loc, Object flag, LocalPlayer lp) {
+    public static boolean validateFlag(final WorldGuardPlugin worldGuardPlugin, final Location loc, final Object flag, final LocalPlayer lp) {
         if (flag != null) {
-            StateFlag.State state = (StateFlag.State) worldGuardPlugin.getRegionManager(loc.getWorld())
-                                                                      .getApplicableRegions(loc)
-                                                                      .getFlag((Flag) flag, lp);
+            final StateFlag.State state = (StateFlag.State) worldGuardPlugin.getRegionManager(loc.getWorld())
+                                                                            .getApplicableRegions(loc)
+                                                                            .getFlag((Flag) flag, lp);
             return state != null && state == StateFlag.State.ALLOW;
         } else {
             return true;

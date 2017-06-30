@@ -22,19 +22,19 @@ import java.util.Set;
 public class CraftHelpListener implements CommandExecutor {
     private final CraftManager craftManager;
 
-    public CraftHelpListener(CraftManager craftManager) {
+    public CraftHelpListener(final CraftManager craftManager) {
         this.craftManager = craftManager;
     }
 
-    private CraftType getCraftByName(String string) {
-        CraftType[] crafts = craftManager.getCraftTypes();
-        if (crafts == null || string == null || string.isEmpty()) {
+    private CraftType getCraftByName(final String name) {
+        final CraftType[] crafts = this.craftManager.getCraftTypes();
+        if (crafts == null || name == null || name.isEmpty()) {
             return null;
         }
 
-        List<CraftType> found = new ArrayList<>();
-        String prefix = string.toLowerCase();
-        for (CraftType tcraft : crafts) {
+        final List<CraftType> found = new ArrayList<>();
+        final String prefix = name.toLowerCase();
+        for (final CraftType tcraft : crafts) {
             if (tcraft.getCraftName().toLowerCase().startsWith(prefix)) {
                 found.add(tcraft);
             }
@@ -48,45 +48,45 @@ public class CraftHelpListener implements CommandExecutor {
     }
 
     @SuppressWarnings("unused")
-    @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    @Override public boolean onCommand(final CommandSender sender, final Command cmd, final String label, String[] args) {
         if (args.length == 0 || args[0].isEmpty()) {
             args = new String[]{"list"};
         }
 
         if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("movecraftadmin.reload")) {
-            craftManager.initCraftTypes();
+            this.craftManager.initCraftTypes();
             sender.sendMessage(ChatColor.GOLD + "Craft configuration reloaded.");
             return true;
         }
 
-        boolean doList = args[0].equalsIgnoreCase("list");
-        CraftType c = null;
+        final boolean doList = args[0].equalsIgnoreCase("list");
+        CraftType craftType = null;
         if (!doList) {
-            c = getCraftByName(args[0]);
-            if (c == null) {
+            craftType = getCraftByName(args[0]);
+            if (craftType == null) {
                 sender.sendMessage(ChatColor.RED + "Unable to locate a craft by that name.");
             }
         }
-        if (doList || c == null) {
+        if (doList || craftType == null) {
             doCraftList(sender);
             return true;
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("&6==========[ &f").append(c.getCraftName()).append("&6 ]==========\n");
-        sb.append("\n&6Size: &7").append(c.getSizeRange().min).append(" to ").append(c.getSizeRange().max);
-        sb.append("\n&6Speed: &7").append(Math.round(20.0 / c.getTickCooldown())).append(" to ")
-          .append(Math.round(20.0 / c.getCruiseTickCooldown()) * c.getCruiseSkipBlocks());
-        sb.append("\n&6Altitude: &7").append(c.getHeightRange().min).append(" to ").append(c.getHeightRange().max);
-        if (c.getFuelBurnRate() > 0) {
-            sb.append("\n&6Fuel Use: &7").append(c.getFuelBurnRate());
+        final StringBuilder sb = new StringBuilder();
+        sb.append("&6==========[ &f").append(craftType.getCraftName()).append("&6 ]==========\n");
+        sb.append("\n&6Size: &7").append(craftType.getSizeRange().min).append(" to ").append(craftType.getSizeRange().max);
+        sb.append("\n&6Speed: &7").append(Math.round(20.0 / craftType.getTickCooldown())).append(" to ")
+          .append(Math.round(20.0 / craftType.getCruiseTickCooldown()) * craftType.getCruiseSkipBlocks());
+        sb.append("\n&6Altitude: &7").append(craftType.getHeightRange().min).append(" to ").append(craftType.getHeightRange().max);
+        if (craftType.getFuelBurnRate() > 0) {
+            sb.append("\n&6Fuel Use: &7").append(craftType.getFuelBurnRate());
         }
-        if (c.getRequireWaterContact()) {
+        if (craftType.getRequireWaterContact()) {
             sb.append("\n&6Requires Water: &7YES");
         }
-        List<String> req = new ArrayList<>();
-        List<String> limit = new ArrayList<>();
-        appendFlyBlocks(req, limit, c.getFlyBlocks());
+        final List<String> req = new ArrayList<>();
+        final List<String> limit = new ArrayList<>();
+        appendFlyBlocks(req, limit, craftType.getFlyBlocks());
         if (!req.isEmpty()) {
             sb.append("\n&6Requirements: &7").append(Joiner.on(", ").join(req));
         }
@@ -95,16 +95,16 @@ public class CraftHelpListener implements CommandExecutor {
         }
 
         sb.append("\n&6Allowed Blocks: &7");
-        MaterialDataPredicate blockIds = c.getAllowedBlocks();
-        Set<String> blockList = new HashSet<>();
-        for (Material material : blockIds.allMaterials()) {
+        final MaterialDataPredicate blockIds = craftType.getAllowedBlocks();
+        final Set<String> blockList = new HashSet<>();
+        for (final Material material : blockIds.allMaterials()) {
             blockList.addAll(BlockNames.itemNames(material));
         }
-        for (MaterialData materialDataPair : blockIds.allMaterialDataPairs()) {
+        for (final MaterialData materialDataPair : blockIds.allMaterialDataPairs()) {
             blockList.addAll(BlockNames.itemNames(materialDataPair));
         }
 
-        String[] names = blockList.toArray(new String[blockList.size()]);
+        final String[] names = blockList.toArray(new String[blockList.size()]);
         Arrays.sort(names);
         sb.append(String.join(", ", names));
 
@@ -112,15 +112,15 @@ public class CraftHelpListener implements CommandExecutor {
         return true;
     }
 
-    private void appendFlyBlocks(List<String> sbReq, List<String> sbLimit,
-                                 Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks)
+    private void appendFlyBlocks(final List<String> sbReq, final List<String> sbLimit,
+                                 final Map<MaterialDataPredicate, List<CraftType.Constraint>> flyBlocks)
     {
-        for (Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
-            MaterialDataPredicate predicate = entry.getKey();
-            List<CraftType.Constraint> constraints = entry.getValue();
-            String name = Joiner.on(" or ").join(BlockNames.materialDataPredicateNames(predicate));
+        for (final Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
+            final MaterialDataPredicate predicate = entry.getKey();
+            final List<CraftType.Constraint> constraints = entry.getValue();
+            final String name = Joiner.on(" or ").join(BlockNames.materialDataPredicateNames(predicate));
 
-            for (CraftType.Constraint constraint : constraints) {
+            for (final CraftType.Constraint constraint : constraints) {
                 if (constraint.isTrivial()) continue;
 
                 if (constraint.isUpper) {
@@ -140,10 +140,10 @@ public class CraftHelpListener implements CommandExecutor {
         }
     }
 
-    private void doCraftList(CommandSender sender) {
-        CraftType[] crafts = craftManager.getCraftTypes();
+    private void doCraftList(final CommandSender sender) {
+        CraftType[] crafts = this.craftManager.getCraftTypes();
         if (crafts == null) crafts = new CraftType[0];
-        String[] names = new String[crafts.length];
+        final String[] names = new String[crafts.length];
         for (int ix = 0; ix < crafts.length; ix++) {
             names[ix] = crafts[ix].getCraftName();
         }

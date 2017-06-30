@@ -58,14 +58,14 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     private final Map<Player, Craft> craftPlayerIndex = new HashMap<>();
     private final Map<Player, BukkitTask> releaseEvents = new HashMap<>();
 
-    public CraftManager(Settings settings, I18nSupport i18nSupport, Plugin plugin) {
+    public CraftManager(final Settings settings, final I18nSupport i18nSupport, final Plugin plugin) {
         this.settings = settings;
         this.i18nSupport = i18nSupport;
         this.plugin = plugin;
     }
 
-    public @Nonnull Optional<CraftType> getCraftTypeFromString(String s) {
-        for (CraftType t : getCraftTypes()) {
+    @Nonnull public Optional<CraftType> getCraftTypeFromString(final String s) {
+        for (final CraftType t : this.getCraftTypes()) {
             if (s.equalsIgnoreCase(t.getCraftName())) {
                 return Optional.of(t);
             }
@@ -75,126 +75,123 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     }
 
     public CraftType[] getCraftTypes() {
-        return craftTypes;
+        return this.craftTypes;
     }
 
     public void initCraftTypes() {
-        File craftsFile = new File(plugin.getDataFolder().getAbsolutePath() + "/types");
+        final File craftsFile = new File(this.plugin.getDataFolder().getAbsolutePath() + "/types");
 
         if (!craftsFile.exists()) {
             craftsFile.mkdirs();
-            plugin.saveResource("types/airship.yaml", false);
-            plugin.saveResource("types/airskiff.yaml", false);
-            plugin.saveResource("types/BigAirship.yaml", false);
-            plugin.saveResource("types/BigSubAirship.yaml", false);
-            plugin.saveResource("types/elevator.yaml", false);
-            plugin.saveResource("types/LaunchTorpedo.yaml", false);
-            plugin.saveResource("types/Ship.yaml", false);
-            plugin.saveResource("types/SubAirship.yaml", false);
-            plugin.saveResource("types/Submarine.yaml", false);
-            plugin.saveResource("types/Turret.yaml", false);
+            this.plugin.saveResource("types/airship.yaml", false);
+            this.plugin.saveResource("types/airskiff.yaml", false);
+            this.plugin.saveResource("types/BigAirship.yaml", false);
+            this.plugin.saveResource("types/BigSubAirship.yaml", false);
+            this.plugin.saveResource("types/elevator.yaml", false);
+            this.plugin.saveResource("types/LaunchTorpedo.yaml", false);
+            this.plugin.saveResource("types/Ship.yaml", false);
+            this.plugin.saveResource("types/SubAirship.yaml", false);
+            this.plugin.saveResource("types/Submarine.yaml", false);
+            this.plugin.saveResource("types/Turret.yaml", false);
         }
 
-        HashSet<CraftType> craftTypesSet = new HashSet<>();
+        final HashSet<CraftType> craftTypesSet = new HashSet<>();
 
         boolean foundCraft = false;
-        for (File file : craftsFile.listFiles()) {
+        for (final File file : craftsFile.listFiles()) {
             if (file.isFile() && (file.getName().endsWith(".craft") || file.getName().endsWith(".yaml"))) {
                 if (file.getName().endsWith(".craft")) {
-                    String name = file.getName();
-                    String newName = name.substring(0, name.length() - ".craft".length()) + ".yaml";
-                    plugin.getLogger()
-                          .warning("\"craft\" extension is deprecated, please rename " + name + " to " + newName);
+                    final String name = file.getName();
+                    final String newName = name.substring(0, name.length() - ".craft".length()) + ".yaml";
+                    this.plugin.getLogger()
+                               .warning("\"craft\" extension is deprecated, please rename " + name + " to " + newName);
                 }
 
                 try {
-                    CraftType type = new CraftType();
-                    type.parseCraftDataFromFile(file, settings.SinkRateTicks);
+                    final CraftType type = new CraftType();
+                    type.parseCraftDataFromFile(file, this.settings.SinkRateTicks);
                     craftTypesSet.add(type);
                     foundCraft = true;
                 } catch (FileNotFoundException | CraftType.ParseException e) {
-                    plugin.getLogger().log(Level.SEVERE,
-                                           String.format(i18nSupport.get("Startup - Error parsing CraftType file"),
+                    this.plugin.getLogger().log(Level.SEVERE,
+                                                String.format(this.i18nSupport.get("Startup - Error parsing CraftType file"),
                                                          file.getAbsolutePath()));
                     e.printStackTrace();
                 }
             }
         }
         if (!foundCraft) {
-            plugin.getLogger().log(Level.SEVERE, "ERROR: NO CRAFTS FOUND!!!");
+            this.plugin.getLogger().log(Level.SEVERE, "ERROR: NO CRAFTS FOUND!!!");
         }
-        craftTypes = craftTypesSet.toArray(new CraftType[1]);
-        plugin.getLogger().log(Level.INFO, String.format(i18nSupport.get("Startup - Number of craft files loaded"),
-                                                         craftTypes.length));
+        this.craftTypes = craftTypesSet.toArray(new CraftType[1]);
+        this.plugin.getLogger().log(Level.INFO, String.format(this.i18nSupport.get("Startup - Number of craft files loaded"),
+                                                              this.craftTypes.length));
     }
 
-    public void addCraft(Craft c, Player p) {
-        Set<Craft> crafts = craftList.get(c.getW());
-        if (crafts == null) {
-            craftList.put(c.getW(), new HashSet<Craft>());
-        }
-        craftList.get(c.getW()).add(c);
-        craftPlayerIndex.put(p, c);
-        destroySnowOnPilot(p, c);
+    public void addCraft(final Craft craft, final Player player) {
+        this.craftList.computeIfAbsent(craft.getWorld(), k -> new HashSet<>());
+        this.craftList.get(craft.getWorld()).add(craft);
+        this.craftPlayerIndex.put(player, craft);
+        this.destroySnowOnPilot(player, craft);
     }
 
-    public void removeCraft(Craft c) {
-        removeReleaseTask(c);
+    public void removeCraft(final Craft craft) {
+        this.removeReleaseTask(craft);
         // if its sinking, just remove the craft without notifying or checking
-        if (c.getSinking()) {
-            craftList.get(c.getW()).remove(c);
-            craftPlayerIndex.remove(getPlayerFromCraft(c));
+        if (craft.getSinking()) {
+            this.craftList.get(craft.getWorld()).remove(craft);
+            this.craftPlayerIndex.remove(this.getPlayerFromCraft(craft));
         }
         // don't just release torpedoes, make them sink so they don't clutter up the place
-        if (c.getType().getCruiseOnPilot()) {
-            c.setCruising(false);
-            c.setSinking(true);
-            c.setNotificationPlayer(null);
+        if (craft.getType().getCruiseOnPilot()) {
+            craft.setCruising(false);
+            craft.setSinking(true);
+            craft.setNotificationPlayer(null);
             return;
         }
-        craftList.get(c.getW()).remove(c);
-        Player pilot = getPlayerFromCraft(c);
+        this.craftList.get(craft.getWorld()).remove(craft);
+        final Player pilot = this.getPlayerFromCraft(craft);
         if (pilot != null) {
-            pilot.sendMessage(i18nSupport.get("Release - Craft has been released message"));
-            plugin.getLogger().log(Level.INFO,
-                                   String.format(i18nSupport.get("Release - Player has released a craft console"),
-                                                 c.getNotificationPlayer().getName(), c.getType().getCraftName(),
-                                                 c.getBlockList().length, c.getMinX(), c.getMinZ()));
+            pilot.sendMessage(this.i18nSupport.get("Release - Craft has been released message"));
+            this.plugin.getLogger().log(Level.INFO,
+                                        String.format(this.i18nSupport.get("Release - Player has released a craft console"),
+                                                      craft.getNotificationPlayer().getName(), craft.getType().getCraftName(),
+                                                      craft.getBlockList().length, craft.getMinX(), craft.getMinZ()));
         } else {
-            plugin.getLogger().log(Level.INFO, String.format(i18nSupport
+            this.plugin.getLogger().log(Level.INFO, String.format(this.i18nSupport
                                                                      .get("NULL Player has released a craft of type " +
                                                                           "%s with size %d at coordinates : %d x , %d" +
                                                                           " z"),
-                                                             c.getType().getCraftName(), c.getBlockList().length,
-                                                             c.getMinX(), c.getMinZ()));
+                                                                  craft.getType().getCraftName(), craft.getBlockList().length,
+                                                                  craft.getMinX(), craft.getMinZ()));
         }
-        craftPlayerIndex.remove(pilot);
+        this.craftPlayerIndex.remove(pilot);
 
-        destroyBindingBlocks(pilot, c);
+        this.destroyBindingBlocks(pilot, craft);
     }
 
-    private boolean canPilotBreakBlock(Player pilot, Block block) {
+    private boolean canPilotBreakBlock(final Player pilot, final Block block) {
         if (pilot == null || !pilot.isOnline()) {
             return false;
         }
-        BlockBreakEvent be = new BlockBreakEvent(block, pilot);
-        plugin.getServer().getPluginManager().callEvent(be);
+        final BlockBreakEvent be = new BlockBreakEvent(block, pilot);
+        this.plugin.getServer().getPluginManager().callEvent(be);
         return !be.isCancelled();
     }
 
-    private void destroySnowOnPilot(Player pilot, Craft craft) {
+    private void destroySnowOnPilot(final Player pilot, final Craft craft) {
         if (pilot == null || !pilot.isOnline()) return;
 
-        Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
-        for (BlockVec block : craftBlocks) {
-            BlockVec test = new BlockVec(block.x, block.y + 1, block.z);
+        final Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        for (final BlockVec block : craftBlocks) {
+            final BlockVec test = new BlockVec(block.x, block.y + 1, block.z);
             if (!craftBlocks.contains(test)) {
-                Block testBlock = craft.getW().getBlockAt(test.x, test.y, test.z);
+                final Block testBlock = craft.getWorld().getBlockAt(test.x, test.y, test.z);
 
                 if (testBlock.getType() == Material.SNOW && testBlock.getData() == 0) {
-                    Collection<ItemStack> drops = testBlock.getDrops(new ItemStack(Material.WOOD_SPADE, 1, (short) 5));
+                    final Collection<ItemStack> drops = testBlock.getDrops(new ItemStack(Material.WOOD_SPADE, 1, (short) 5));
                     testBlock.setType(Material.AIR);
-                    for (ItemStack drop : drops) {
+                    for (final ItemStack drop : drops) {
                         testBlock.getWorld().dropItemNaturally(testBlock.getLocation(), drop);
                     }
                 }
@@ -202,32 +199,33 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         }
     }
 
-    private void destroyBindingBlocks(Player pilot, Craft craft) {
+    private void destroyBindingBlocks(final Player pilot, final Craft craft) {
         if (pilot != null && (pilot.getGameMode() == GameMode.CREATIVE || pilot.hasPermission("*"))) {
             return;
         }
 
-        Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        final Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
         int blockedBroken = 0;
-        for (BlockVec block : craftBlocks) {
+        for (final BlockVec block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
                         //No diagonals
-                        if ((z != 0 && x != 0) || (x == 0 && y == 0 && z == 0)) continue;
+                        if (z != 0 && x != 0) continue;
+                        if (x == 0 && y == 0 && z == 0) continue;
 
-                        BlockVec test = new BlockVec(block.x + x, block.y + y, block.z + z);
+                        final BlockVec test = new BlockVec(block.x + x, block.y + y, block.z + z);
                         if (!craftBlocks.contains(test)) {
-                            Block testBlock = craft.getW().getBlockAt(test.x, test.y, test.z);
+                            Block testBlock = craft.getWorld().getBlockAt(test.x, test.y, test.z);
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||
                                 craft.getType().isForbiddenBlock(testBlock.getTypeId(), testBlock.getData())) {
 
-                                testBlock = craft.getW().getBlockAt(block.x, block.y, block.z);
-                                if (!canPilotBreakBlock(pilot, testBlock)) {
+                                testBlock = craft.getWorld().getBlockAt(block.x, block.y, block.z);
+                                if (!this.canPilotBreakBlock(pilot, testBlock)) {
                                     blockedBroken++;
-                                    Collection<ItemStack> drops = testBlock.getDrops();
+                                    final Collection<ItemStack> drops = testBlock.getDrops();
                                     testBlock.setType(Material.AIR);
-                                    for (ItemStack drop : drops) {
+                                    for (final ItemStack drop : drops) {
                                         testBlock.getWorld().dropItemNaturally(testBlock.getLocation(), drop);
                                     }
                                 }
@@ -243,37 +241,26 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         }
     }
 
-    public @Nonnull List<net.countercraft.movecraft.api.Craft> getCrafts() {
-        List<net.countercraft.movecraft.api.Craft> result = new ArrayList<>();
-        for (Map.Entry<World, Set<Craft>> entry : craftList.entrySet()) {
+    @Nonnull public List<net.countercraft.movecraft.api.Craft> getCrafts() {
+        final List<net.countercraft.movecraft.api.Craft> result = new ArrayList<>();
+        for (final Map.Entry<World, Set<Craft>> entry : this.craftList.entrySet()) {
             result.addAll(entry.getValue());
         }
         return Collections.unmodifiableList(result);
     }
 
-    public @Nonnull Set<Craft> getCraftsInWorld(World w) {
-        Set<Craft> result = craftList.get(w);
+    @Nonnull public Set<Craft> getCraftsInWorld(final World world) {
+        final Set<Craft> result = this.craftList.get(world);
         if (result == null) return Collections.emptySet();
         return Collections.unmodifiableSet(result);
     }
 
-    public Craft getCraftByPlayer(Player p) {
-        return craftPlayerIndex.get(p);
+    public Craft getCraftByPlayer(final Player p) {
+        return this.craftPlayerIndex.get(p);
     }
 
-    public Craft getCraftByPlayerName(String name) {
-        for (Map.Entry<Player, Craft> entry : craftPlayerIndex.entrySet()) {
-            if (entry.getKey() != null) {
-                if (entry.getKey().getName().equals(name)) {
-                    return entry.getValue();
-                }
-            }
-        }
-        return null;
-    }
-
-    public Player getPlayerFromCraft(Craft c) {
-        for (Map.Entry<Player, Craft> playerCraftEntry : craftPlayerIndex.entrySet()) {
+    public Player getPlayerFromCraft(final Craft c) {
+        for (final Map.Entry<Player, Craft> playerCraftEntry : this.craftPlayerIndex.entrySet()) {
 
             if (playerCraftEntry.getValue() == c) {
                 return playerCraftEntry.getKey();
@@ -283,43 +270,43 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         return null;
     }
 
-    public void removePlayerFromCraft(Craft c) {
-        if (getPlayerFromCraft(c) != null) {
-            removeReleaseTask(c);
-            getPlayerFromCraft(c).sendMessage(i18nSupport.get("Release - Craft has been released message"));
-            plugin.getLogger().log(Level.INFO,
-                                   String.format(i18nSupport.get("Release - Player has released a craft console"),
-                                                 c.getNotificationPlayer().getName(), c.getType().getCraftName(),
-                                                 c.getBlockList().length, c.getMinX(), c.getMinZ()));
-            Player p = getPlayerFromCraft(c);
-            craftPlayerIndex.put(null, c);
-            craftPlayerIndex.remove(p);
+    public void removePlayerFromCraft(final Craft craft) {
+        if (this.getPlayerFromCraft(craft) != null) {
+            this.removeReleaseTask(craft);
+            this.getPlayerFromCraft(craft).sendMessage(this.i18nSupport.get("Release - Craft has been released message"));
+            this.plugin.getLogger().log(Level.INFO,
+                                        String.format(this.i18nSupport.get("Release - Player has released a craft console"),
+                                                      craft.getNotificationPlayer().getName(), craft.getType().getCraftName(),
+                                                      craft.getBlockList().length, craft.getMinX(), craft.getMinZ()));
+            final Player p = this.getPlayerFromCraft(craft);
+            this.craftPlayerIndex.put(null, craft);
+            this.craftPlayerIndex.remove(p);
         }
     }
 
     public Map<Player, BukkitTask> getReleaseEvents() {
-        return releaseEvents;
+        return this.releaseEvents;
     }
 
     public void addReleaseTask(final Craft c) {
-        Player p = getPlayerFromCraft(c);
-        if (!getReleaseEvents().containsKey(p)) {
-            p.sendMessage(i18nSupport.get("Release - Player has left craft"));
-            BukkitTask releaseTask = new BukkitRunnable() {
+        final Player p = this.getPlayerFromCraft(c);
+        if (!this.getReleaseEvents().containsKey(p)) {
+            p.sendMessage(this.i18nSupport.get("Release - Player has left craft"));
+            final BukkitTask releaseTask = new BukkitRunnable() {
                 @Override public void run() {
-                    removeCraft(c);
+                    CraftManager.this.removeCraft(c);
                 }
-            }.runTaskLater(plugin, (20 * 15));
-            getReleaseEvents().put(p, releaseTask);
+            }.runTaskLater(this.plugin, (20 * 15));
+            this.getReleaseEvents().put(p, releaseTask);
         }
     }
 
     public void removeReleaseTask(final Craft c) {
-        Player p = getPlayerFromCraft(c);
+        final Player p = this.getPlayerFromCraft(c);
         if (p != null) {
-            if (releaseEvents.containsKey(p)) {
-                releaseEvents.get(p).cancel();
-                releaseEvents.remove(p);
+            if (this.releaseEvents.containsKey(p)) {
+                this.releaseEvents.get(p).cancel();
+                this.releaseEvents.remove(p);
             }
         }
     }

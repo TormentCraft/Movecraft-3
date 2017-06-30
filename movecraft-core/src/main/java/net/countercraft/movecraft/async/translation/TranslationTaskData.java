@@ -38,8 +38,8 @@ public class TranslationTaskData {
     public final IntRange heightRange;
     private boolean collisionExplosion;
 
-    public TranslationTaskData(int dx, int dz, int dy, BlockVec[] blockList, int[][][] hitbox, int minZ, int minX,
-                               IntRange heightRange)
+    public TranslationTaskData(final int dx, final int dz, final int dy, final BlockVec[] blockList, final int[][][] hitbox, final int minZ, final int minX,
+                               final IntRange heightRange)
     {
         this.dx = dx;
         this.dz = dz;
@@ -53,90 +53,90 @@ public class TranslationTaskData {
 
     public int getDx() {
 
-        return dx;
+        return this.dx;
     }
 
     public int getDy() {
-        return dy;
+        return this.dy;
     }
 
     public int getDz() {
-        return dz;
+        return this.dz;
     }
 
-    public void setDy(int dY) {
+    public void setDy(final int dY) {
         this.dy = dY;
     }
 
     public boolean failed() {
-        return failed;
+        return this.failed;
     }
 
-    public void setFailed(boolean failed) {
+    public void setFailed(final boolean failed) {
         this.failed = failed;
     }
 
     public boolean collisionExplosion() {
-        return collisionExplosion;
+        return this.collisionExplosion;
     }
 
-    public void setCollisionExplosion(boolean collisionExplosion) {
+    public void setCollisionExplosion(final boolean collisionExplosion) {
         this.collisionExplosion = collisionExplosion;
     }
 
     public String getFailMessage() {
-        return failMessage;
+        return this.failMessage;
     }
 
-    public void setFailMessage(String failMessage) {
+    public void setFailMessage(final String failMessage) {
         this.failMessage = failMessage;
     }
 
     public BlockVec[] getBlockList() {
-        return blockList;
+        return this.blockList;
     }
 
-    public void setBlockList(BlockVec[] blockList) {
+    public void setBlockList(final BlockVec[] blockList) {
         this.blockList = blockList;
     }
 
     public MapUpdateCommand[] getUpdates() {
-        return updates;
+        return this.updates;
     }
 
-    public void setUpdates(MapUpdateCommand[] updates) {
+    public void setUpdates(final MapUpdateCommand[] updates) {
         this.updates = updates;
     }
 
     public EntityUpdateCommand[] getEntityUpdates() {
-        return entityUpdates;
+        return this.entityUpdates;
     }
 
-    public void setEntityUpdates(EntityUpdateCommand[] entityUpdates) {
+    public void setEntityUpdates(final EntityUpdateCommand[] entityUpdates) {
         this.entityUpdates = entityUpdates;
     }
 
     public int[][][] getHitbox() {
-        return hitbox;
+        return this.hitbox;
     }
 
-    public void setHitbox(int[][][] hitbox) {
+    public void setHitbox(final int[][][] hitbox) {
         this.hitbox = hitbox;
     }
 
     public int getMinX() {
-        return minX;
+        return this.minX;
     }
 
-    public void setMinX(int minX) {
+    public void setMinX(final int minX) {
         this.minX = minX;
     }
 
     public int getMinZ() {
-        return minZ;
+        return this.minZ;
     }
 
-    public void setMinZ(int minZ) {
+    public void setMinZ(final int minZ) {
         this.minZ = minZ;
     }
 
@@ -144,7 +144,7 @@ public class TranslationTaskData {
         return this.itemDropUpdates;
     }
 
-    public void setItemDropUpdates(ItemDropUpdateCommand[] itemDropUpdate) {
+    public void setItemDropUpdates(final ItemDropUpdateCommand[] itemDropUpdate) {
         this.itemDropUpdates = itemDropUpdate;
     }
 }

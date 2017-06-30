@@ -35,6 +35,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public class CommandListener implements CommandExecutor {
     private final CraftManager craftManager;
     private final AsyncManager asyncManager;
 
-    public CommandListener(Settings settings, I18nSupport i18n, CraftManager craftManager, AsyncManager asyncManager)
+    public CommandListener(final Settings settings, final I18nSupport i18n, final CraftManager craftManager, final AsyncManager asyncManager)
     {
         this.settings = settings;
         this.i18n = i18n;
@@ -52,16 +53,16 @@ public class CommandListener implements CommandExecutor {
         this.asyncManager = asyncManager;
     }
 
-    private Location getCraftTeleportPoint(Craft craft, World w) {
+    private static Location getCraftTeleportPoint(final Craft craft, final World w) {
         int maxDX = 0;
         int maxDZ = 0;
         int maxY = 0;
         int minY = 32767;
-        for (int[][] i1 : craft.getHitBox()) {
+        for (final int[][] i1 : craft.getHitBox()) {
             maxDX++;
             if (i1 != null) {
                 int indexZ = 0;
-                for (int[] i2 : i1) {
+                for (final int[] i2 : i1) {
                     indexZ++;
                     if (i2 != null) {
                         if (i2[0] < minY) {
@@ -79,22 +80,22 @@ public class CommandListener implements CommandExecutor {
                 }
             }
         }
-        double telX = craft.getMinX() + (maxDX / 2.0);
-        double telZ = craft.getMinZ() + (maxDZ / 2.0);
-        double telY = maxY + 1.0;
+        final double telX = craft.getMinX() + (maxDX / 2.0);
+        final double telZ = craft.getMinZ() + (maxDZ / 2.0);
+        final double telY = maxY + 1.0;
         return new Location(w, telX, telY, telZ);
     }
 
-    private BlockVec getCraftMidPoint(Craft craft) {
+    private static BlockVec getCraftMidPoint(final Craft craft) {
         int maxDX = 0;
         int maxDZ = 0;
         int maxY = 0;
         int minY = 32767;
-        for (int[][] i1 : craft.getHitBox()) {
+        for (final int[][] i1 : craft.getHitBox()) {
             maxDX++;
             if (i1 != null) {
                 int indexZ = 0;
-                for (int[] i2 : i1) {
+                for (final int[] i2 : i1) {
                     indexZ++;
                     if (i2 != null) {
                         if (i2[0] < minY) {
@@ -112,34 +113,34 @@ public class CommandListener implements CommandExecutor {
                 }
             }
         }
-        int midX = craft.getMinX() + (maxDX / 2);
-        int midY = (minY + maxY) / 2;
-        int midZ = craft.getMinZ() + (maxDZ / 2);
+        final int midX = craft.getMinX() + (maxDX / 2);
+        final int midY = (minY + maxY) / 2;
+        final int midZ = craft.getMinZ() + (maxDZ / 2);
         return new BlockVec(midX, midY, midZ);
     }
 
-    @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    @Override public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("This command can only be run by a player.");
             return false;
         }
 
-        Player player = (Player) sender;
+        final Player player = (Player) sender;
 
-        final Craft playerCraft = craftManager.getCraftByPlayer(player);
+        final Craft playerCraft = this.craftManager.getCraftByPlayer(player);
 
         if (cmd.getName().equalsIgnoreCase("release")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.release")) {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+                player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 return true;
             }
 
             if (playerCraft != null) {
-                craftManager.removeCraft(playerCraft);
+                this.craftManager.removeCraft(playerCraft);
                 //e.getPlayer().sendMessage( String.format( i18n.get( "Player- Craft
                 // has been released" ) ) );
             } else {
-                player.sendMessage(i18n.get("Player- Error - You do not have a craft to release!"));
+                player.sendMessage(this.i18n.get("Player- Error - You do not have a craft to release!"));
             }
 
             return true;
@@ -147,30 +148,30 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("pilot")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.pilot")) {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+                player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 return true;
             }
 
             if (args.length > 0) {
                 if (player.hasPermission("movecraft." + args[0] + ".pilot")) {
-                    BlockVec startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
-                    Optional<CraftType> ct = craftManager.getCraftTypeFromString(args[0]);
+                    final BlockVec startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
+                    final Optional<CraftType> ct = this.craftManager.getCraftTypeFromString(args[0]);
 
                     if (ct.isPresent()) {
-                        Craft c = new Craft(ct.get(), player.getWorld());
+                        final Craft c = new Craft(ct.get(), player.getWorld());
 
                         if (playerCraft == null) {
-                            asyncManager.detect(c, player, player, startPoint);
+                            this.asyncManager.detect(c, player, player, startPoint);
                         } else {
-                            craftManager.removeCraft(playerCraft);
-                            asyncManager.detect(c, player, player, startPoint);
+                            this.craftManager.removeCraft(playerCraft);
+                            this.asyncManager.detect(c, player, player, startPoint);
                         }
                     } else {
-                        player.sendMessage(i18n.get("Unknown craft type."));
+                        player.sendMessage(this.i18n.get("Unknown craft type."));
                     }
 
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
                 return true;
             }
@@ -178,18 +179,19 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("rotate")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.rotate")) {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+                player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 return true;
             }
 
             if (playerCraft != null) {
                 if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                    BlockVec midPoint = getCraftMidPoint(playerCraft);
-                    Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left")) ? Rotation.ANTICLOCKWISE
-                                                                                              : Rotation.CLOCKWISE;
-                    asyncManager.rotate(playerCraft, rotation, midPoint);
+                    final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
+                    final Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left"))
+                                              ? Rotation.ANTICLOCKWISE
+                                              : Rotation.CLOCKWISE;
+                    this.asyncManager.rotate(playerCraft, rotation, midPoint);
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
 
@@ -198,16 +200,16 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("rotateleft")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.rotateleft")) {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+                player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 return true;
             }
 
             if (playerCraft != null) {
                 if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                    BlockVec midPoint = getCraftMidPoint(playerCraft);
-                    asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
+                    final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
+                    this.asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
 
@@ -217,16 +219,16 @@ public class CommandListener implements CommandExecutor {
         if (cmd.getName().equalsIgnoreCase("rotateright")) {
             if (!player.hasPermission("movecraft.commands") &&
                 !player.hasPermission("movecraft.commands.rotateright")) {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+                player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 return true;
             }
 
             if (playerCraft != null) {
                 if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                    BlockVec midPoint = getCraftMidPoint(playerCraft);
-                    asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
+                    final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
+                    this.asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
 
@@ -235,7 +237,7 @@ public class CommandListener implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("cruise")) {
             if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.cruise")) {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+                player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 return true;
             }
 
@@ -243,17 +245,17 @@ public class CommandListener implements CommandExecutor {
                 if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".move")) {
                     if (playerCraft.getType().getCanCruise()) {
                         if (args.length == 0) {
-                            Location loc = player.getLocation();
-                            float yaw = loc.getYaw();
-                            float pitch = loc.getPitch();
+                            final Location loc = player.getLocation();
+                            final float yaw = loc.getYaw();
+                            final float pitch = loc.getPitch();
 
-                            Direction dir = Direction.fromYawPitch(yaw, pitch);
+                            final Direction dir = Direction.fromYawPitch(yaw, pitch);
                             playerCraft.setCruiseDirection(dir);
                             playerCraft.setCruising(!dir.equals(Direction.OFF));
                             return true;
                         } else {
                             Direction dir = Direction.OFF;
-                            for (String a : args) {
+                            for (final String a : args) {
                                 if (a.isEmpty()) {
                                     continue;
                                 }
@@ -268,7 +270,7 @@ public class CommandListener implements CommandExecutor {
                         }
                     }
                 } else {
-                    player.sendMessage(i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 }
             }
 
@@ -285,21 +287,25 @@ public class CommandListener implements CommandExecutor {
         if (cmd.getName().equalsIgnoreCase("craftreport")) {
             if (!player.hasPermission("movecraft.commands") &&
                 !player.hasPermission("movecraft.commands.craftreport")) {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
+                player.sendMessage(this.i18n.get("Insufficient Permissions"));
                 return true;
             }
 
             boolean noCraftsFound = true;
-            for (Craft craft : craftManager.getCraftsInWorld(player.getWorld())) {
+            for (final Craft craft : this.craftManager.getCraftsInWorld(player.getWorld())) {
                 if (craft != null) {
-                    String output;
+                    final String output;
                     if (craft.getNotificationPlayer() != null) {
-                        output = craft.getType().getCraftName() + " " + craft.getNotificationPlayer().getName() +
-                                 " " + craft.getBlockList().length + " @ " + craft.getMinX() + "," +
-                                 craft.getMinY() + "," + craft.getMinZ();
+                        output = MessageFormat.format("{0} {1} {2} @ {3},{4},{5}",
+                                                      craft.getType().getCraftName(),
+                                                      craft.getNotificationPlayer().getName(),
+                                                      craft.getBlockList().length,
+                                                      craft.getMinX(), craft.getMinY(), craft.getMinZ());
                     } else {
-                        output = craft.getType().getCraftName() + " NULL " + craft.getBlockList().length + " @ " +
-                                 craft.getMinX() + "," + craft.getMinY() + "," + craft.getMinZ();
+                        output = MessageFormat.format("{0} NULL {1} @ {2},{3},{4}",
+                                                      craft.getType().getCraftName(),
+                                                      craft.getBlockList().length,
+                                                      craft.getMinX(), craft.getMinY(), craft.getMinZ());
                     }
                     player.sendMessage(output);
                     noCraftsFound = false;
@@ -314,22 +320,22 @@ public class CommandListener implements CommandExecutor {
         if (cmd.getName().equalsIgnoreCase("contacts")) {
             if (playerCraft != null) {
                 boolean foundContact = false;
-                for (Craft tcraft : craftManager.getCraftsInWorld(playerCraft.getW())) {
+                for (final Craft tcraft : this.craftManager.getCraftsInWorld(playerCraft.getWorld())) {
                     long cposx = playerCraft.getMaxX() + playerCraft.getMinX();
                     long cposy = playerCraft.getMaxY() + playerCraft.getMinY();
                     long cposz = playerCraft.getMaxZ() + playerCraft.getMinZ();
-                    cposx = cposx >> 1;
-                    cposy = cposy >> 1;
-                    cposz = cposz >> 1;
+                    cposx = cposx / 2;
+                    cposy = cposy / 2;
+                    cposz = cposz / 2;
                     long tposx = tcraft.getMaxX() + tcraft.getMinX();
                     long tposy = tcraft.getMaxY() + tcraft.getMinY();
                     long tposz = tcraft.getMaxZ() + tcraft.getMinZ();
-                    tposx = tposx >> 1;
-                    tposy = tposy >> 1;
-                    tposz = tposz >> 1;
-                    long diffx = cposx - tposx;
-                    long diffy = cposy - tposy;
-                    long diffz = cposz - tposz;
+                    tposx = tposx / 2;
+                    tposy = tposy / 2;
+                    tposz = tposz / 2;
+                    final long diffx = cposx - tposx;
+                    final long diffy = cposy - tposy;
+                    final long diffz = cposz - tposz;
                     long distsquared = Math.abs(diffx) * Math.abs(diffx);
                     distsquared += Math.abs(diffy) * Math.abs(diffy);
                     distsquared += Math.abs(diffz) * Math.abs(diffz);
@@ -362,25 +368,25 @@ public class CommandListener implements CommandExecutor {
                         playerCraft.getNotificationPlayer().sendMessage(notification);
                     }
                 }
-                if (!foundContact) player.sendMessage(i18n.get("No contacts within range"));
+                if (!foundContact) player.sendMessage(this.i18n.get("No contacts within range"));
                 return true;
             } else {
-                player.sendMessage(i18n.get("You must be piloting a craft"));
+                player.sendMessage(this.i18n.get("You must be piloting a craft"));
                 return true;
             }
         }
 
         if (cmd.getName().equalsIgnoreCase("manOverBoard")) {
             if (playerCraft != null) {
-                Location telPoint = getCraftTeleportPoint(playerCraft, playerCraft.getW());
+                final Location telPoint = CommandListener.getCraftTeleportPoint(playerCraft, playerCraft.getWorld());
                 player.teleport(telPoint);
             } else {
-                for (World w : Bukkit.getWorlds()) {
-                    for (Craft tcraft : craftManager.getCraftsInWorld(w)) {
+                for (final World w : Bukkit.getWorlds()) {
+                    for (final Craft tcraft : this.craftManager.getCraftsInWorld(w)) {
                         if (tcraft.getMovedPlayers().containsKey(player))
                             if ((System.currentTimeMillis() - tcraft.getMovedPlayers().get(player)) / 1000 <
-                                settings.ManOverBoardTimeout) {
-                                Location telPoint = getCraftTeleportPoint(tcraft, w);
+                                this.settings.ManOverBoardTimeout) {
+                                final Location telPoint = CommandListener.getCraftTeleportPoint(tcraft, w);
                                 player.teleport(telPoint);
                             }
                     }

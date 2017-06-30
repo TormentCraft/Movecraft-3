@@ -23,18 +23,19 @@ import org.bukkit.Location;
 
 public final class MathUtils {
 
-    public static boolean playerIsWithinBoundingPolygon(int[][][] box, int minX, int minZ, BlockVec l) {
+    public static boolean playerIsWithinBoundingPolygon(final int[][][] box, final int minX, final int minZ, final BlockVec l) {
 
         if (l.x >= minX && l.x < (minX + box.length)) {
             // PLayer is within correct X boundary
             if (l.z >= minZ && l.z < (minZ + box[l.x - minX].length)) {
                 // Player is within valid Z boundary
-                int minY, maxY;
+                final int minY;
+                final int maxY;
 
                 try {
                     minY = box[l.x - minX][l.z - minZ][0];
                     maxY = box[l.x - minX][l.z - minZ][1];
-                } catch (NullPointerException e) {
+                } catch (final NullPointerException e) {
                     return false;
                 }
 
@@ -48,53 +49,53 @@ public final class MathUtils {
         return false;
     }
 
-    public static BlockVec bukkit2MovecraftLoc(Location l) {
+    public static BlockVec bukkit2MovecraftLoc(final Location l) {
         return new BlockVec(l.getBlockX(), l.getBlockY(), l.getBlockZ());
     }
 
-    public static BlockVec rotateVec(Rotation r, BlockVec l) {
-        double theta;
+    public static BlockVec rotateVec(final Rotation r, final BlockVec l) {
+        final double theta;
         if (r == Rotation.CLOCKWISE) {
             theta = 0.5 * Math.PI;
         } else {
             theta = -1 * 0.5 * Math.PI;
         }
 
-        int x = (int) Math.round((l.x * Math.cos(theta)) + (l.z * (-1 * Math.sin(theta))));
-        int z = (int) Math.round((l.x * Math.sin(theta)) + (l.z * Math.cos(theta)));
+        final int x = (int) Math.round((l.x * Math.cos(theta)) + (l.z * (-1 * Math.sin(theta))));
+        final int z = (int) Math.round((l.x * Math.sin(theta)) + (l.z * Math.cos(theta)));
 
         return new BlockVec(x, l.y, z);
     }
 
-    public static double[] rotateVec(Rotation r, double x, double z) {
-        double theta;
+    public static double[] rotateVec(final Rotation r, final double x, final double z) {
+        final double theta;
         if (r == Rotation.CLOCKWISE) {
             theta = 0.5 * Math.PI;
         } else {
             theta = -1 * 0.5 * Math.PI;
         }
 
-        double newX = Math.round((x * Math.cos(theta)) + (z * (-1 * Math.sin(theta))));
-        double newZ = Math.round((x * Math.sin(theta)) + (z * Math.cos(theta)));
+        final double newX = Math.round((x * Math.cos(theta)) + (z * (-1 * Math.sin(theta))));
+        final double newZ = Math.round((x * Math.sin(theta)) + (z * Math.cos(theta)));
 
         return new double[]{newX, newZ};
     }
 
-    public static double[] rotateVecNoRound(Rotation r, double x, double z) {
-        double theta;
+    public static double[] rotateVecNoRound(final Rotation r, final double x, final double z) {
+        final double theta;
         if (r == Rotation.CLOCKWISE) {
             theta = 0.5 * Math.PI;
         } else {
             theta = -1 * 0.5 * Math.PI;
         }
 
-        double newX = (x * Math.cos(theta)) + (z * (-1 * Math.sin(theta)));
-        double newZ = (x * Math.sin(theta)) + (z * Math.cos(theta));
+        final double newX = (x * Math.cos(theta)) + (z * (-1 * Math.sin(theta)));
+        final double newZ = (x * Math.sin(theta)) + (z * Math.cos(theta));
 
         return new double[]{newX, newZ};
     }
 
-    public static int positiveMod(int mod, int divisor) {
+    public static int positiveMod(int mod, final int divisor) {
         if (mod < 0) {
             mod += divisor;
         }

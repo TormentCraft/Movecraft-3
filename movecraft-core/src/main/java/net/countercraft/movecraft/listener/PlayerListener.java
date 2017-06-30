@@ -47,25 +47,26 @@ public class PlayerListener implements Listener {
     private final I18nSupport i18n;
     private final CraftManager craftManager;
 
-    public PlayerListener(Plugin plugin, Settings settings, I18nSupport i18n, CraftManager craftManager) {
+    public PlayerListener(final Plugin plugin, final Settings settings, final I18nSupport i18n, final CraftManager craftManager) {
         this.plugin = plugin;
         this.settings = settings;
         this.i18n = i18n;
         this.craftManager = craftManager;
     }
 
-    private String checkCraftBorders(Craft craft) {
-        Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
-        for (BlockVec block : craftBlocks) {
+    private static String checkCraftBorders(final Craft craft) {
+        final Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        for (final BlockVec block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
                         //No diagonals
-                        if ((z != 0 && x != 0) || (x == 0 && y == 0 && z == 0)) continue;
+                        if (x == 0 && y == 0 && z == 0) continue;
+                        if (z != 0 && x != 0) continue;
 
-                        BlockVec test = new BlockVec(block.x + x, block.y + y, block.z + z);
+                        final BlockVec test = new BlockVec(block.x + x, block.y + y, block.z + z);
                         if (!craftBlocks.contains(test)) {
-                            Block testBlock = craft.getW().getBlockAt(block.x + x, block.y + y, block.z + z);
+                            final Block testBlock = craft.getWorld().getBlockAt(block.x + x, block.y + y, block.z + z);
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||
                                 craft.getType().isForbiddenBlock(testBlock.getTypeId(), testBlock.getData())) {
 
@@ -82,11 +83,11 @@ public class PlayerListener implements Listener {
     }
 
     @SuppressWarnings("unused")
-    @EventHandler public void onPLayerLogout(PlayerQuitEvent e) {
-        Craft c = craftManager.getCraftByPlayer(e.getPlayer());
+    @EventHandler public void onPLayerLogout(final PlayerQuitEvent event) {
+        final Craft c = this.craftManager.getCraftByPlayer(event.getPlayer());
 
         if (c != null) {
-            craftManager.removeCraft(c);
+            this.craftManager.removeCraft(c);
         }
     }
 
@@ -98,56 +99,56 @@ public class PlayerListener implements Listener {
 	}*/
 
     @SuppressWarnings("unused")
-    @EventHandler public void onPlayerDeath(EntityDamageByEntityEvent e)
+    @EventHandler public void onPlayerDeath(final EntityDamageByEntityEvent event)
     {  // changed to death so when you shoot up an airship and hit the pilot, it still sinks
-        if (e instanceof Player) {
-            Player p = (Player) e;
-            craftManager.removeCraft(craftManager.getCraftByPlayer(p));
+        if (event instanceof Player) {
+            final Player p = (Player) event;
+            this.craftManager.removeCraft(this.craftManager.getCraftByPlayer(p));
         }
     }
 
     @SuppressWarnings("unused")
-    @EventHandler public void onPlayerMove(PlayerMoveEvent event) {
+    @EventHandler public void onPlayerMove(final PlayerMoveEvent event) {
         final Player player = event.getPlayer();
-        final Craft craft = craftManager.getCraftByPlayer(player);
+        final Craft craft = this.craftManager.getCraftByPlayer(player);
 
         if (craft != null) {
             if (craft.isNotProcessing() && (!MathUtils
                     .playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
                                                    MathUtils.bukkit2MovecraftLoc(player.getLocation())))) {
 
-                if (!craftManager.getReleaseEvents().containsKey(player) && craft.getType().getMoveEntities()) {
-                    if (settings.ManOverBoardTimeout == 0)
-                        player.sendMessage(i18n.get("Release - Player has left craft"));
-                    else player.sendMessage(i18n.get(
+                if (!this.craftManager.getReleaseEvents().containsKey(player) && craft.getType().getMoveEntities()) {
+                    if (this.settings.ManOverBoardTimeout == 0)
+                        player.sendMessage(this.i18n.get("Release - Player has left craft"));
+                    else player.sendMessage(this.i18n.get(
                             "You have left your craft. You may return to your craft by typing /manoverboard any time " +
                             "before the timeout expires"));
                     if (craft.getBlockList().length > 11000) {
-                        player.sendMessage(i18n.get(
+                        player.sendMessage(this.i18n.get(
                                 "Craft is too big to check its borders. Make sure this area is safe to release your " +
                                 "craft in."));
                     } else {
-                        String ret = checkCraftBorders(craft);
+                        final String ret = checkCraftBorders(craft);
                         if (ret != null) {
                             player.sendMessage(ChatColor.RED +
-                                               i18n.get("WARNING! There are blocks near your craft, part of" +
-                                                        " your craft may be damaged!") +
+                                               this.i18n.get("WARNING! There are blocks near your craft, part of" +
+                                                             " your craft may be damaged!") +
                                                ChatColor.RESET + "\n" + ret);
                         }
                     }
 
-                    BukkitTask releaseTask = new BukkitRunnable() {
+                    final BukkitTask releaseTask = new BukkitRunnable() {
 
                         @Override public void run() {
-                            craftManager.removeCraft(craft);
+                            PlayerListener.this.craftManager.removeCraft(craft);
                         }
-                    }.runTaskLater(plugin, (20 * 30));
+                    }.runTaskLater(this.plugin, (20 * 30));
 
-                    craftManager.getReleaseEvents().put(player, releaseTask);
+                    this.craftManager.getReleaseEvents().put(player, releaseTask);
                 }
             } else {
-                if (craftManager.getReleaseEvents().containsKey(player) && craft.getType().getMoveEntities()) {
-                    craftManager.removeReleaseTask(craft);
+                if (this.craftManager.getReleaseEvents().containsKey(player) && craft.getType().getMoveEntities()) {
+                    this.craftManager.removeReleaseTask(craft);
                 }
             }
         }

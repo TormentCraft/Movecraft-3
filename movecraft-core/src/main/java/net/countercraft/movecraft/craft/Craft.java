@@ -33,7 +33,7 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     private int[][][] hitBox;
     @Nonnull public final CraftType type;
     private BlockVec[] blockList;
-    @Nonnull public final World w;
+    @Nonnull public final World world;
     private final AtomicBoolean processing = new AtomicBoolean();
     private int minX;
     private int minZ;
@@ -54,9 +54,9 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     private Player notificationPlayer;
     private final Map<Player, Long> movedPlayers = new HashMap<>();
 
-    public Craft(CraftType type, World world) {
+    public Craft(final CraftType type, final World world) {
         this.type = type;
-        this.w = world;
+        this.world = world;
         this.blockList = new BlockVec[1];
         this.pilotLocked = false;
         this.pilotLockedX = 0.0;
@@ -66,46 +66,46 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     }
 
     public boolean isNotProcessing() {
-        return !processing.get();
+        return !this.processing.get();
     }
 
-    public void setProcessing(boolean processing) {
+    public void setProcessing(final boolean processing) {
         this.processing.set(processing);
     }
 
     public BlockVec[] getBlockList() {
-        synchronized (blockList) {
-            return blockList.clone();
+        synchronized (this.blockList) {
+            return this.blockList.clone();
         }
     }
 
-    public void setBlockList(BlockVec[] blockList) {
+    public void setBlockList(final BlockVec[] blockList) {
         synchronized (this.blockList) {
             this.blockList = blockList;
         }
     }
 
     public CraftType getType() {
-        return type;
+        return this.type;
     }
 
-    public World getW() {
-        return w;
+    public World getWorld() {
+        return this.world;
     }
 
     public int[][][] getHitBox() {
-        return hitBox;
+        return this.hitBox;
     }
 
-    public void setHitBox(int[][][] hitBox) {
+    public void setHitBox(final int[][][] hitBox) {
         this.hitBox = hitBox;
     }
 
-    public void resetSigns(boolean resetCruise, boolean resetAscend, boolean resetDescend) {
-        for (BlockVec location : blockList) {
-            int blockID = w.getBlockAt(location.x, location.y, location.z).getTypeId();
+    public void resetSigns(final boolean resetCruise, final boolean resetAscend, final boolean resetDescend) {
+        for (final BlockVec location : this.blockList) {
+            final int blockID = this.world.getBlockAt(location.x, location.y, location.z).getTypeId();
             if (blockID == 63 || blockID == 68) {
-                Sign s = (Sign) w.getBlockAt(location.x, location.y, location.z).getState();
+                final Sign s = (Sign) this.world.getBlockAt(location.x, location.y, location.z).getState();
                 if (resetCruise) if (ChatColor.stripColor(s.getLine(0)).equals("Cruise: ON")) {
                     s.setLine(0, "Cruise: OFF");
                     s.update(true);
@@ -123,18 +123,18 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     }
 
     public int getMaxX() {
-        return minX + hitBox.length;
+        return this.minX + this.hitBox.length;
     }
 
     public int getMaxZ() {
-        return minZ + hitBox[0].length;
+        return this.minZ + this.hitBox[0].length;
     }
 
     public int getMinY() {
         int minY = 65535;
         int maxY = -65535;
-        for (int[][] i1 : hitBox) {
-            if (i1 != null) for (int[] i2 : i1) {
+        for (final int[][] i1 : this.hitBox) {
+            if (i1 != null) for (final int[] i2 : i1) {
                 if (i2 != null) {
                     if (i2[0] < minY) {
                         minY = i2[0];
@@ -151,8 +151,8 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     public int getMaxY() {
         int minY = 65535;
         int maxY = -65535;
-        for (int[][] i1 : hitBox) {
-            for (int[] i2 : i1) {
+        for (final int[][] i1 : this.hitBox) {
+            for (final int[] i2 : i1) {
                 if (i2 != null) {
                     if (i2[0] < minY) {
                         minY = i2[0];
@@ -167,170 +167,170 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     }
 
     public int getMinZ() {
-        return minZ;
+        return this.minZ;
     }
 
     public int getMinX() {
-        return minX;
+        return this.minX;
     }
 
-    public void setMinX(int minX) {
+    public void setMinX(final int minX) {
         this.minX = minX;
     }
 
-    public void setMinZ(int minZ) {
+    public void setMinZ(final int minZ) {
         this.minZ = minZ;
     }
 
-    public boolean isCraftBlock(BlockVec mloc) {
+    public boolean isCraftBlock(final BlockVec mloc) {
 
         if (mloc.x < getMinX() || mloc.x > getMaxX()) return false;
         if (mloc.z < getMinZ() || mloc.z > getMaxZ()) return false;
         if (mloc.y < getMinY() || mloc.y > getMaxY()) return false;
 
-        for (BlockVec loc : getBlockList()) {
+        for (final BlockVec loc : getBlockList()) {
             if (loc.x == mloc.x && loc.y == mloc.y && loc.z == mloc.z) return true;
         }
         return false;
     }
 
     public boolean getCruising() {
-        return cruising;
+        return this.cruising;
     }
 
     public boolean getSinking() {
-        return sinking;
+        return this.sinking;
     }
 
-    public void setCruiseDirection(Direction cruiseDirection) {
+    public void setCruiseDirection(final Direction cruiseDirection) {
         this.cruiseDirection = cruiseDirection;
     }
 
     public Direction getCruiseDirection() {
-        return cruiseDirection;
+        return this.cruiseDirection;
     }
 
-    public void setCruising(boolean cruising) {
+    public void setCruising(final boolean cruising) {
         this.cruising = cruising;
     }
 
-    public void setSinking(boolean sinking) {
+    public void setSinking(final boolean sinking) {
         this.sinking = sinking;
     }
 
-    public void setLastCruiseUpdate(long update) {
+    public void setLastCruiseUpdate(final long update) {
         this.lastCruiseUpdate = update;
     }
 
     public long getLastCruiseUpdate() {
-        return lastCruiseUpdate;
+        return this.lastCruiseUpdate;
     }
 
-    public void setLastBlockCheck(long update) {
+    public void setLastBlockCheck(final long update) {
         this.lastBlockCheck = update;
     }
 
     public long getLastBlockCheck() {
-        return lastBlockCheck;
+        return this.lastBlockCheck;
     }
 
-    public void setLastRightClick(long update) {
+    public void setLastRightClick(final long update) {
         this.lastRightClick = update;
     }
 
     public long getLastRightClick() {
-        return lastRightClick;
+        return this.lastRightClick;
     }
 
-    public void setKeepMoving(boolean keepMoving) {
+    public void setKeepMoving(final boolean keepMoving) {
         this.keepMoving = keepMoving;
     }
 
     public boolean getKeepMoving() {
-        return keepMoving;
+        return this.keepMoving;
     }
 
     public int getLastDX() {
-        return lastDX;
+        return this.lastDX;
     }
 
-    public void setLastDX(int dX) {
+    public void setLastDX(final int dX) {
         this.lastDX = dX;
     }
 
     public int getLastDY() {
-        return lastDY;
+        return this.lastDY;
     }
 
-    public void setLastDY(int dY) {
+    public void setLastDY(final int dY) {
         this.lastDY = dY;
     }
 
     public int getLastDZ() {
-        return lastDZ;
+        return this.lastDZ;
     }
 
-    public void setLastDZ(int dZ) {
+    public void setLastDZ(final int dZ) {
         this.lastDZ = dZ;
     }
 
     public boolean getPilotLocked() {
-        return pilotLocked;
+        return this.pilotLocked;
     }
 
     public Map<Player, Long> getMovedPlayers() {
-        return movedPlayers;
+        return this.movedPlayers;
     }
 
-    public void setPilotLocked(boolean pilotLocked) {
+    public void setPilotLocked(final boolean pilotLocked) {
         this.pilotLocked = pilotLocked;
     }
 
     public double getPilotLockedX() {
-        return pilotLockedX;
+        return this.pilotLockedX;
     }
 
-    public void setPilotLockedX(double pilotLockedX) {
+    public void setPilotLockedX(final double pilotLockedX) {
         this.pilotLockedX = pilotLockedX;
     }
 
     public double getPilotLockedY() {
-        return pilotLockedY;
+        return this.pilotLockedY;
     }
 
-    public void setPilotLockedY(double pilotLockedY) {
+    public void setPilotLockedY(final double pilotLockedY) {
         this.pilotLockedY = pilotLockedY;
     }
 
     public double getPilotLockedZ() {
-        return pilotLockedZ;
+        return this.pilotLockedZ;
     }
 
-    public void setPilotLockedZ(double pilotLockedZ) {
+    public void setPilotLockedZ(final double pilotLockedZ) {
         this.pilotLockedZ = pilotLockedZ;
     }
 
-    public void setBurningFuel(double burningFuel) {
+    public void setBurningFuel(final double burningFuel) {
         this.burningFuel = burningFuel;
     }
 
     public double getBurningFuel() {
-        return burningFuel;
+        return this.burningFuel;
     }
 
-    public void setOrigBlockCount(int origBlockCount) {
+    public void setOrigBlockCount(final int origBlockCount) {
         this.origBlockCount = origBlockCount;
     }
 
     public int getOrigBlockCount() {
-        return origBlockCount;
+        return this.origBlockCount;
     }
 
-    public void setNotificationPlayer(Player notificationPlayer) {
+    public void setNotificationPlayer(final Player notificationPlayer) {
         this.notificationPlayer = notificationPlayer;
     }
 
     public Player getNotificationPlayer() {
-        return notificationPlayer;
+        return this.notificationPlayer;
     }
 }

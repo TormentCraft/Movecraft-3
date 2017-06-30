@@ -24,16 +24,16 @@ public abstract class AsyncTask extends BukkitRunnable {
     private final Craft craft;
 
     protected AsyncTask(Craft c) {
-        craft = c;
+        this.craft = c;
     }
 
     @Override public void run() {
-        execute();
+        this.execute();
     }
 
     protected abstract void execute();
 
     protected Craft getCraft() {
-        return craft;
+        return this.craft;
     }
 }
