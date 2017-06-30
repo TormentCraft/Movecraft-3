@@ -196,16 +196,12 @@ public final class AsyncManager extends BukkitRunnable {
         }
 
         submitTask(new RotationTask(craft, plugin, settings, i18n, craftManager, originPoint, craft.getBlockList(),
-                                    rotation, craft
-
-                                            .getW()), craft);
+                                    rotation, craft.getW()), craft);
     }
 
     public void rotate(Craft craft, Rotation rotation, BlockVec originPoint, boolean isSubCraft) {
         submitTask(new RotationTask(craft, plugin, settings, i18n, craftManager, originPoint, craft.getBlockList(),
-                                    rotation, craft.getW(), isSubCraft),
-
-                   craft);
+                                    rotation, craft.getW(), isSubCraft), craft);
     }
 
     public void submitTask(final AsyncTask task, Craft c) {
