@@ -49,6 +49,7 @@ import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
 import org.apache.commons.collections.ListUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -946,7 +947,7 @@ public final class AsyncManager extends BukkitRunnable {
                     for (BlockVec loc : locations) {
                         if (plugin.blockFadeWorldMap.get(loc) == w) {
                             Long time = plugin.blockFadeTimeMap.get(loc);
-                            Integer type = plugin.blockFadeTypeMap.get(loc);
+                            Material type = plugin.blockFadeTypeMap.get(loc);
                             Boolean water = plugin.blockFadeWaterMap.get(loc);
                             if (time != null && type != null && water != null) {
                                 long secsElapsed =
@@ -960,7 +961,7 @@ public final class AsyncManager extends BukkitRunnable {
                                         w.loadChunk(cx, cz);
                                     }
                                     // check to see if the block type has changed, if so don't fade it
-                                    if (w.getBlockTypeIdAt(loc.x, loc.y, loc.z) == plugin.blockFadeTypeMap.get(loc)) {
+                                    if (w.getBlockAt(loc.x, loc.y, loc.z).getType() == plugin.blockFadeTypeMap.get(loc)) {
                                         // should it become water? if not, then air
                                         if (plugin.blockFadeWaterMap.get(loc)) {
                                             MapUpdateCommand updateCom = new MapUpdateCommand(loc, 9, (byte) 0, null);

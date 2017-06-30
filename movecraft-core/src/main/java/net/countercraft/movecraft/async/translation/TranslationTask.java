@@ -645,20 +645,20 @@ public class TranslationTask extends AsyncTask {
             // explosions for map update
             for (MapUpdateCommand m : explosionSet) {
 
-                if (existingBlockSet.contains(m.getNewBlockLocation())) {
-                    existingBlockSet.remove(m.getNewBlockLocation());
+                if (existingBlockSet.contains(m.newBlockLocation)) {
+                    existingBlockSet.remove(m.newBlockLocation);
                     if (settings.FadeWrecksAfter > 0) {
-                        Material typeID = getCraft().getW().getBlockAt(m.getNewBlockLocation().x, m.getNewBlockLocation().y,
-                                                                  m.getNewBlockLocation().z).getType();
+                        Material typeID = getCraft().getW().getBlockAt(m.newBlockLocation.x, m.newBlockLocation.y,
+                                                                       m.newBlockLocation.z).getType();
                         if (typeID != Material.AIR && typeID != Material.STATIONARY_WATER) {
-                            plugin.blockFadeTimeMap.put(m.getNewBlockLocation(), System.currentTimeMillis());
-                            plugin.blockFadeTypeMap.put(m.getNewBlockLocation(), typeID);
-                            if (m.getNewBlockLocation().y <= waterLine) {
-                                plugin.blockFadeWaterMap.put(m.getNewBlockLocation(), true);
+                            plugin.blockFadeTimeMap.put(m.newBlockLocation, System.currentTimeMillis());
+                            plugin.blockFadeTypeMap.put(m.newBlockLocation, typeID);
+                            if (m.newBlockLocation.y <= waterLine) {
+                                plugin.blockFadeWaterMap.put(m.newBlockLocation, true);
                             } else {
-                                plugin.blockFadeWaterMap.put(m.getNewBlockLocation(), false);
+                                plugin.blockFadeWaterMap.put(m.newBlockLocation, false);
                             }
-                            plugin.blockFadeWorldMap.put(m.getNewBlockLocation(), getCraft().getW());
+                            plugin.blockFadeWorldMap.put(m.newBlockLocation, getCraft().getW());
                         }
                     }
                 }
@@ -667,13 +667,13 @@ public class TranslationTask extends AsyncTask {
                 // for smoothing sinking
                 if (getCraft().getSinking() &&
                     (getCraft().getType().getExplodeOnCrash() == 0.0)) {
-                    int posy = m.getNewBlockLocation().y + 1;
+                    int posy = m.newBlockLocation.y + 1;
                     Material testID = getCraft().getW()
-                                           .getBlockAt(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z)
+                                           .getBlockAt(m.newBlockLocation.x, posy, m.newBlockLocation.z)
                                            .getType();
 
                     while (posy <= maxY && !fallThroughBlocks.contains(testID)) {
-                        BlockVec testLoc = new BlockVec(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z);
+                        BlockVec testLoc = new BlockVec(m.newBlockLocation.x, posy, m.newBlockLocation.z);
                         if (existingBlockSet.contains(testLoc)) {
                             existingBlockSet.remove(testLoc);
                             if (settings.FadeWrecksAfter > 0) {
@@ -692,7 +692,7 @@ public class TranslationTask extends AsyncTask {
                         }
                         posy = posy + 1;
                         testID = getCraft().getW()
-                                           .getBlockAt(m.getNewBlockLocation().x, posy, m.getNewBlockLocation().z)
+                                           .getBlockAt(m.newBlockLocation.x, posy, m.newBlockLocation.z)
                                            .getType();
                     }
                 }

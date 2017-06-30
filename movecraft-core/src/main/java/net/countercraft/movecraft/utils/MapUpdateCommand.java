@@ -21,22 +21,27 @@ import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.craft.Craft;
 
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+
 /**
  * Class that stores the data about a single blocks changes to the map in an unspecified world. The world is
  * retrieved contextually from the submitting craft.
  */
+@Immutable
 public class MapUpdateCommand {
-    private BlockVec blockLocation;
-    private final BlockVec newBlockLocation;
-    private final int typeID;
-    private final byte dataID;
-    private final Object worldEditBaseBlock;
-    private final Rotation rotation;
-    private final Craft craft;
-    private final int smoke;
+    @Nullable public final BlockVec blockLocation;
+    public final BlockVec newBlockLocation;
+    public final int typeID;
+    public final byte dataID;
+    @Nullable public final Object worldEditBaseBlock;
+    public final Rotation rotation;
+    public final Craft craft;
+    public final int smoke;
 
-    public MapUpdateCommand(BlockVec blockLocation, BlockVec newBlockLocation, int typeID, byte dataID,
-                            Rotation rotation, Craft craft)
+    public MapUpdateCommand(final BlockVec blockLocation, final BlockVec newBlockLocation,
+                            final int typeID, final byte dataID,
+                            final Rotation rotation, final Craft craft)
     {
         this.blockLocation = blockLocation;
         this.newBlockLocation = newBlockLocation;
@@ -48,7 +53,8 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(BlockVec blockLocation, BlockVec newBlockLocation, int typeID, byte dataID, Craft craft)
+    public MapUpdateCommand(final BlockVec blockLocation, final BlockVec newBlockLocation,
+                            final int typeID, final byte dataID, final Craft craft)
     {
         this.blockLocation = blockLocation;
         this.newBlockLocation = newBlockLocation;
@@ -60,7 +66,8 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(BlockVec newBlockLocation, int typeID, byte dataID, Craft craft) {
+    public MapUpdateCommand(final BlockVec newBlockLocation, final int typeID, final byte dataID, final Craft craft) {
+        this.blockLocation = null;
         this.newBlockLocation = newBlockLocation;
         this.typeID = typeID;
         this.dataID = dataID;
@@ -70,8 +77,10 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(BlockVec newBlockLocation, int typeID, byte dataID, Object worldEditBaseBlock, Craft craft)
+    public MapUpdateCommand(final BlockVec newBlockLocation, final int typeID, final byte dataID,
+                            final Object worldEditBaseBlock, final Craft craft)
     {
+        this.blockLocation = null;
         this.newBlockLocation = newBlockLocation;
         this.typeID = typeID;
         this.dataID = dataID;
@@ -81,7 +90,9 @@ public class MapUpdateCommand {
         this.smoke = 0;
     }
 
-    public MapUpdateCommand(BlockVec newBlockLocation, int typeID, byte dataID, Craft craft, int smoke) {
+    public MapUpdateCommand(final BlockVec newBlockLocation, final int typeID, final byte dataID,
+                            final Craft craft, final int smoke) {
+        this.blockLocation = null;
         this.newBlockLocation = newBlockLocation;
         this.typeID = typeID;
         this.dataID = dataID;
@@ -89,38 +100,6 @@ public class MapUpdateCommand {
         this.rotation = Rotation.NONE;
         this.craft = craft;
         this.smoke = smoke;
-    }
-
-    public int getTypeID() {
-        return typeID;
-    }
-
-    public byte getDataID() {
-        return dataID;
-    }
-
-    public Object getWorldEditBaseBlock() {
-        return worldEditBaseBlock;
-    }
-
-    public int getSmoke() {
-        return smoke;
-    }
-
-    public BlockVec getOldBlockLocation() {
-        return blockLocation;
-    }
-
-    public BlockVec getNewBlockLocation() {
-        return newBlockLocation;
-    }
-
-    public Rotation getRotation() {
-        return rotation;
-    }
-
-    public Craft getCraft() {
-        return craft;
     }
 }
 
