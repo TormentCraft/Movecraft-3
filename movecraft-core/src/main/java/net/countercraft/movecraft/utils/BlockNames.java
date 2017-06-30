@@ -38,9 +38,8 @@ public final class BlockNames {
         String tmp = null;
 
         try {
-            tmp = new ItemStack(Item.getById(material.getId()), 0, data).getName();
-        } catch (Exception e) {
-        }
+            tmp = new ItemStack(Item.getById(material.getId()), 1, data).getName();
+        } catch (Exception ignored) { }
 
         if (tmp == null || tmp.isEmpty()) {
             tmp = material.name();
