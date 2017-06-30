@@ -63,7 +63,7 @@ public class InteractListener implements Listener {
         this.asyncManager = asyncManager;
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @EventHandler public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK) {
             Material m = event.getClickedBlock().getType();

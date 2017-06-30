@@ -72,12 +72,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
 public final class AsyncManager extends BukkitRunnable {
-    private final Settings settings;
-    private final I18nSupport i18n;
-    private final CraftManager craftManager;
-    private final Movecraft plugin;
-    private final MapUpdateManager mapUpdateManager;
-    private final Events events = new Events(Bukkit.getPluginManager());
+    private final @Nonnull Settings settings;
+    private final @Nonnull I18nSupport i18n;
+    private final @Nonnull CraftManager craftManager;
+    private final @Nonnull Movecraft plugin;
+    private final @Nonnull MapUpdateManager mapUpdateManager;
+    private final @Nonnull Events events = new Events(Bukkit.getPluginManager());
 
     private final Map<AsyncTask, Craft> ownershipMap = new HashMap<>();
     private final Map<org.bukkit.entity.TNTPrimed, Double> TNTTracking = new HashMap<>();
@@ -90,11 +90,9 @@ public final class AsyncManager extends BukkitRunnable {
     private long lastTNTContactCheck = 0;
     private long lastFadeCheck = 0;
     private long lastContactCheck = 0;
-    private long lastSiegeNotification = 0;
-    private long lastSiegePayout = 0;
 
-    public AsyncManager(Settings settings, I18nSupport i18n, CraftManager craftManager, Movecraft plugin,
-                        MapUpdateManager mapUpdateManager)
+    public AsyncManager(@Nonnull Settings settings, @Nonnull I18nSupport i18n, @Nonnull CraftManager craftManager,
+                        @Nonnull Movecraft plugin, @Nonnull MapUpdateManager mapUpdateManager)
     {
         this.settings = settings;
         this.i18n = i18n;
@@ -648,10 +646,8 @@ public final class AsyncManager extends BukkitRunnable {
                             Map<MaterialDataPredicate, Integer> foundFlyBlocks = new HashMap<>();
                             boolean regionPVPBlocked = false;
                             boolean sinkingForbiddenByFlag = false;
-                            boolean sinkingForbiddenByTowny = false;
                             // go through each block in the blocklist, and if its in the FlyBlocks, total up the
                             // number of them
-                            Location townyLoc = null;
                             for (BlockVec l : pcraft.getBlockList()) {
                                 if (isRegionBlockedPVP(l, w)) regionPVPBlocked = true;
                                 if (!isRegionFlagSinkAllowed(l, w)) sinkingForbiddenByFlag = true;
@@ -712,7 +708,7 @@ public final class AsyncManager extends BukkitRunnable {
                             boolean cancelled = events.sinkingStarted();
 
                             if (isSinking &&
-                                (regionPVPBlocked || sinkingForbiddenByFlag || sinkingForbiddenByTowny) &&
+                                (regionPVPBlocked || sinkingForbiddenByFlag) &&
                                 pcraft.isNotProcessing() || cancelled) {
                                 Player p = craftManager.getPlayerFromCraft(pcraft);
                                 Player notifyP = pcraft.getNotificationPlayer();
@@ -727,17 +723,6 @@ public final class AsyncManager extends BukkitRunnable {
                                                 i18n.get("WGCustomFlags - Sinking a craft is not allowed in this " +
                                                          "WorldGuard " +
                                                          "region"));
-                                    } else if (sinkingForbiddenByTowny) {
-                                        if (townyLoc != null) {
-                                            notifyP.sendMessage(String.format(i18n.get(
-                                                    "Towny - Sinking a craft is not allowed in this town plot") +
-                                                                              " @ %d,%d,%d", townyLoc.getBlockX(),
-                                                                              townyLoc.getBlockY(),
-                                                                              townyLoc.getBlockZ()));
-                                        } else {
-                                            notifyP.sendMessage(i18n.get(
-                                                    "Towny - Sinking a craft is not allowed in this town plot"));
-                                        }
                                     } else {
                                         notifyP.sendMessage(i18n.get("Sinking a craft is not allowed."));
                                     }
@@ -772,7 +757,7 @@ public final class AsyncManager extends BukkitRunnable {
             }
 
             // sink all the sinking ships
-            if (craftManager.getCraftsInWorld(w) != null) for (Craft pcraft : craftManager.getCraftsInWorld(w)) {
+            for (Craft pcraft : craftManager.getCraftsInWorld(w)) {
                 if (pcraft != null && pcraft.getSinking()) {
                     if (pcraft.getBlockList().length == 0) {
                         craftManager.removeCraft(pcraft);

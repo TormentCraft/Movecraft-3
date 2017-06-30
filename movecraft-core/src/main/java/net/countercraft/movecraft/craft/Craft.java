@@ -24,21 +24,22 @@ import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Craft implements net.countercraft.movecraft.api.Craft {
     private int[][][] hitBox;
-    public final CraftType type;
+    @Nonnull public final CraftType type;
     private BlockVec[] blockList;
-    public final World w;
+    @Nonnull public final World w;
     private final AtomicBoolean processing = new AtomicBoolean();
     private int minX;
     private int minZ;
     private boolean cruising;
     private boolean sinking;
-    private Direction cruiseDirection;
+    @Nonnull private Direction cruiseDirection;
     private long lastCruiseUpdate;
     private long lastBlockCheck;
     private long lastRightClick;

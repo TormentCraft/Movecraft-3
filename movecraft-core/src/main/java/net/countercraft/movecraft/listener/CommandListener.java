@@ -47,7 +47,6 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
-//public class CommandListener implements Listener {
 public class CommandListener implements CommandExecutor {
     private final Settings settings;
     private final I18nSupport i18n;
@@ -252,36 +251,37 @@ public class CommandListener implements CommandExecutor {
                 return true;
             }
 
-            if (playerCraft == null) {
-            } else if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".move")) {
-                if (playerCraft.getType().getCanCruise()) {
-                    if (args.length == 0) {
-                        Location loc = player.getLocation();
-                        float yaw = loc.getYaw();
-                        float pitch = loc.getPitch();
+            if (playerCraft != null) {
+                if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".move")) {
+                    if (playerCraft.getType().getCanCruise()) {
+                        if (args.length == 0) {
+                            Location loc = player.getLocation();
+                            float yaw = loc.getYaw();
+                            float pitch = loc.getPitch();
 
-                        Direction dir = Direction.fromYawPitch(yaw, pitch);
-                        playerCraft.setCruiseDirection(dir);
-                        playerCraft.setCruising(!dir.equals(Direction.OFF));
-                        return true;
-                    } else {
-                        Direction dir = Direction.OFF;
-                        for (String a : args) {
-                            if (a.isEmpty()) {
-                                continue;
+                            Direction dir = Direction.fromYawPitch(yaw, pitch);
+                            playerCraft.setCruiseDirection(dir);
+                            playerCraft.setCruising(!dir.equals(Direction.OFF));
+                            return true;
+                        } else {
+                            Direction dir = Direction.OFF;
+                            for (String a : args) {
+                                if (a.isEmpty()) {
+                                    continue;
+                                }
+
+                                dir = dir.combine(Direction.namedOr(a, Direction.OFF));
+
+                                if (Objects.equals(dir, Direction.OFF)) break;
                             }
 
-                            dir = dir.combine(Direction.namedOr(a, Direction.OFF));
-
-                            if (Objects.equals(dir, Direction.OFF)) break;
+                            playerCraft.setCruiseDirection(dir);
+                            playerCraft.setCruising(!dir.equals(Direction.OFF));
                         }
-
-                        playerCraft.setCruiseDirection(dir);
-                        playerCraft.setCruising(!dir.equals(Direction.OFF));
                     }
+                } else {
+                    player.sendMessage(i18n.get("Insufficient Permissions"));
                 }
-            } else {
-                player.sendMessage(i18n.get("Insufficient Permissions"));
             }
 
             return true;
