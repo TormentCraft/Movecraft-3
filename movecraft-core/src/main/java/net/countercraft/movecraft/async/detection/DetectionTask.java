@@ -18,9 +18,8 @@
 package net.countercraft.movecraft.async.detection;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.IntRange;
@@ -45,6 +44,7 @@ import org.bukkit.material.MaterialData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,9 +66,6 @@ public class DetectionTask extends AsyncTask {
     private final Map<MaterialDataPredicate, Integer> blockTypeCount = new HashMap<>();
     private Map<MaterialDataPredicate, List<CraftType.Constraint>> dFlyBlocks;
     private final DetectionTaskData data;
-
-    private int craftMinY = 0;
-    private int craftMaxY = 0;
 
     public DetectionTask(Craft c, BlockVec startLocation, IntRange sizeRange, MaterialDataPredicate allowedBlocks,
                          MaterialDataPredicate forbiddenBlocks, Player player, Player notificationPlayer, World w,
@@ -110,29 +107,25 @@ public class DetectionTask extends AsyncTask {
     }
 
     private void detectBlock(int x, int y, int z) {
-
         BlockVec workingLocation = new BlockVec(x, y, z);
 
         if (notVisited(workingLocation, visited)) {
-
             Block testBlock;
             Material testMaterial;
-            int testID;
-            byte testData;
+            MaterialData materialData;
             try {
                 testBlock = data.getWorld().getBlockAt(x, y, z);
-                testMaterial = testBlock.getType();
-                testID = testBlock.getTypeId();
-                testData = testBlock.getData();
+                materialData = testBlock.getState().getData();
+                testMaterial = materialData.getItemType();
             } catch (Exception e) {
                 fail(String.format(i18n.get("Detection - Craft too large"), sizeRange.max));
                 return;
             }
 
-            if ((testID == 8) || (testID == 9)) {
+            if ((testMaterial == Material.WATER) || (testMaterial == Material.STATIONARY_WATER)) {
                 data.setWaterContact(true);
             }
-            if (testID == 63 || testID == 68) {
+            if (testMaterial == Material.WALL_SIGN || testMaterial == Material.SIGN_POST) {
                 BlockState state = data.getWorld().getBlockAt(x, y, z).getState();
                 if (state instanceof Sign) {
                     Sign s = (Sign) state;
@@ -150,45 +143,20 @@ public class DetectionTask extends AsyncTask {
                 }
             }
 
-            if (isForbiddenBlock(testID, testData)) {
+            if (isForbiddenBlock(materialData)) {
                 fail(i18n.get("Detection - Forbidden block found") +
-                     String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(testMaterial, testData),
+                     String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(materialData),
                                    x, y, z));
-            } else if (isAllowedBlock(testID, testData)) {
-                //check for double chests
-                if (testID == 54) {
-                    boolean foundDoubleChest = false;
-                    if (data.getWorld().getBlockTypeIdAt(x - 1, y, z) == 54) {
-                        foundDoubleChest = true;
-                    }
-                    if (data.getWorld().getBlockTypeIdAt(x + 1, y, z) == 54) {
-                        foundDoubleChest = true;
-                    }
-                    if (data.getWorld().getBlockTypeIdAt(x, y, z - 1) == 54) {
-                        foundDoubleChest = true;
-                    }
-                    if (data.getWorld().getBlockTypeIdAt(x, y, z + 1) == 54) {
-                        foundDoubleChest = true;
-                    }
-                    if (foundDoubleChest) {
-                        fail(i18n.get("Detection - ERROR: Double chest found"));
-                    }
-                }
-                //check for double trapped chests
-                if (testID == 146) {
-                    boolean foundDoubleChest = false;
-                    if (data.getWorld().getBlockTypeIdAt(x - 1, y, z) == 146) {
-                        foundDoubleChest = true;
-                    }
-                    if (data.getWorld().getBlockTypeIdAt(x + 1, y, z) == 146) {
-                        foundDoubleChest = true;
-                    }
-                    if (data.getWorld().getBlockTypeIdAt(x, y, z - 1) == 146) {
-                        foundDoubleChest = true;
-                    }
-                    if (data.getWorld().getBlockTypeIdAt(x, y, z + 1) == 146) {
-                        foundDoubleChest = true;
-                    }
+            } else if (isAllowedBlock(materialData)) {
+                // Check for double chests.
+                Set<Material> chestTypes = Sets.immutableEnumSet(Material.CHEST, Material.TRAPPED_CHEST);
+                if (chestTypes.contains(testMaterial)) {
+                    World w = data.getWorld();
+                    boolean foundDoubleChest =
+                            (w.getBlockAt(x - 1, y, z).getType() == testMaterial) ||
+                            (w.getBlockAt(x + 1, y, z).getType() == testMaterial) ||
+                            (w.getBlockAt(x, y, z - 1).getType() == testMaterial) ||
+                            (w.getBlockAt(x, y, z + 1).getType() == testMaterial);
                     if (foundDoubleChest) {
                         fail(i18n.get("Detection - ERROR: Double chest found"));
                     }
@@ -232,12 +200,12 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private boolean isAllowedBlock(int test, byte testData) {
-        return data.getAllowedBlocks().check(new MaterialData(test, testData));
+    private boolean isAllowedBlock(MaterialData test) {
+        return data.getAllowedBlocks().check(test);
     }
 
-    private boolean isForbiddenBlock(int test, byte testData) {
-        return data.getForbiddenBlocks().check(new MaterialData(test, testData));
+    private boolean isForbiddenBlock(MaterialData test) {
+        return data.getForbiddenBlocks().check(test);
     }
 
     public DetectionTaskData getData() {
@@ -262,7 +230,7 @@ public class DetectionTask extends AsyncTask {
     }
 
     private void addToBlockCount(MaterialDataPredicate id) {
-        int count = Optional.fromNullable(blockTypeCount.get(id)).or(0);
+        int count = Optional.ofNullable(blockTypeCount.get(id)).orElse(0);
         blockTypeCount.put(id, count + 1);
     }
 
@@ -352,7 +320,7 @@ public class DetectionTask extends AsyncTask {
         for (Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
             MaterialDataPredicate predicate = entry.getKey();
             List<CraftType.Constraint> constraints = entry.getValue();
-            int count = Optional.fromNullable(countData.get(predicate)).or(0);
+            int count = Optional.ofNullable(countData.get(predicate)).orElse(0);
             double percentage = ((double) count / total) * 100;
             String name = Joiner.on(' ').join(BlockNames.materialDataPredicateNames(entry.getKey()));
 
