@@ -17,6 +17,7 @@
 
 package net.countercraft.movecraft.craft;
 
+import com.google.common.collect.Sets;
 import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.localisation.I18nSupport;
@@ -36,7 +37,6 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -129,8 +129,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     }
 
     public void addCraft(final Craft craft, final Player player) {
-        this.craftList.computeIfAbsent(craft.getWorld(), k -> new HashSet<>());
-        this.craftList.get(craft.getWorld()).add(craft);
+        this.craftList.computeIfAbsent(craft.getWorld(), k -> new HashSet<>()).add(craft);
         this.craftPlayerIndex.put(player, craft);
         this.destroySnowOnPilot(player, craft);
     }
@@ -182,7 +181,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
     private void destroySnowOnPilot(final Player pilot, final Craft craft) {
         if (pilot == null || !pilot.isOnline()) return;
 
-        final Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        final Set<BlockVec> craftBlocks = Sets.newHashSet(craft.getBlockList());
         for (final BlockVec block : craftBlocks) {
             final BlockVec test = new BlockVec(block.x, block.y + 1, block.z);
             if (!craftBlocks.contains(test)) {
@@ -204,7 +203,7 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
             return;
         }
 
-        final Set<BlockVec> craftBlocks = new HashSet<>(Arrays.asList(craft.getBlockList()));
+        final Set<BlockVec> craftBlocks = Sets.newHashSet(craft.getBlockList());
         int blockedBroken = 0;
         for (final BlockVec block : craftBlocks) {
             for (int x = -1; x <= 1; x++) {
@@ -255,14 +254,14 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         return Collections.unmodifiableSet(result);
     }
 
-    public Craft getCraftByPlayer(final Player p) {
-        return this.craftPlayerIndex.get(p);
+    public Craft getCraftByPlayer(final Player player) {
+        return this.craftPlayerIndex.get(player);
     }
 
-    public Player getPlayerFromCraft(final Craft c) {
+    public Player getPlayerFromCraft(final Craft craft) {
         for (final Map.Entry<Player, Craft> playerCraftEntry : this.craftPlayerIndex.entrySet()) {
 
-            if (playerCraftEntry.getValue() == c) {
+            if (playerCraftEntry.getValue() == craft) {
                 return playerCraftEntry.getKey();
             }
         }
@@ -288,13 +287,13 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
         return this.releaseEvents;
     }
 
-    public void addReleaseTask(final Craft c) {
-        final Player p = this.getPlayerFromCraft(c);
+    public void addReleaseTask(final Craft craft) {
+        final Player p = this.getPlayerFromCraft(craft);
         if (!this.getReleaseEvents().containsKey(p)) {
             p.sendMessage(this.i18nSupport.get("Release - Player has left craft"));
             final BukkitTask releaseTask = new BukkitRunnable() {
                 @Override public void run() {
-                    CraftManager.this.removeCraft(c);
+                    CraftManager.this.removeCraft(craft);
                 }
             }.runTaskLater(this.plugin, (20 * 15));
             this.getReleaseEvents().put(p, releaseTask);

@@ -17,6 +17,7 @@
 
 package net.countercraft.movecraft.listener;
 
+import net.countercraft.movecraft.Permissions;
 import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.Direction;
 import net.countercraft.movecraft.api.Rotation;
@@ -53,7 +54,7 @@ public class CommandListener implements CommandExecutor {
         this.asyncManager = asyncManager;
     }
 
-    private static Location getCraftTeleportPoint(final Craft craft, final World w) {
+    private static Location getCraftTeleportPoint(final Craft craft, final World world) {
         int maxDX = 0;
         int maxDZ = 0;
         int maxY = 0;
@@ -83,7 +84,7 @@ public class CommandListener implements CommandExecutor {
         final double telX = craft.getMinX() + (maxDX / 2.0);
         final double telZ = craft.getMinZ() + (maxDZ / 2.0);
         final double telY = maxY + 1.0;
-        return new Location(w, telX, telY, telZ);
+        return new Location(world, telX, telY, telZ);
     }
 
     private static BlockVec getCraftMidPoint(final Craft craft) {
@@ -119,194 +120,173 @@ public class CommandListener implements CommandExecutor {
         return new BlockVec(midX, midY, midZ);
     }
 
-    @Override public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be run by a player.");
-            return false;
-        }
+    static final class InsufficientPermissionsException extends Exception {
+        private static final long serialVersionUID = -7764750243263992533L;
+    }
+
+    static final class PlayerOnlyCommandException extends Exception {
+        private static final long serialVersionUID = 1726514287074215228L;
+    }
+
+    static final class CommandRequiresPilotedCraftException extends Exception {
+        private static final long serialVersionUID = 1578133834052849743L;
+    }
+
+    static final class InvalidCommandSyntaxException extends Exception {
+        private static final long serialVersionUID = 8962188695118319340L;
+    }
+
+    private void handleCommand(final CommandSender sender, final String name, final String[] args)
+    throws InsufficientPermissionsException, PlayerOnlyCommandException, CommandRequiresPilotedCraftException
+    {
+        if (!(sender instanceof Player)) throw new PlayerOnlyCommandException();
 
         final Player player = (Player) sender;
-
         final Craft playerCraft = this.craftManager.getCraftByPlayer(player);
 
-        if (cmd.getName().equalsIgnoreCase("release")) {
-            if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.release")) {
-                player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                return true;
-            }
+        if (name.equalsIgnoreCase("release")) {
+            if (!player.hasPermission(Permissions.COMMANDS) && !player.hasPermission(Permissions.COMMAND_RELEASE))
+                throw new InsufficientPermissionsException();
 
-            if (playerCraft != null) {
-                this.craftManager.removeCraft(playerCraft);
-                //e.getPlayer().sendMessage( String.format( i18n.get( "Player- Craft
-                // has been released" ) ) );
-            } else {
-                player.sendMessage(this.i18n.get("Player- Error - You do not have a craft to release!"));
-            }
+            if (playerCraft == null)
+                throw new CommandRequiresPilotedCraftException();
 
-            return true;
+            this.craftManager.removeCraft(playerCraft);
+            player.getPlayer().sendMessage(this.i18n.get("Player - Craft has been released" ));
         }
 
-        if (cmd.getName().equalsIgnoreCase("pilot")) {
-            if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.pilot")) {
-                player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                return true;
-            }
+        if (name.equalsIgnoreCase("pilot")) {
+            if (!player.hasPermission(Permissions.COMMANDS) && !player.hasPermission(Permissions.COMMAND_PILOT))
+                throw new InsufficientPermissionsException();
 
             if (args.length > 0) {
-                if (player.hasPermission("movecraft." + args[0] + ".pilot")) {
-                    final BlockVec startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
-                    final Optional<CraftType> ct = this.craftManager.getCraftTypeFromString(args[0]);
+                if (!player.hasPermission(Permissions.PILOT(args[0])))
+                    throw new InsufficientPermissionsException();
 
-                    if (ct.isPresent()) {
-                        final Craft c = new Craft(ct.get(), player.getWorld());
+                final BlockVec startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
+                final Optional<CraftType> ct = this.craftManager.getCraftTypeFromString(args[0]);
 
-                        if (playerCraft == null) {
-                            this.asyncManager.detect(c, player, player, startPoint);
-                        } else {
-                            this.craftManager.removeCraft(playerCraft);
-                            this.asyncManager.detect(c, player, player, startPoint);
-                        }
+                if (ct.isPresent()) {
+                    final Craft craft = new Craft(ct.get(), player.getWorld());
+
+                    if (playerCraft == null) {
+                        this.asyncManager.detect(craft, player, player, startPoint);
                     } else {
-                        player.sendMessage(this.i18n.get("Unknown craft type."));
+                        this.craftManager.removeCraft(playerCraft);
+                        this.asyncManager.detect(craft, player, player, startPoint);
                     }
-
                 } else {
-                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
+                    player.sendMessage(this.i18n.get("Unknown craft type."));
                 }
-                return true;
             }
         }
 
-        if (cmd.getName().equalsIgnoreCase("rotate")) {
-            if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.rotate")) {
-                player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                return true;
-            }
+        if (name.equalsIgnoreCase("rotate")) {
+            if (!player.hasPermission(Permissions.COMMANDS) && !player.hasPermission("movecraft.commands.rotate"))
+                throw new InsufficientPermissionsException();
 
-            if (playerCraft != null) {
-                if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                    final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
-                    final Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left"))
-                                              ? Rotation.ANTICLOCKWISE
-                                              : Rotation.CLOCKWISE;
-                    this.asyncManager.rotate(playerCraft, rotation, midPoint);
-                } else {
-                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                }
-            }
+            if (playerCraft == null) throw new CommandRequiresPilotedCraftException();
 
-            return true;
+            if (!player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate"))
+                throw new InsufficientPermissionsException();
+
+            final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
+            final Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left"))
+                                      ? Rotation.ANTICLOCKWISE
+                                      : Rotation.CLOCKWISE;
+            this.asyncManager.rotate(playerCraft, rotation, midPoint);
         }
 
-        if (cmd.getName().equalsIgnoreCase("rotateleft")) {
-            if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.rotateleft")) {
-                player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                return true;
-            }
+        if (name.equalsIgnoreCase("rotateleft")) {
+            if (!player.hasPermission(Permissions.COMMANDS) && !player.hasPermission("movecraft.commands.rotateleft"))
+                throw new InsufficientPermissionsException();
 
-            if (playerCraft != null) {
-                if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                    final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
-                    this.asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
-                } else {
-                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                }
-            }
+            if (playerCraft == null) throw new CommandRequiresPilotedCraftException();
 
-            return true;
+            if (!player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate"))
+                throw new InsufficientPermissionsException();
+
+            final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
+            this.asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
         }
 
-        if (cmd.getName().equalsIgnoreCase("rotateright")) {
-            if (!player.hasPermission("movecraft.commands") &&
-                !player.hasPermission("movecraft.commands.rotateright")) {
-                player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                return true;
+        if (name.equalsIgnoreCase("rotateright")) {
+            if (!player.hasPermission(Permissions.COMMANDS) && !player.hasPermission("movecraft.commands.rotateright"))
+                throw new InsufficientPermissionsException();
+
+            if (playerCraft == null)
+                throw new CommandRequiresPilotedCraftException();
+
+            if (!player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
+                throw new InsufficientPermissionsException();
             }
 
-            if (playerCraft != null) {
-                if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".rotate")) {
-                    final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
-                    this.asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
-                } else {
-                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                }
-            }
-
-            return true;
+            final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
+            this.asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
         }
 
-        if (cmd.getName().equalsIgnoreCase("cruise")) {
-            if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.cruise")) {
-                player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                return true;
-            }
+        if (name.equalsIgnoreCase("cruise")) {
+            if (!player.hasPermission("movecraft.commands") && !player.hasPermission("movecraft.commands.cruise"))
+                throw new InsufficientPermissionsException();
 
-            if (playerCraft != null) {
-                if (player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".move")) {
-                    if (playerCraft.getType().getCanCruise()) {
-                        if (args.length == 0) {
-                            final Location loc = player.getLocation();
-                            final float yaw = loc.getYaw();
-                            final float pitch = loc.getPitch();
+            if (playerCraft == null)
+                throw new CommandRequiresPilotedCraftException();
 
-                            final Direction dir = Direction.fromYawPitch(yaw, pitch);
-                            playerCraft.setCruiseDirection(dir);
-                            playerCraft.setCruising(!dir.equals(Direction.OFF));
-                            return true;
-                        } else {
-                            Direction dir = Direction.OFF;
-                            for (final String a : args) {
-                                if (a.isEmpty()) {
-                                    continue;
-                                }
+            if (!player.hasPermission("movecraft." + playerCraft.getType().getCraftName() + ".move"))
+                throw new InsufficientPermissionsException();
 
-                                dir = dir.combine(Direction.namedOr(a, Direction.OFF));
+            if (playerCraft.getType().getCanCruise()) {
+                if (args.length == 0) {
+                    final Location loc = player.getLocation();
+                    final float yaw = loc.getYaw();
+                    final float pitch = loc.getPitch();
 
-                                if (Objects.equals(dir, Direction.OFF)) break;
-                            }
-
-                            playerCraft.setCruiseDirection(dir);
-                            playerCraft.setCruising(!dir.equals(Direction.OFF));
+                    final Direction dir = Direction.fromYawPitch(yaw, pitch);
+                    playerCraft.setCruiseDirection(dir);
+                    playerCraft.setCruising(!dir.equals(Direction.OFF));
+                } else {
+                    Direction dir = Direction.OFF;
+                    for (final String a : args) {
+                        if (a.isEmpty()) {
+                            continue;
                         }
+
+                        dir = dir.combine(Direction.namedOr(a, Direction.OFF));
+
+                        if (Objects.equals(dir, Direction.OFF)) break;
                     }
-                } else {
-                    player.sendMessage(this.i18n.get("Insufficient Permissions"));
+
+                    playerCraft.setCruiseDirection(dir);
+                    playerCraft.setCruising(!dir.equals(Direction.OFF));
                 }
             }
-
-            return true;
         }
 
-        if (cmd.getName().equalsIgnoreCase("cruiseoff")) {
-            if (playerCraft != null) {
-                playerCraft.setCruising(false);
-            }
-            return true;
+        if (name.equalsIgnoreCase("cruiseoff")) {
+            if (playerCraft == null)
+                throw new CommandRequiresPilotedCraftException();
+
+            playerCraft.setCruising(false);
         }
 
-        if (cmd.getName().equalsIgnoreCase("craftreport")) {
-            if (!player.hasPermission("movecraft.commands") &&
-                !player.hasPermission("movecraft.commands.craftreport")) {
-                player.sendMessage(this.i18n.get("Insufficient Permissions"));
-                return true;
-            }
+        if (name.equalsIgnoreCase("craftreport")) {
+            if (!player.hasPermission(Permissions.COMMANDS) && !player.hasPermission("movecraft.commands.craftreport"))
+                throw new InsufficientPermissionsException();
 
             boolean noCraftsFound = true;
             for (final Craft craft : this.craftManager.getCraftsInWorld(player.getWorld())) {
                 if (craft != null) {
-                    final String output;
-                    if (craft.getNotificationPlayer() != null) {
-                        output = MessageFormat.format("{0} {1} {2} @ {3},{4},{5}",
-                                                      craft.getType().getCraftName(),
-                                                      craft.getNotificationPlayer().getName(),
-                                                      craft.getBlockList().length,
-                                                      craft.getMinX(), craft.getMinY(), craft.getMinZ());
-                    } else {
-                        output = MessageFormat.format("{0} NULL {1} @ {2},{3},{4}",
-                                                      craft.getType().getCraftName(),
-                                                      craft.getBlockList().length,
-                                                      craft.getMinX(), craft.getMinY(), craft.getMinZ());
-                    }
+                    final String notificationPlayer;
+                    if (craft.getNotificationPlayer() != null)
+                        notificationPlayer = craft.getNotificationPlayer().getName();
+                    else notificationPlayer = "NULL";
+
+                    final String output = MessageFormat.format("{0} {1} {2} @ {3},{4},{5}",
+                                                               craft.getType().getCraftName(),
+                                                               notificationPlayer,
+                                                               craft.getBlockList().length,
+                                                               craft.getMinX(), craft.getMinY(), craft.getMinZ());
+
                     player.sendMessage(output);
                     noCraftsFound = false;
                 }
@@ -314,69 +294,59 @@ public class CommandListener implements CommandExecutor {
             if (noCraftsFound) {
                 player.sendMessage("No crafts found");
             }
-            return true;
         }
 
-        if (cmd.getName().equalsIgnoreCase("contacts")) {
-            if (playerCraft != null) {
-                boolean foundContact = false;
-                for (final Craft tcraft : this.craftManager.getCraftsInWorld(playerCraft.getWorld())) {
-                    long cposx = playerCraft.getMaxX() + playerCraft.getMinX();
-                    long cposy = playerCraft.getMaxY() + playerCraft.getMinY();
-                    long cposz = playerCraft.getMaxZ() + playerCraft.getMinZ();
-                    cposx = cposx / 2;
-                    cposy = cposy / 2;
-                    cposz = cposz / 2;
-                    long tposx = tcraft.getMaxX() + tcraft.getMinX();
-                    long tposy = tcraft.getMaxY() + tcraft.getMinY();
-                    long tposz = tcraft.getMaxZ() + tcraft.getMinZ();
-                    tposx = tposx / 2;
-                    tposy = tposy / 2;
-                    tposz = tposz / 2;
-                    final long diffx = cposx - tposx;
-                    final long diffy = cposy - tposy;
-                    final long diffz = cposz - tposz;
-                    long distsquared = Math.abs(diffx) * Math.abs(diffx);
-                    distsquared += Math.abs(diffy) * Math.abs(diffy);
-                    distsquared += Math.abs(diffz) * Math.abs(diffz);
-                    long detectionRange = 0;
-                    if (tposy > 65) {
-                        detectionRange = (long) (Math.sqrt(tcraft.getOrigBlockCount()) *
-                                                 tcraft.getType().getDetectionMultiplier());
-                    } else {
-                        detectionRange = (long) (Math.sqrt(tcraft.getOrigBlockCount()) *
-                                                 tcraft.getType().getUnderwaterDetectionMultiplier());
-                    }
-                    if (distsquared < detectionRange * detectionRange &&
-                        tcraft.getNotificationPlayer() != playerCraft.getNotificationPlayer()) {
-                        // craft has been detected
-                        foundContact = true;
-                        String notification = "Contact: ";
-                        notification += tcraft.getType().getCraftName();
-                        notification += " commanded by ";
-                        notification += tcraft.getNotificationPlayer().getDisplayName();
-                        notification += ", size: ";
-                        notification += tcraft.getOrigBlockCount();
-                        notification += ", range: ";
-                        notification += (int) Math.sqrt(distsquared);
-                        notification += " to the";
-                        if (Math.abs(diffx) > Math.abs(diffz)) if (diffx < 0) notification += " east.";
-                        else notification += " west.";
-                        else if (diffz < 0) notification += " south.";
-                        else notification += " north.";
+        if (name.equalsIgnoreCase("contacts")) {
+            if (playerCraft == null)
+                throw new CommandRequiresPilotedCraftException();
 
-                        playerCraft.getNotificationPlayer().sendMessage(notification);
-                    }
+            boolean foundContact = false;
+            for (final Craft tcraft : this.craftManager.getCraftsInWorld(playerCraft.getWorld())) {
+                final long cposx = (playerCraft.getMaxX() + playerCraft.getMinX()) / 2;
+                final long cposy = (playerCraft.getMaxY() + playerCraft.getMinY()) / 2;
+                final long cposz = (playerCraft.getMaxZ() + playerCraft.getMinZ()) / 2;
+
+                final long tposx = (tcraft.getMaxX() + tcraft.getMinX()) / 2;
+                final long tposy = (tcraft.getMaxY() + tcraft.getMinY()) / 2;
+                final long tposz = (tcraft.getMaxZ() + tcraft.getMinZ()) / 2;
+
+                final long detectionRange;
+                if (tposy > 65) {
+                    detectionRange = (long) (Math.sqrt(tcraft.getOrigBlockCount()) *
+                                             tcraft.getType().getDetectionMultiplier());
+                } else {
+                    detectionRange = (long) (Math.sqrt(tcraft.getOrigBlockCount()) *
+                                             tcraft.getType().getUnderwaterDetectionMultiplier());
                 }
-                if (!foundContact) player.sendMessage(this.i18n.get("No contacts within range"));
-                return true;
-            } else {
-                player.sendMessage(this.i18n.get("You must be piloting a craft"));
-                return true;
+
+                final long dx = cposx - tposx;
+                final long dy = cposy - tposy;
+                final long dz = cposz - tposz;
+                final long dr = dx * dx + dy * dy + dz * dz;
+                if (dr < detectionRange * detectionRange &&
+                    tcraft.getNotificationPlayer() != playerCraft.getNotificationPlayer()) {
+                    // craft has been detected
+                    foundContact = true;
+
+                    final String direction;
+                    if (Math.abs(dx) > Math.abs(dz)) {
+                        if (dx < 0) direction = "east";
+                        else direction = "west";
+                    } else if (dz < 0) {
+                        direction = "south";
+                    } else direction = "north";
+
+                    final String notification = MessageFormat
+                            .format("Contact: {0} commanded by {1}, size: {2}, range: {3} to the {4}.",
+                                    tcraft.getType().getCraftName(), tcraft.getNotificationPlayer().getDisplayName(),
+                                    tcraft.getOrigBlockCount(), Math.sqrt(dr), direction);
+                    playerCraft.getNotificationPlayer().sendMessage(notification);
+                }
             }
+            if (!foundContact) player.sendMessage(this.i18n.get("No contacts within range"));
         }
 
-        if (cmd.getName().equalsIgnoreCase("manOverBoard")) {
+        if (name.equalsIgnoreCase("manOverBoard")) {
             if (playerCraft != null) {
                 final Location telPoint = CommandListener.getCraftTeleportPoint(playerCraft, playerCraft.getWorld());
                 player.teleport(telPoint);
@@ -392,9 +362,22 @@ public class CommandListener implements CommandExecutor {
                     }
                 }
             }
-            return true;
         }
+    }
 
-        return false;
+    @Override public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
+        try {
+            this.handleCommand(sender, cmd.getName(), args);
+            return true;
+        } catch (final InsufficientPermissionsException e) {
+            sender.sendMessage(this.i18n.get("Insufficient Permissions"));
+            return false;
+        } catch (final PlayerOnlyCommandException e) {
+            sender.sendMessage(this.i18n.get("This command can only be run by a player."));
+            return false;
+        } catch (final CommandRequiresPilotedCraftException e) {
+            sender.sendMessage(this.i18n.get("You must be piloting a craft."));
+            return false;
+        }
     }
 }

@@ -17,34 +17,46 @@
 
 package net.countercraft.movecraft.utils;
 
+import com.google.common.collect.Sets;
 import net.countercraft.movecraft.api.Rotation;
+import org.bukkit.Material;
 
 import java.util.Arrays;
+import java.util.Set;
+
+import static org.bukkit.Material.*;
 
 public final class BlockUtils {
-    private static final int[] dataBlocks = new int[]{
+    public static final Set<Material> FRAGILE_BLOCKS = Sets.immutableEnumSet(
+            BED_BLOCK, PISTON_EXTENSION, TORCH, REDSTONE_WIRE, SIGN_POST, WOODEN_DOOR, LADDER,
+            WALL_SIGN, LEVER, STONE_PLATE, IRON_DOOR_BLOCK, WOOD_PLATE, REDSTONE_TORCH_OFF, REDSTONE_TORCH_ON,
+            STONE_BUTTON, DIODE_BLOCK_OFF, DIODE_BLOCK_ON, TRAP_DOOR, TRIPWIRE_HOOK, TRIPWIRE, WOOD_BUTTON,
+            GOLD_PLATE, IRON_PLATE, REDSTONE_COMPARATOR_OFF, REDSTONE_COMPARATOR_ON, DAYLIGHT_DETECTOR, CARPET,
+            SPRUCE_DOOR, BIRCH_DOOR, JUNGLE_DOOR, ACACIA_DOOR, DARK_OAK_DOOR);
+
+    private static final int[] DATA_BLOCKS = new int[]{
             2, 3, 5, 6, 8, 9, 10, 11, 17, 18, 23, 24, 25, 26, 27, 28, 29, 31, 33, 34, 35, 43, 44, 46, 50, 51, 52, 53,
             55, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 75, 76, 77, 78, 81, 83, 84, 86, 91, 92, 93, 94,
             96, 98, 99, 100, 104, 105, 106, 107, 108, 109, 114, 115, 116, 117, 118, 120, 125, 126, 127, 128, 130, 131,
             132, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 154, 155,
             156, 157, 158, 159, 170, 171};
 
-    private static final int[] rotationBlocks = new int[]{
+    private static final int[] ROTATION_BLOCKS = new int[]{
             17, 50, 54, 75, 76, 26, 29, 33, 34, 53, 67, 108, 109, 114, 128, 134, 135, 136, 156, 63, 64, 71, 66, 27, 28,
             65, 68, 61, 23, 69, 77, 143, 93, 94, 96, 107, 120, 131, 144, 145, 62, 99, 100, 106, 127, 130, 145, 149, 150,
             154, 157, 158, 170, 86, 91, 163, 164, 203};
 
     static {
-        Arrays.sort(dataBlocks);
-        Arrays.sort(rotationBlocks);
+        Arrays.sort(DATA_BLOCKS);
+        Arrays.sort(ROTATION_BLOCKS);
     }
 
     public static boolean blockHasNoData(int id) {
-        return Arrays.binarySearch(dataBlocks, id) == -1;
+        return Arrays.binarySearch(DATA_BLOCKS, id) == -1;
     }
 
     public static boolean blockRequiresRotation(int id) {
-        return Arrays.binarySearch(rotationBlocks, id) != -1;
+        return Arrays.binarySearch(ROTATION_BLOCKS, id) != -1;
     }
 
     public static boolean arrayContainsOverlap(Object[] array1, Object[] array2) {

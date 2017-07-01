@@ -40,6 +40,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -77,116 +78,114 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
 
     @Override public void onDisable() {
         // Process the storage crates to disk
-        shuttingDown = true;
+        this.shuttingDown = true;
     }
 
     @Override public void onEnable() {
         // Read in config
         this.saveDefaultConfig();
 
-        settings.LOCALE = getConfig().getString("Locale");
-        settings.Debug = getConfig().getBoolean("Debug", false);
-        settings.DisableSpillProtection = getConfig().getBoolean("DisableSpillProtection", false);
+        final FileConfiguration config = this.getConfig();
+
+        this.settings.LOCALE = config.getString("Locale");
+        this.settings.Debug = config.getBoolean("Debug", false);
+        this.settings.DisableSpillProtection = config.getBoolean("DisableSpillProtection", false);
         // if the PilotTool is specified in the config.yml file, use it
-        if (getConfig().getInt("PilotTool") == 0) {
-            logger.log(Level.INFO, "No PilotTool setting, using default of 280");
+        if (config.getInt("PilotTool") == 0) {
+            this.logger.log(Level.INFO, "No PilotTool setting, using default of 280");
         } else {
-            logger.log(Level.INFO, "Recognized PilotTool setting of: " + getConfig().getInt("PilotTool"));
-            settings.PilotTool = getConfig().getInt("PilotTool");
+            this.logger.log(Level.INFO, "Recognized PilotTool setting of: " + config.getInt("PilotTool"));
+            this.settings.PilotTool = config.getInt("PilotTool");
         }
         // if the CompatibilityMode is specified in the config.yml file, use it.
         // Otherwise set to false.
-        settings.CompatibilityMode = getConfig().getBoolean("CompatibilityMode", false);
-        if (!settings.CompatibilityMode) {
+        this.settings.CompatibilityMode = config.getBoolean("CompatibilityMode", false);
+        if (!this.settings.CompatibilityMode) {
             try {
                 Class.forName("net.minecraft.server.v1_12_R1.Chunk");
-            } catch (ClassNotFoundException e) {
-                settings.CompatibilityMode = true;
-                logger.log(Level.INFO,
+            } catch (final ClassNotFoundException e) {
+                this.settings.CompatibilityMode = true;
+                this.logger.log(Level.INFO,
                            "WARNING: CompatibilityMode was set to false, but required build-specific classes were not" +
                            " found. FORCING COMPATIBILITY MODE");
             }
         }
-        logger.log(Level.INFO, "CompatiblityMode is set to {0}", settings.CompatibilityMode);
-        settings.SinkRateTicks = getConfig().getInt("SinkRateTicks", 20);
-        settings.SinkCheckTicks = getConfig().getDouble("SinkCheckTicks", 100.0);
-        settings.TracerRateTicks = getConfig().getDouble("TracerRateTicks", 5.0);
-        settings.ManOverBoardTimeout = getConfig().getInt("ManOverBoardTimeout", 30);
-        settings.FireballLifespan = getConfig().getInt("FireballLifespan", 6);
-        settings.FireballPenetration = getConfig().getBoolean("FireballPenetration", true);
-        settings.BlockQueueChunkSize = getConfig().getInt("BlockQueueChunkSize", 1000);
-        settings.ProtectPilotedCrafts = getConfig().getBoolean("ProtectPilotedCrafts", false);
-        settings.AllowCrewSigns = getConfig().getBoolean("AllowCrewSigns", true);
-        settings.SetHomeToCrewSign = getConfig().getBoolean("SetHomeToCrewSign", true);
-        settings.RequireCreatePerm = getConfig().getBoolean("RequireCreatePerm", false);
-        settings.TNTContactExplosives = getConfig().getBoolean("TNTContactExplosives", true);
-        settings.FadeWrecksAfter = getConfig().getInt("FadeWrecksAfter", 0);
+        this.logger.log(Level.INFO, "CompatiblityMode is set to {0}", this.settings.CompatibilityMode);
+        this.settings.SinkRateTicks = config.getInt("SinkRateTicks", 20);
+        this.settings.SinkCheckTicks = config.getDouble("SinkCheckTicks", 100.0);
+        this.settings.TracerRateTicks = config.getDouble("TracerRateTicks", 5.0);
+        this.settings.ManOverBoardTimeout = config.getInt("ManOverBoardTimeout", 30);
+        this.settings.FireballLifespan = config.getInt("FireballLifespan", 6);
+        this.settings.FireballPenetration = config.getBoolean("FireballPenetration", true);
+        this.settings.BlockQueueChunkSize = config.getInt("BlockQueueChunkSize", 1000);
+        this.settings.ProtectPilotedCrafts = config.getBoolean("ProtectPilotedCrafts", false);
+        this.settings.AllowCrewSigns = config.getBoolean("AllowCrewSigns", true);
+        this.settings.SetHomeToCrewSign = config.getBoolean("SetHomeToCrewSign", true);
+        this.settings.RequireCreatePerm = config.getBoolean("RequireCreatePerm", false);
+        this.settings.TNTContactExplosives = config.getBoolean("TNTContactExplosives", true);
+        this.settings.FadeWrecksAfter = config.getInt("FadeWrecksAfter", 0);
 
         //load up WorldGuard if it's present
 
         //ROK - disable completely since we can't control it.
-        Plugin wGPlugin = null;
-        if (getConfig().getBoolean("WGIntegationEnabled", false)) {
-            getServer().getPluginManager().getPlugin("WorldGuard");
+        final Plugin wGPlugin = null;
+        if (config.getBoolean("WGIntegationEnabled", false)) {
+            this.getServer().getPluginManager().getPlugin("WorldGuard");
         }
 
         if (!(wGPlugin instanceof WorldGuardPlugin)) {
-            logger.log(Level.INFO,
-                       "Movecraft did not find a compatible version of WorldGuard. Disabling WorldGuard integration");
+            this.logger.log(Level.INFO,
+                            "Movecraft did not find a compatible version of WorldGuard. Disabling WorldGuard integration");
         } else {
-            logger.log(Level.INFO, "Found a compatible version of WorldGuard. Enabling WorldGuard integration");
-            settings.WorldGuardBlockMoveOnBuildPerm = getConfig().getBoolean("WorldGuardBlockMoveOnBuildPerm", false);
-            settings.WorldGuardBlockSinkOnPVPPerm = getConfig().getBoolean("WorldGuardBlockSinkOnPVPPerm", false);
-            logger.log(Level.INFO, "Settings: WorldGuardBlockMoveOnBuildPerm - {0}, WorldGuardBlockSinkOnPVPPerm - {1}",
-                       new Object[]{settings.WorldGuardBlockMoveOnBuildPerm, settings.WorldGuardBlockSinkOnPVPPerm});
+            this.logger.log(Level.INFO, "Found a compatible version of WorldGuard. Enabling WorldGuard integration");
+            this.settings.WorldGuardBlockMoveOnBuildPerm = config.getBoolean("WorldGuardBlockMoveOnBuildPerm", false);
+            this.settings.WorldGuardBlockSinkOnPVPPerm = config.getBoolean("WorldGuardBlockSinkOnPVPPerm", false);
+            this.logger.log(Level.INFO, "Settings: WorldGuardBlockMoveOnBuildPerm - {0}, WorldGuardBlockSinkOnPVPPerm - {1}",
+                            new Object[]{this.settings.WorldGuardBlockMoveOnBuildPerm, this.settings.WorldGuardBlockSinkOnPVPPerm});
         }
-        worldGuardPlugin = (WorldGuardPlugin) wGPlugin;
+        this.worldGuardPlugin = (WorldGuardPlugin) wGPlugin;
 
         //load up WorldEdit if it's present
-        Plugin wEPlugin = getServer().getPluginManager().getPlugin("WorldEdit");
+        final Plugin wEPlugin = this.getServer().getPluginManager().getPlugin("WorldEdit");
         if (!(wEPlugin instanceof WorldEditPlugin)) {
-            logger.log(Level.INFO,
-                       "Movecraft did not find a compatible version of WorldEdit. Disabling WorldEdit integration");
+            this.logger.log(Level.INFO,
+                            "Movecraft did not find a compatible version of WorldEdit. Disabling WorldEdit integration");
         } else {
-            logger.log(Level.INFO, "Found a compatible version of WorldEdit. Enabling WorldEdit integration");
-            settings.RepairTicksPerBlock = getConfig().getInt("RepairTicksPerBlock", 0);
+            this.logger.log(Level.INFO, "Found a compatible version of WorldEdit. Enabling WorldEdit integration");
+            this.settings.RepairTicksPerBlock = config.getInt("RepairTicksPerBlock", 0);
         }
-        worldEditPlugin = (WorldEditPlugin) wEPlugin;
+        this.worldEditPlugin = (WorldEditPlugin) wEPlugin;
 
         // next is Cannons
-        Plugin plug = getServer().getPluginManager().getPlugin("Cannons");
+        final Plugin plug = this.getServer().getPluginManager().getPlugin("Cannons");
         if (plug instanceof Cannons) {
-            cannonsPlugin = (Cannons) plug;
-            logger.log(Level.INFO, "Found a compatible version of Cannons. Enabling Cannons integration");
+            this.cannonsPlugin = (Cannons) plug;
+            this.logger.log(Level.INFO, "Found a compatible version of Cannons. Enabling Cannons integration");
         }
 
-        if (worldGuardPlugin != null || worldGuardPlugin instanceof WorldGuardPlugin) {
-            if (worldGuardPlugin.isEnabled()) {
-                Plugin tempWGCustomFlagsPlugin = getServer().getPluginManager().getPlugin("WGCustomFlags");
+        if (this.worldGuardPlugin != null || this.worldGuardPlugin instanceof WorldGuardPlugin) {
+            if (this.worldGuardPlugin.isEnabled()) {
+                final Plugin tempWGCustomFlagsPlugin = this.getServer().getPluginManager().getPlugin("WGCustomFlags");
                 if (tempWGCustomFlagsPlugin instanceof WGCustomFlagsPlugin) {
-                    logger.log(Level.INFO,
-                               "Found a compatible version of WGCustomFlags. Enabling WGCustomFlags integration.");
-                    wgCustomFlagsPlugin = (WGCustomFlagsPlugin) tempWGCustomFlagsPlugin;
-                    FLAG_PILOT = WGCustomFlagsUtils.getNewStateFlag("movecraft-pilot", true);
-                    FLAG_MOVE = WGCustomFlagsUtils.getNewStateFlag("movecraft-move", true);
-                    FLAG_ROTATE = WGCustomFlagsUtils.getNewStateFlag("movecraft-rotate", true);
-                    FLAG_SINK = WGCustomFlagsUtils.getNewStateFlag("movecraft-sink", true);
+                    this.logger.log(Level.INFO,
+                                    "Found a compatible version of WGCustomFlags. Enabling WGCustomFlags integration.");
+                    this.wgCustomFlagsPlugin = (WGCustomFlagsPlugin) tempWGCustomFlagsPlugin;
+                    this.FLAG_PILOT = WGCustomFlagsUtils.getNewStateFlag("movecraft-pilot", true);
+                    this.FLAG_MOVE = WGCustomFlagsUtils.getNewStateFlag("movecraft-move", true);
+                    this.FLAG_ROTATE = WGCustomFlagsUtils.getNewStateFlag("movecraft-rotate", true);
+                    this.FLAG_SINK = WGCustomFlagsUtils.getNewStateFlag("movecraft-sink", true);
                     WGCustomFlagsUtils
-                            .registerFlags(wgCustomFlagsPlugin, FLAG_PILOT, FLAG_MOVE, FLAG_ROTATE, FLAG_SINK);
-                    settings.WGCustomFlagsUsePilotFlag = getConfig().getBoolean("WGCustomFlagsUsePilotFlag", false);
-                    settings.WGCustomFlagsUseMoveFlag = getConfig().getBoolean("WGCustomFlagsUseMoveFlag", false);
-                    settings.WGCustomFlagsUseRotateFlag = getConfig().getBoolean("WGCustomFlagsUseRotateFlag", false);
-                    settings.WGCustomFlagsUseSinkFlag = getConfig().getBoolean("WGCustomFlagsUseSinkFlag", false);
-                    logger.log(Level.INFO, "Settings: WGCustomFlagsUsePilotFlag - {0}",
-                               settings.WGCustomFlagsUsePilotFlag);
-                    logger.log(Level.INFO, "Settings: WGCustomFlagsUseMoveFlag - {0}",
-                               settings.WGCustomFlagsUseMoveFlag);
-                    logger.log(Level.INFO, "Settings: WGCustomFlagsUseRotateFlag - {0}",
-                               settings.WGCustomFlagsUseRotateFlag);
-                    logger.log(Level.INFO, "Settings: WGCustomFlagsUseSinkFlag - {0}",
-                               settings.WGCustomFlagsUseSinkFlag);
+                            .registerFlags(this.wgCustomFlagsPlugin, this.FLAG_PILOT, this.FLAG_MOVE, this.FLAG_ROTATE, this.FLAG_SINK);
+                    this.settings.WGCustomFlagsUsePilotFlag = config.getBoolean("WGCustomFlagsUsePilotFlag", false);
+                    this.settings.WGCustomFlagsUseMoveFlag = config.getBoolean("WGCustomFlagsUseMoveFlag", false);
+                    this.settings.WGCustomFlagsUseRotateFlag = config.getBoolean("WGCustomFlagsUseRotateFlag", false);
+                    this.settings.WGCustomFlagsUseSinkFlag = config.getBoolean("WGCustomFlagsUseSinkFlag", false);
+                    this.logger.log(Level.INFO, "Settings: WGCustomFlagsUsePilotFlag - {0}", this.settings.WGCustomFlagsUsePilotFlag);
+                    this.logger.log(Level.INFO, "Settings: WGCustomFlagsUseMoveFlag - {0}", this.settings.WGCustomFlagsUseMoveFlag);
+                    this.logger.log(Level.INFO, "Settings: WGCustomFlagsUseRotateFlag - {0}", this.settings.WGCustomFlagsUseRotateFlag);
+                    this.logger.log(Level.INFO, "Settings: WGCustomFlagsUseSinkFlag - {0}", this.settings.WGCustomFlagsUseSinkFlag);
                 } else {
-                    logger.log(Level.INFO,
+                    this.logger.log(Level.INFO,
                                "Movecraft did not find a compatible version of WGCustomFlags. Disabling WGCustomFlags" +
                                " integration.");
                 }
@@ -194,52 +193,53 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
         }
 
         // and now Vault
-        if (getServer().getPluginManager().getPlugin("Vault") != null) {
-            RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (this.getServer().getPluginManager().getPlugin("Vault") != null) {
+            final RegisteredServiceProvider<Economy> rsp = this.getServer().getServicesManager().getRegistration(Economy.class);
             if (rsp != null) {
-                economy = rsp.getProvider();
-                settings.RepairMoneyPerBlock = getConfig().getDouble("RepairMoneyPerBlock", 0.0);
-                logger.log(Level.INFO, "Found a compatible Vault plugin.");
+                this.economy = rsp.getProvider();
+                this.settings.RepairMoneyPerBlock = config.getDouble("RepairMoneyPerBlock", 0.0);
+                this.logger.log(Level.INFO, "Found a compatible Vault plugin.");
             } else {
-                logger.log(Level.INFO, "Could not find compatible Vault plugin. Disabling Vault integration.");
-                economy = null;
+                this.logger.log(Level.INFO, "Could not find compatible Vault plugin. Disabling Vault integration.");
+                this.economy = null;
             }
         } else {
-            logger.log(Level.INFO, "Could not find compatible Vault plugin. Disabling Vault integration.");
-            economy = null;
+            this.logger.log(Level.INFO, "Could not find compatible Vault plugin. Disabling Vault integration.");
+            this.economy = null;
         }
-        String[] localisations = {"en", "cz", "nl"};
-        for (String s : localisations) {
-            if (!new File(getDataFolder() + "/localisation/movecraftlang_" + s + ".properties").exists()) {
+        final String[] localisations = {"en", "cz", "nl"};
+        for (final String s : localisations) {
+            if (!new File(this.getDataFolder() + "/localisation/movecraftlang_" + s + ".properties").exists()) {
                 this.saveResource("localisation/movecraftlang_" + s + ".properties", false);
             }
         }
 
-        if (shuttingDown && settings.IGNORE_RESET) {
-            logger.log(Level.SEVERE, i18nSupport.get("Startup - Error - Reload error"));
-            logger.log(Level.INFO, i18nSupport.get("Startup - Error - Disable warning for reload"));
-            getPluginLoader().disablePlugin(this);
+        if (this.shuttingDown && this.settings.IGNORE_RESET) {
+            this.logger.log(Level.SEVERE, this.i18nSupport.get("Startup - Error - Reload error"));
+            this.logger.log(Level.INFO, this.i18nSupport.get("Startup - Error - Disable warning for reload"));
+            this.getPluginLoader().disablePlugin(this);
         } else {
-            craftManager = new CraftManager(settings, i18nSupport, this);
-            craftManager.initCraftTypes();
-            mapUpdateManager = new MapUpdateManager(settings, i18nSupport, this);
-            asyncManager = new AsyncManager(settings, i18nSupport, craftManager, this, mapUpdateManager);
+            this.craftManager = new CraftManager(this.settings, this.i18nSupport, this);
+            this.craftManager.initCraftTypes();
+            this.mapUpdateManager = new MapUpdateManager(this.settings, this.i18nSupport, this);
+            this.asyncManager = new AsyncManager(this.settings, this.i18nSupport, this.craftManager, this, this.mapUpdateManager);
 
             // Startup procedure
-            asyncManager.runTaskTimer(this, 0, 1);
-            mapUpdateManager.runTaskTimer(this, 0, 1);
+            this.asyncManager.runTaskTimer(this, 0, 1);
+            this.mapUpdateManager.runTaskTimer(this, 0, 1);
 
-            getServer().getPluginManager()
-                       .registerEvents(new InteractListener(this, settings, i18nSupport, craftManager, asyncManager),
+            this.getServer().getPluginManager()
+                .registerEvents(new InteractListener(this, this.settings, this.i18nSupport, this.craftManager,
+                                                            this.asyncManager),
                                        this);
-            if (worldEditPlugin != null) {
-                getServer().getPluginManager().registerEvents(
-                        new WorldEditInteractListener(this, settings, i18nSupport, mapUpdateManager, craftManager),
+            if (this.worldEditPlugin != null) {
+                this.getServer().getPluginManager().registerEvents(
+                        new WorldEditInteractListener(this, this.settings, this.i18nSupport, this.mapUpdateManager, this.craftManager),
                         this);
             }
 
-            CommandListener commandListener = new CommandListener(settings, i18nSupport, craftManager,
-                                                                  asyncManager);
+            final CommandListener commandListener = new CommandListener(this.settings, this.i18nSupport, this.craftManager,
+                                                                        this.asyncManager);
 
             this.getCommand("pilot").setExecutor(commandListener);
             this.getCommand("release").setExecutor(commandListener);
@@ -252,45 +252,46 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
             this.getCommand("craftreport").setExecutor(commandListener);
             this.getCommand("manoverboard").setExecutor(commandListener);
             this.getCommand("contacts").setExecutor(commandListener);
-            this.getCommand("craft").setExecutor(new CraftHelpListener(craftManager));
+            this.getCommand("craft").setExecutor(new CraftHelpListener(this.craftManager));
 
-            getServer().getPluginManager()
-                       .registerEvents(new BlockListener(this, settings, i18nSupport, craftManager), this);
-            getServer().getPluginManager()
-                       .registerEvents(new PlayerListener(this, settings, i18nSupport, craftManager), this);
+            this.getServer().getPluginManager()
+                .registerEvents(new BlockListener(this, this.settings, this.i18nSupport, this.craftManager), this);
+            this.getServer().getPluginManager()
+                .registerEvents(new PlayerListener(this, this.settings, this.i18nSupport, this.craftManager), this);
 
-            logger.log(Level.INFO,
-                       String.format(i18nSupport.get("Startup - Enabled message"), getDescription().getVersion()));
+            this.logger.log(Level.INFO,
+                            String.format(this.i18nSupport.get("Startup - Enabled message"), this.getDescription()
+                                                                                                 .getVersion()));
         }
     }
 
     @Override public void onLoad() {
         super.onLoad();
-        logger = getLogger();
+        this.logger = this.getLogger();
     }
 
     public WorldGuardPlugin getWorldGuardPlugin() {
-        return worldGuardPlugin;
+        return this.worldGuardPlugin;
     }
 
     public WorldEditPlugin getWorldEditPlugin() {
-        return worldEditPlugin;
+        return this.worldEditPlugin;
     }
 
     public Economy getEconomy() {
-        return economy;
+        return this.economy;
     }
 
     public Cannons getCannonsPlugin() {
-        return cannonsPlugin;
+        return this.cannonsPlugin;
     }
 
     public WGCustomFlagsPlugin getWGCustomFlagsPlugin() {
-        return wgCustomFlagsPlugin;
+        return this.wgCustomFlagsPlugin;
     }
 
     @Override public net.countercraft.movecraft.api.CraftManager getCraftManager() {
-        return craftManager;
+        return this.craftManager;
     }
 }
 

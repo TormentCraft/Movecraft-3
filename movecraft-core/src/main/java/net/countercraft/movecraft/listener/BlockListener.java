@@ -20,13 +20,16 @@ package net.countercraft.movecraft.listener;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
+import net.countercraft.movecraft.Permissions;
 import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
+import net.countercraft.movecraft.utils.BlockUtils;
 import net.countercraft.movecraft.utils.MathUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -49,7 +52,6 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -84,14 +86,14 @@ public class BlockListener implements Listener {
     }
 
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.HIGHEST) public void onBlockBreak(final BlockBreakEvent e) {
-        if (e.isCancelled()) {
+    @EventHandler(priority = EventPriority.HIGHEST) public void onBlockBreak(final BlockBreakEvent event) {
+        if (event.isCancelled()) {
             return;
         }
         if (this.settings.ProtectPilotedCrafts) {
-            final BlockVec mloc = MathUtils.bukkit2MovecraftLoc(e.getBlock().getLocation());
+            final BlockVec mloc = MathUtils.bukkit2MovecraftLoc(event.getBlock().getLocation());
             boolean blockInCraft = false;
-            for (final Craft craft : this.craftManager.getCraftsInWorld(e.getBlock().getWorld())) {
+            for (final Craft craft : this.craftManager.getCraftsInWorld(event.getBlock().getWorld())) {
                 if (craft != null) {
                     for (final BlockVec tloc : craft.getBlockList()) {
                         if (tloc.x == mloc.x && tloc.y == mloc.y && tloc.z == mloc.z) blockInCraft = true;
@@ -99,23 +101,23 @@ public class BlockListener implements Listener {
                 }
             }
             if (blockInCraft) {
-                e.getPlayer().sendMessage(this.i18n.get("BLOCK IS PART OF A PILOTED CRAFT"));
-                e.setCancelled(true);
+                event.getPlayer().sendMessage(this.i18n.get("BLOCK IS PART OF A PILOTED CRAFT"));
+                event.setCancelled(true);
             }
         }
     }
 
     // prevent items from dropping from moving crafts
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.HIGHEST) public void onItemSpawn(final ItemSpawnEvent e) {
-        if (e.isCancelled()) {
+    @EventHandler(priority = EventPriority.HIGHEST) public void onItemSpawn(final ItemSpawnEvent event) {
+        if (event.isCancelled()) {
             return;
         }
-        for (final Craft tcraft : this.craftManager.getCraftsInWorld(e.getLocation().getWorld())) {
+        for (final Craft tcraft : this.craftManager.getCraftsInWorld(event.getLocation().getWorld())) {
             if ((!tcraft.isNotProcessing()) && MathUtils
                     .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
-                                                   MathUtils.bukkit2MovecraftLoc(e.getLocation()))) {
-                e.setCancelled(true);
+                                                   MathUtils.bukkit2MovecraftLoc(event.getLocation()))) {
+                event.setCancelled(true);
                 return;
             }
         }
@@ -123,17 +125,17 @@ public class BlockListener implements Listener {
 
     // prevent water from spreading on moving crafts
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.HIGHEST) public void onBlockFromTo(final BlockFromToEvent e) {
-        if (e.isCancelled()) {
+    @EventHandler(priority = EventPriority.HIGHEST) public void onBlockFromTo(final BlockFromToEvent event) {
+        if (event.isCancelled()) {
             return;
         }
-        final Block block = e.getToBlock();
+        final Block block = event.getToBlock();
         if (block.getType() == Material.WATER) {
-            for (final Craft tcraft : this.craftManager.getCraftsInWorld(block.getWorld())) {
-                if ((!tcraft.isNotProcessing()) && MathUtils
-                        .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
+            for (final Craft craft : this.craftManager.getCraftsInWorld(block.getWorld())) {
+                if ((!craft.isNotProcessing()) && MathUtils
+                        .playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
                                                        MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
-                    e.setCancelled(true);
+                    event.setCancelled(true);
                     return;
                 }
             }
@@ -147,15 +149,11 @@ public class BlockListener implements Listener {
             return;
         }
         final Block block = event.getBlock();
-        final int[] fragileBlocks = new int[]{
-                26, 34, 50, 55, 63, 64, 65, 68, 69, 70, 71, 72, 75, 76, 77, 93, 94, 96, 131, 132, 143, 147, 148, 149,
-                150, 151, 171, 193, 194, 195, 196, 197};
         for (final Craft tcraft : this.craftManager.getCraftsInWorld(block.getWorld())) {
             if ((!tcraft.isNotProcessing()) && MathUtils
                     .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
                                                    MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
-                final boolean isFragile = (Arrays.binarySearch(fragileBlocks, block.getTypeId()) >= 0);
-                if (isFragile) {
+                if (BlockUtils.FRAGILE_BLOCKS.contains(block.getType())) {
 //						BlockFace face = ((Attachable) block).getAttachedFace();
 //					    if (!event.getBlock().getRelative(face).getType().isSolid()) {
                     event.setCancelled(true);
@@ -170,24 +168,26 @@ public class BlockListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL) public void onSignChange(final SignChangeEvent event) {
         final Player p = event.getPlayer();
         if (p == null) return;
-        final String signText = org.bukkit.ChatColor.stripColor(event.getLine(0));
+
+        final String firstLine = ChatColor.stripColor(event.getLine(0));
+
         // did the player try to create a craft command sign?
-        if (this.craftManager.getCraftTypeFromString(signText).isPresent()) {
+        if (this.craftManager.getCraftTypeFromString(firstLine).isPresent()) {
             if (!this.settings.RequireCreatePerm) {
                 return;
             }
-            if (!p.hasPermission("movecraft." + org.bukkit.ChatColor.stripColor(event.getLine(0)) + ".create")) {
+            if (!p.hasPermission(Permissions.CREATE(firstLine))) {
                 p.sendMessage(this.i18n.get("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
-        if (signText.equalsIgnoreCase("Cruise: OFF") || signText.equalsIgnoreCase("Cruise: ON")) {
-            if (!p.hasPermission("movecraft.cruisesign") && this.settings.RequireCreatePerm) {
+        if (firstLine.equalsIgnoreCase("Cruise: OFF") || firstLine.equalsIgnoreCase("Cruise: ON")) {
+            if (!p.hasPermission(Permissions.CREATE_CRUISE_SIGN) && this.settings.RequireCreatePerm) {
                 p.sendMessage(this.i18n.get("Insufficient Permissions"));
                 event.setCancelled(true);
             }
         }
-        if (signText.equalsIgnoreCase("Crew:")) {
+        if (firstLine.equalsIgnoreCase("Crew:")) {
             final String crewName = org.bukkit.ChatColor.stripColor(event.getLine(1));
             if (!p.getName().equalsIgnoreCase(crewName)) {
                 p.sendMessage(this.i18n.get("You can only create a Crew: sign for yourself"));
@@ -239,30 +239,33 @@ public class BlockListener implements Listener {
 	}*/
 
     @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.NORMAL) public void explodeEvent(final EntityExplodeEvent e) {
+    @EventHandler(priority = EventPriority.NORMAL) public void explodeEvent(final EntityExplodeEvent event) {
         // Remove any blocks from the list that were adjacent to water, to prevent spillage
-        final Iterator<Block> i = e.blockList().iterator();
-        if (!this.settings.DisableSpillProtection) while (i.hasNext()) {
-            final Block b = i.next();
-            boolean isNearWater = false;
-            if (b.getY() > b.getWorld().getSeaLevel()) for (int mx = -1; mx <= 1; mx++) {
-                for (int mz = -1; mz <= 1; mz++) {
-                    for (int my = 0; my <= 1; my++) {
-                        if (b.getRelative(mx, my, mz).getType() == Material.STATIONARY_WATER ||
-                            b.getRelative(mx, my, mz).getType() == Material.WATER) isNearWater = true;
+        if (!this.settings.DisableSpillProtection) {
+            final Iterator<Block> iter = event.blockList().iterator();
+
+            while (iter.hasNext()) {
+                final Block block = iter.next();
+                boolean isNearWater = false;
+                if (block.getY() > block.getWorld().getSeaLevel()) for (int mx = -1; mx <= 1; mx++) {
+                    for (int mz = -1; mz <= 1; mz++) {
+                        for (int my = 0; my <= 1; my++) {
+                            if (block.getRelative(mx, my, mz).getType() == Material.STATIONARY_WATER ||
+                                block.getRelative(mx, my, mz).getType() == Material.WATER) isNearWater = true;
+                        }
                     }
                 }
-            }
-            if (isNearWater) {
-                i.remove();
+                if (isNearWater) {
+                    iter.remove();
+                }
             }
         }
 
-        if (e.getEntity() == null) return;
-        for (final Player p : e.getEntity().getWorld().getPlayers()) {
-            final org.bukkit.entity.Entity tnt = e.getEntity();
+        if (event.getEntity() == null) return;
+        for (final Player p : event.getEntity().getWorld().getPlayers()) {
+            final org.bukkit.entity.Entity tnt = event.getEntity();
 
-            if (e.getEntityType() == EntityType.PRIMED_TNT && this.settings.TracerRateTicks != 0) {
+            if (event.getEntityType() == EntityType.PRIMED_TNT && this.settings.TracerRateTicks != 0) {
                 final long minDistSquared = 60 * 60;
                 long maxDistSquared = Bukkit.getServer().getViewDistance() * 16;
                 maxDistSquared = maxDistSquared - 16;
@@ -273,7 +276,7 @@ public class BlockListener implements Listener {
                     minDistSquared) {  // we use squared because its faster
                     final Location loc = tnt.getLocation();
                     final Player fp = p;
-                    final World fw = e.getEntity().getWorld();
+                    final World fw = event.getEntity().getWorld();
                     // then make a glowstone to look like the explosion, place it a little later so it isn't right in
                     // the middle of the volley
                     final BukkitTask placeCobweb = new BukkitRunnable() {
