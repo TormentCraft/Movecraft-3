@@ -17,9 +17,9 @@
 
 package net.countercraft.movecraft.listener;
 
-import net.countercraft.movecraft.api.BlockVec;
-import net.countercraft.movecraft.api.Direction;
-import net.countercraft.movecraft.api.Rotation;
+import com.alexknvl.shipcraft.math.BlockVec;
+import com.alexknvl.shipcraft.math.RotationXZ;
+import com.alexknvl.shipcraft.math.Direction;
 import net.countercraft.movecraft.async.AsyncManager;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -75,7 +75,7 @@ public class InteractListener implements Listener {
                 }
 
                 if (firstLine.equalsIgnoreCase("Remote Sign")) {
-                    final BlockVec sourceLocation = MathUtils.bukkit2MovecraftLoc(event.getClickedBlock().getLocation());
+                    final BlockVec sourceLocation = BlockVec.from(event.getClickedBlock().getLocation());
                     Craft foundCraft = null;
                     for (final Craft tcraft : this.craftManager.getCraftsInWorld(event.getClickedBlock().getWorld())) {
                         if (MathUtils.playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(),
@@ -99,7 +99,7 @@ public class InteractListener implements Listener {
                     final String targetText = org.bukkit.ChatColor.stripColor(sign.getLine(1));
                     BlockVec foundLoc = null;
                     for (final BlockVec tloc : foundCraft.getBlockList()) {
-                        final Block tb = event.getClickedBlock().getWorld().getBlockAt(tloc.x, tloc.y, tloc.z);
+                        final Block tb = event.getClickedBlock().getWorld().getBlockAt(tloc.x(), tloc.y(), tloc.z());
                         if (tb.getType() == Material.SIGN_POST || tb.getType() == Material.WALL_SIGN) {
                             final Sign ts = (Sign) tb.getState();
                             if (org.bukkit.ChatColor.stripColor(ts.getLine(0)) != null)
@@ -127,7 +127,7 @@ public class InteractListener implements Listener {
                         return;
                     }
 
-                    final Block newBlock = event.getClickedBlock().getWorld().getBlockAt(foundLoc.x, foundLoc.y, foundLoc.z);
+                    final Block newBlock = event.getClickedBlock().getWorld().getBlockAt(foundLoc.x(), foundLoc.y(), foundLoc.z());
                     final PlayerInteractEvent newEvent = new PlayerInteractEvent(event.getPlayer(), event.getAction(),
                                                                                  event.getItem(), newBlock,
                                                                                  event.getBlockFace());
@@ -180,18 +180,17 @@ public class InteractListener implements Listener {
                             }
 
                             if (MathUtils.playerIsWithinBoundingPolygon(playerCraft.getHitBox(), playerCraft.getMinX(),
-                                                                        playerCraft.getMinZ(), MathUtils
-                                                                                .bukkit2MovecraftLoc(event.getPlayer()
+                                                                        playerCraft.getMinZ(), BlockVec.from(event.getPlayer()
                                                                                                           .getLocation()))) {
                                 if (playerCraft.getType().rotateAtMidpoint()) {
                                     final BlockVec midpoint = new BlockVec(
                                             (playerCraft.getMaxX() + playerCraft.getMinX()) / 2,
                                             (playerCraft.getMaxY() + playerCraft.getMinY()) / 2,
                                             (playerCraft.getMaxZ() + playerCraft.getMinZ()) / 2);
-                                    this.asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midpoint);
+                                    this.asyncManager.rotate(playerCraft, RotationXZ.CCW$.MODULE$, midpoint);
                                 } else {
-                                    this.asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE,
-                                                             MathUtils.bukkit2MovecraftLoc(sign.getLocation()));
+                                    this.asyncManager.rotate(playerCraft, RotationXZ.CCW$.MODULE$,
+                                                             BlockVec.from(sign.getLocation()));
                                 }
 
                                 this.timeMap.put(event.getPlayer(), System.currentTimeMillis());
@@ -239,7 +238,7 @@ public class InteractListener implements Listener {
 
                                 @Override public void run() {
                                     InteractListener.this.asyncManager
-                                            .rotate(c, Rotation.ANTICLOCKWISE, MathUtils.bukkit2MovecraftLoc(loc),
+                                            .rotate(c, RotationXZ.CCW$.MODULE$, BlockVec.from(loc),
                                                     true);
                                 }
                             }.runTaskLater(this.plugin, (10));
@@ -333,16 +332,16 @@ public class InteractListener implements Listener {
 
                     if (MathUtils.playerIsWithinBoundingPolygon(playerCraft.getHitBox(), playerCraft.getMinX(),
                                                                 playerCraft.getMinZ(),
-                                                                MathUtils.bukkit2MovecraftLoc(player.getLocation()))) {
+                                                                BlockVec.from(player.getLocation()))) {
                         if (playerCraft.getType().rotateAtMidpoint()) {
                             final BlockVec midpoint = new BlockVec(
                                     (playerCraft.getMaxX() + playerCraft.getMinX()) / 2,
                                     (playerCraft.getMaxY() + playerCraft.getMinY()) / 2,
                                     (playerCraft.getMaxZ() + playerCraft.getMinZ()) / 2);
-                            this.asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midpoint);
+                            this.asyncManager.rotate(playerCraft, RotationXZ.CW$.MODULE$, midpoint);
                         } else {
-                            this.asyncManager.rotate(playerCraft, Rotation.CLOCKWISE,
-                                                     MathUtils.bukkit2MovecraftLoc(sign.getLocation()));
+                            this.asyncManager.rotate(playerCraft, RotationXZ.CW$.MODULE$,
+                                                     BlockVec.from(sign.getLocation()));
                         }
 
                         this.timeMap.put(player, System.currentTimeMillis());
@@ -388,7 +387,7 @@ public class InteractListener implements Listener {
 
                         @Override public void run() {
                             InteractListener.this.asyncManager
-                                    .rotate(c, Rotation.CLOCKWISE, MathUtils.bukkit2MovecraftLoc(loc), true);
+                                    .rotate(c, RotationXZ.CW$.MODULE$, BlockVec.from(loc), true);
                         }
                     }.runTaskLater(this.plugin, (10));
                     this.timeMap.put(player, System.currentTimeMillis());
@@ -420,7 +419,7 @@ public class InteractListener implements Listener {
                     sign.setLine(0, "Ascend: ON");
                     sign.update(true);
 
-                    playerCraft.setCruiseDirection(Direction.UP);
+                    playerCraft.setCruiseDirection(Direction.Up());
                     playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     playerCraft.setCruising(true);
 
@@ -436,7 +435,7 @@ public class InteractListener implements Listener {
                     sign.setLine(0, "Descend: ON");
                     sign.update(true);
 
-                    playerCraft.setCruiseDirection(Direction.DOWN);
+                    playerCraft.setCruiseDirection(Direction.Down());
                     playerCraft.setLastCruiseUpdate(System.currentTimeMillis());
                     playerCraft.setCruising(true);
 
@@ -623,8 +622,7 @@ public class InteractListener implements Listener {
                 }
 
                 if (MathUtils.playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
-                                                            MathUtils.bukkit2MovecraftLoc(
-                                                                    event.getPlayer().getLocation()))) {
+                                                            BlockVec.from(event.getPlayer().getLocation()))) {
 
                     if (event.getPlayer().hasPermission("movecraft." + craft.getType().getCraftName() + ".move")) {
                         if (craft.getPilotLocked()) {

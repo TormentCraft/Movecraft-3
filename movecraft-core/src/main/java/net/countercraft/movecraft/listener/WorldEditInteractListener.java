@@ -17,12 +17,12 @@
 
 package net.countercraft.movecraft.listener;
 
+import com.alexknvl.shipcraft.math.BlockVec;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.SignBlock;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -146,9 +146,9 @@ public class WorldEditInteractListener implements Listener {
                             197};  // BLOCKS THAT CAN'T BE PARTIALLY RECONSTRUCTED
 
                     for (final BlockVec loc : pCraft.getBlockList()) {
-                        final Vector ccpos = new Vector(loc.x - pCraft.getMinX(), loc.y - pCraft.getMinY(),
-                                                  loc.z - pCraft.getMinZ());
-                        final Block b = sign.getWorld().getBlockAt(loc.x, loc.y, loc.z);
+                        final Vector ccpos = new Vector(loc.x() - pCraft.getMinX(), loc.y() - pCraft.getMinY(),
+                                                  loc.z() - pCraft.getMinZ());
+                        final Block b = sign.getWorld().getBlockAt(loc.x(), loc.y(), loc.z());
                         final boolean isIgnored = (Arrays.binarySearch(ignoredBlocks, b.getTypeId()) >= 0);
                         if (!isIgnored) {
                             final com.sk89q.worldedit.blocks.BaseBlock bb;
@@ -320,7 +320,7 @@ public class WorldEditInteractListener implements Listener {
                     final ArrayList<InventoryHolder> chests = new ArrayList<>();
 
                     for (final BlockVec loc : craft.getBlockList()) {
-                        final Block b = craft.getWorld().getBlockAt(loc.x, loc.y, loc.z);
+                        final Block b = craft.getWorld().getBlockAt(loc.x(), loc.y(), loc.z());
                         if ((b.getTypeId() == 54) || (b.getTypeId() == 146)) {
                             final InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
                             if (inventoryHolder.getInventory().contains(itemTypeId) && remainingQty > 0) {

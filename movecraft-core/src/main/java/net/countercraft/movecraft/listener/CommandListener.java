@@ -17,17 +17,16 @@
 
 package net.countercraft.movecraft.listener;
 
+import com.alexknvl.shipcraft.math.BlockVec;
+import com.alexknvl.shipcraft.math.RotationXZ;
 import net.countercraft.movecraft.Permissions;
-import net.countercraft.movecraft.api.BlockVec;
-import net.countercraft.movecraft.api.Direction;
-import net.countercraft.movecraft.api.Rotation;
+import com.alexknvl.shipcraft.math.Direction;
 import net.countercraft.movecraft.async.AsyncManager;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.utils.MathUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -163,7 +162,7 @@ public class CommandListener implements CommandExecutor {
                 if (!player.hasPermission(Permissions.PILOT(args[0])))
                     throw new InsufficientPermissionsException();
 
-                final BlockVec startPoint = MathUtils.bukkit2MovecraftLoc(player.getLocation());
+                final BlockVec startPoint = BlockVec.from(player.getLocation());
                 final Optional<CraftType> ct = this.craftManager.getCraftTypeFromString(args[0]);
 
                 if (ct.isPresent()) {
@@ -191,9 +190,9 @@ public class CommandListener implements CommandExecutor {
                 throw new InsufficientPermissionsException();
 
             final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
-            final Rotation rotation = (args.length > 0 && args[0].equalsIgnoreCase("left"))
-                                      ? Rotation.ANTICLOCKWISE
-                                      : Rotation.CLOCKWISE;
+            final RotationXZ rotation = (args.length > 0 && args[0].equalsIgnoreCase("left"))
+                                      ? RotationXZ.CCW$.MODULE$
+                                      : RotationXZ.CW$.MODULE$;
             this.asyncManager.rotate(playerCraft, rotation, midPoint);
         }
 
@@ -207,7 +206,7 @@ public class CommandListener implements CommandExecutor {
                 throw new InsufficientPermissionsException();
 
             final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
-            this.asyncManager.rotate(playerCraft, Rotation.ANTICLOCKWISE, midPoint);
+            this.asyncManager.rotate(playerCraft, RotationXZ.CCW$.MODULE$, midPoint);
         }
 
         if (name.equalsIgnoreCase("rotateright")) {
@@ -222,7 +221,7 @@ public class CommandListener implements CommandExecutor {
             }
 
             final BlockVec midPoint = CommandListener.getCraftMidPoint(playerCraft);
-            this.asyncManager.rotate(playerCraft, Rotation.CLOCKWISE, midPoint);
+            this.asyncManager.rotate(playerCraft, RotationXZ.CW$.MODULE$, midPoint);
         }
 
         if (name.equalsIgnoreCase("cruise")) {
@@ -243,21 +242,21 @@ public class CommandListener implements CommandExecutor {
 
                     final Direction dir = Direction.fromYawPitch(yaw, pitch);
                     playerCraft.setCruiseDirection(dir);
-                    playerCraft.setCruising(!dir.equals(Direction.OFF));
+                    playerCraft.setCruising(!dir.equals(Direction.Off()));
                 } else {
-                    Direction dir = Direction.OFF;
+                    Direction dir = Direction.Off();
                     for (final String a : args) {
                         if (a.isEmpty()) {
                             continue;
                         }
 
-                        dir = dir.combine(Direction.namedOr(a, Direction.OFF));
+                        dir = dir.combine(Direction.namedOr(a, Direction.Off()));
 
-                        if (Objects.equals(dir, Direction.OFF)) break;
+                        if (Objects.equals(dir, Direction.Off())) break;
                     }
 
                     playerCraft.setCruiseDirection(dir);
-                    playerCraft.setCruising(!dir.equals(Direction.OFF));
+                    playerCraft.setCruising(!dir.equals(Direction.Off()));
                 }
             }
         }

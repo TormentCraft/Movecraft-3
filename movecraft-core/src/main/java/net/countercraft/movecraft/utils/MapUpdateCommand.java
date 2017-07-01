@@ -17,8 +17,8 @@
 
 package net.countercraft.movecraft.utils;
 
-import net.countercraft.movecraft.api.BlockVec;
-import net.countercraft.movecraft.api.Rotation;
+import com.alexknvl.shipcraft.math.BlockVec;
+import com.alexknvl.shipcraft.math.RotationXZ;
 import net.countercraft.movecraft.craft.Craft;
 
 import javax.annotation.Nullable;
@@ -35,13 +35,13 @@ public class MapUpdateCommand {
     public final int typeID;
     public final byte dataID;
     @Nullable public final Object worldEditBaseBlock;
-    public final Rotation rotation;
+    public final RotationXZ rotation;
     public final Craft craft;
     public final int smoke;
 
     public MapUpdateCommand(final BlockVec blockLocation, final BlockVec newBlockLocation,
                             final int typeID, final byte dataID,
-                            final Rotation rotation, final Craft craft)
+                            final RotationXZ rotation, final Craft craft)
     {
         this.blockLocation = blockLocation;
         this.newBlockLocation = newBlockLocation;
@@ -61,7 +61,7 @@ public class MapUpdateCommand {
         this.typeID = typeID;
         this.dataID = dataID;
         this.worldEditBaseBlock = null;
-        this.rotation = Rotation.NONE;
+        this.rotation = RotationXZ.None$.MODULE$;
         this.craft = craft;
         this.smoke = 0;
     }
@@ -72,7 +72,7 @@ public class MapUpdateCommand {
         this.typeID = typeID;
         this.dataID = dataID;
         this.worldEditBaseBlock = null;
-        this.rotation = Rotation.NONE;
+        this.rotation = RotationXZ.None$.MODULE$;
         this.craft = craft;
         this.smoke = 0;
     }
@@ -85,7 +85,7 @@ public class MapUpdateCommand {
         this.typeID = typeID;
         this.dataID = dataID;
         this.worldEditBaseBlock = worldEditBaseBlock;
-        this.rotation = Rotation.NONE;
+        this.rotation = RotationXZ.None$.MODULE$;
         this.craft = craft;
         this.smoke = 0;
     }
@@ -97,7 +97,7 @@ public class MapUpdateCommand {
         this.typeID = typeID;
         this.dataID = dataID;
         this.worldEditBaseBlock = null;
-        this.rotation = Rotation.NONE;
+        this.rotation = RotationXZ.None$.MODULE$;
         this.craft = craft;
         this.smoke = smoke;
     }

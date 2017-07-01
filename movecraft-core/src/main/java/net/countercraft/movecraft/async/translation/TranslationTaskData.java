@@ -17,8 +17,8 @@
 
 package net.countercraft.movecraft.async.translation;
 
-import net.countercraft.movecraft.api.BlockVec;
-import net.countercraft.movecraft.api.IntRange;
+import com.alexknvl.shipcraft.math.BlockVec;
+import com.alexknvl.shipcraft.math.IntRange;
 import net.countercraft.movecraft.utils.EntityUpdateCommand;
 import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
 import net.countercraft.movecraft.utils.MapUpdateCommand;

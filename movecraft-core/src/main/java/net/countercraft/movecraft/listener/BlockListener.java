@@ -17,11 +17,11 @@
 
 package net.countercraft.movecraft.listener;
 
+import com.alexknvl.shipcraft.math.BlockVec;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.Permissions;
-import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -91,12 +91,12 @@ public class BlockListener implements Listener {
             return;
         }
         if (this.settings.ProtectPilotedCrafts) {
-            final BlockVec mloc = MathUtils.bukkit2MovecraftLoc(event.getBlock().getLocation());
+            final BlockVec mloc = BlockVec.from(event.getBlock().getLocation());
             boolean blockInCraft = false;
             for (final Craft craft : this.craftManager.getCraftsInWorld(event.getBlock().getWorld())) {
                 if (craft != null) {
                     for (final BlockVec tloc : craft.getBlockList()) {
-                        if (tloc.x == mloc.x && tloc.y == mloc.y && tloc.z == mloc.z) blockInCraft = true;
+                        if (tloc.equals(mloc)) blockInCraft = true;
                     }
                 }
             }
@@ -116,7 +116,7 @@ public class BlockListener implements Listener {
         for (final Craft tcraft : this.craftManager.getCraftsInWorld(event.getLocation().getWorld())) {
             if ((!tcraft.isNotProcessing()) && MathUtils
                     .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
-                                                   MathUtils.bukkit2MovecraftLoc(event.getLocation()))) {
+                                                   BlockVec.from(event.getLocation()))) {
                 event.setCancelled(true);
                 return;
             }
@@ -134,7 +134,7 @@ public class BlockListener implements Listener {
             for (final Craft craft : this.craftManager.getCraftsInWorld(block.getWorld())) {
                 if ((!craft.isNotProcessing()) && MathUtils
                         .playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
-                                                       MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
+                                                       BlockVec.from(block.getLocation()))) {
                     event.setCancelled(true);
                     return;
                 }
@@ -152,7 +152,7 @@ public class BlockListener implements Listener {
         for (final Craft tcraft : this.craftManager.getCraftsInWorld(block.getWorld())) {
             if ((!tcraft.isNotProcessing()) && MathUtils
                     .playerIsWithinBoundingPolygon(tcraft.getHitBox(), tcraft.getMinX(), tcraft.getMinZ(),
-                                                   MathUtils.bukkit2MovecraftLoc(block.getLocation()))) {
+                                                   BlockVec.from(block.getLocation()))) {
                 if (BlockUtils.FRAGILE_BLOCKS.contains(block.getType())) {
 //						BlockFace face = ((Attachable) block).getAttachedFace();
 //					    if (!event.getBlock().getRelative(face).getType().isSolid()) {

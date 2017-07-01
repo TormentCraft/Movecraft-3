@@ -17,13 +17,13 @@
 
 package net.countercraft.movecraft.utils;
 
+import com.alexknvl.shipcraft.math.BlockVec;
+import com.alexknvl.shipcraft.math.RotationXZ;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.SignBlock;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockVec;
-import net.countercraft.movecraft.api.Rotation;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.localisation.I18nSupport;
@@ -81,9 +81,9 @@ public final class MapUpdateManager extends BukkitRunnable {
         final BlockVec workingL = m.newBlockLocation;
         final int[] blocksToBlankOut = {54, 61, 62, 63, 68, 116, 117, 146, 149, 150, 154, 158, 145};
 
-        final int x = workingL.x;
-        final int y = workingL.y;
-        final int z = workingL.z;
+        final int x = workingL.x();
+        final int y = workingL.y();
+        final int z = workingL.z();
 
         int newTypeID = m.typeID;
 
@@ -266,7 +266,7 @@ Changed for 1.8, and quite possibly wrong:
                 if (transferData instanceof SignTransferHolder) {
 
                     final SignTransferHolder signData = (SignTransferHolder) transferData;
-                    final BlockState bs = w.getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).getState();
+                    final BlockState bs = w.getBlockAt(entry.getKey().x(), entry.getKey().y(), entry.getKey().z()).getState();
                     if (bs instanceof Sign) {
                         final Sign sign = (Sign) bs;
                         for (int i = 0; i < signData.lines.length; i++) {
@@ -300,17 +300,17 @@ Changed for 1.8, and quite possibly wrong:
                 } else if (transferData instanceof InventoryTransferHolder) {
                     final InventoryTransferHolder invData = (InventoryTransferHolder) transferData;
                     final InventoryHolder inventoryHolder = (InventoryHolder) w
-                            .getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).getState();
+                            .getBlockAt(entry.getKey().x(), entry.getKey().y(), entry.getKey().z()).getState();
                     inventoryHolder.getInventory().setContents(invData.inventory);
                 } else if (transferData instanceof CommandBlockTransferHolder) {
                     final CommandBlockTransferHolder cbData = (CommandBlockTransferHolder) transferData;
                     final CommandBlock cblock = (CommandBlock) w
-                            .getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).getState();
+                            .getBlockAt(entry.getKey().x(), entry.getKey().y(), entry.getKey().z()).getState();
                     cblock.setCommand(cbData.commandText);
                     cblock.setName(cbData.commandName);
                     cblock.update();
                 }
-                w.getBlockAt(entry.getKey().x, entry.getKey().y, entry.getKey().z).setData(transferData.data);
+                w.getBlockAt(entry.getKey().x(), entry.getKey().y(), entry.getKey().z()).setData(transferData.data);
             } catch (final IndexOutOfBoundsException | IllegalArgumentException e) {
                 this.plugin.getLogger().log(Level.SEVERE, "Severe error in map updater");
             }
@@ -373,8 +373,7 @@ Changed for 1.8, and quite possibly wrong:
             if (!this.settings.CompatibilityMode) {
                 // send updates to client
                 for (final MapUpdateCommand command : updatesInWorld) {
-                    final Location loc = new Location(w, command.newBlockLocation.x, command.newBlockLocation.y,
-                                                      command.newBlockLocation.z);
+                    final Location loc = command.newBlockLocation.toBukkitLocation(w);
                     w.getBlockAt(loc).getState().update();
                 }
 //				for ( net.minecraft.server.v1_8_R3.Chunk c : chunks ) {
@@ -444,18 +443,18 @@ Changed for 1.8, and quite possibly wrong:
 
                     if (l != null) {
                         // keep track of the light levels that were present before moving the craft
-                        origLightMap.put(l, entry.getKey().getBlockAt(l.x, l.y, l.z).getLightLevel());
+                        origLightMap.put(l, entry.getKey().getBlockAt(l.x(), l.y(), l.z()).getLightLevel());
 
                         // keep track of block data for later reconstruction
                         final TransferData blockDataPacket = this.getBlockDataPacket(
-                                entry.getKey().getBlockAt(l.x, l.y, l.z).getState(), c.rotation);
+                                entry.getKey().getBlockAt(l.x(), l.y(), l.z()).getState(), c.rotation);
                         if (blockDataPacket != null) {
                             dataMap.put(c.newBlockLocation, blockDataPacket);
                         }
 
                         //remove dispensers and replace them with half slabs to prevent them firing during
                         // reconstruction
-                        if (entry.getKey().getBlockAt(l.x, l.y, l.z).getTypeId() == 23) {
+                        if (entry.getKey().getBlockAt(l.x(), l.y(), l.z()).getTypeId() == 23) {
                             final MapUpdateCommand blankCommand = new MapUpdateCommand(c.blockLocation, 23, c
                                     .dataID, c.craft);
 //							if(Settings.CompatibilityMode) {
@@ -466,7 +465,7 @@ Changed for 1.8, and quite possibly wrong:
                         }
                         //remove redstone blocks and replace them with stone to prevent redstone activation during
                         // reconstruction
-                        if (entry.getKey().getBlockAt(l.x, l.y, l.z).getTypeId() == 152) {
+                        if (entry.getKey().getBlockAt(l.x(), l.y(), l.z()).getTypeId() == 152) {
                             final MapUpdateCommand blankCommand = new MapUpdateCommand(c.blockLocation, 1, (byte) 0, c.craft);
 //							if(Settings.CompatibilityMode) {
                             queuedMapUpdateCommands.add(blankCommand);
@@ -476,8 +475,8 @@ Changed for 1.8, and quite possibly wrong:
                         }
                         //remove water and lava blocks and replace them with stone to prevent spillage during
                         // reconstruction
-                        if (entry.getKey().getBlockAt(l.x, l.y, l.z).getTypeId() >= 8 &&
-                            entry.getKey().getBlockAt(l.x, l.y, l.z).getTypeId() <= 11) {
+                        if (entry.getKey().getBlockAt(l.x(), l.y(), l.z()).getTypeId() >= 8 &&
+                            entry.getKey().getBlockAt(l.x(), l.y(), l.z()).getTypeId() <= 11) {
                             final MapUpdateCommand blankCommand = new MapUpdateCommand(c.blockLocation, 0, (byte) 0, c.craft);
                             this.updateBlock(blankCommand, entry.getKey(), dataMap, chunks, cmChunks, origLightMap, false);
                         }
@@ -504,17 +503,15 @@ Changed for 1.8, and quite possibly wrong:
                                 // send the blocks around the player first
                                 final Player p = (Player) command.entity;
                                 for (final MapUpdateCommand muc : updatesInWorld) {
-                                    final int disty = Math.abs(muc.newBlockLocation.y - command.newLocation.getBlockY());
+                                    final int disty = Math.abs(muc.newBlockLocation.y() - command.newLocation.getBlockY());
 
-                                    final int distx = Math.abs(muc.newBlockLocation.x - command.newLocation.getBlockX
+                                    final int distx = Math.abs(muc.newBlockLocation.x() - command.newLocation.getBlockX
                                             ());
-                                    final int distz = Math.abs(muc.newBlockLocation.z - command.newLocation.getBlockZ());
+                                    final int distz = Math.abs(muc.newBlockLocation.z() - command.newLocation.getBlockZ());
                                     if (disty < 2 && distx < 2 && distz < 2) {
                                         this.updateBlock(muc, entry.getKey(), dataMap, chunks, cmChunks, origLightMap,
                                                          false);
-                                        final Location nloc = new Location(entry.getKey(), muc.newBlockLocation.x,
-                                                                           muc.newBlockLocation.y,
-                                                                           muc.newBlockLocation.z);
+                                        final Location nloc = muc.newBlockLocation.toBukkitLocation(entry.getKey());
                                         p.sendBlockChange(nloc, muc.typeID, muc.dataID);
                                     }
                                 }
@@ -529,8 +526,8 @@ Changed for 1.8, and quite possibly wrong:
                     if (i != null) {
                         if (i.typeID >= 0) {
                             final int prevType = entry.getKey()
-                                                      .getBlockAt(i.newBlockLocation.x, i.newBlockLocation.y,
-                                                            i.newBlockLocation.z).getTypeId();
+                                                      .getBlockAt(i.newBlockLocation.x(), i.newBlockLocation.y(),
+                                                            i.newBlockLocation.z()).getTypeId();
                             final boolean prevIsFragile = (Arrays.binarySearch(fragileBlocks, prevType) >= 0);
                             final boolean isFragile = (Arrays.binarySearch(fragileBlocks, i.typeID) >= 0);
                             if (prevIsFragile && (!isFragile)) {
@@ -564,9 +561,9 @@ Changed for 1.8, and quite possibly wrong:
                                 if (command.typeID < -10) { // don't bother with tiny explosions
                                     float explosionPower = command.typeID;
                                     explosionPower = 0.0F - explosionPower / 100.0F;
-                                    final Location loc = new Location(entry.getKey(), command.newBlockLocation.x + 0.5,
-                                                                      command.newBlockLocation.y + 0.5,
-                                                                      command.newBlockLocation.z);
+                                    final Location loc = new Location(entry.getKey(), command.newBlockLocation.x() + 0.5,
+                                                                      command.newBlockLocation.y() + 0.5,
+                                                                      command.newBlockLocation.z());
                                     this.createExplosion(loc, explosionPower);
                                     //world.createExplosion(command.getNewBlockLocation().getX()+0.5, command.getNewBlockLocation()
                                     // .getY()+0.5, command.getNewBlockLocation().getZ()+0.5, explosionPower);
@@ -677,8 +674,7 @@ Changed for 1.8, and quite possibly wrong:
                 for (final MapUpdateCommand command : updatesInWorld) {
                     if (command != null) {
                         if (command.smoke == 1) {
-                            final Location loc = new Location(entry.getKey(), command.newBlockLocation.x,
-                                                              command.newBlockLocation.y, command.newBlockLocation.z);
+                            final Location loc = command.newBlockLocation.toBukkitLocation(entry.getKey());
                             entry.getKey().playEffect(loc, Effect.SMOKE, 4);
                         }
                     }
@@ -786,24 +782,24 @@ Changed for 1.8, and quite possibly wrong:
 
         Integer miny = Integer.MAX_VALUE;
         Integer maxy = Integer.MIN_VALUE;
-        final Map<BlockVec, MapUpdateCommand> sortRef = new HashMap<>();
         if (mapUpdates != null) {
             Integer minx = Integer.MAX_VALUE;
             Integer maxx = Integer.MIN_VALUE;
             Integer minz = Integer.MAX_VALUE;
             Integer maxz = Integer.MIN_VALUE;
+            //final Map<BlockVec, MapUpdateCommand> sortRef = new HashMap<>();
             for (final MapUpdateCommand command : mapUpdates) {
                 if (MapUpdateManager.areIntersecting(get, command)) {
                     return true;
                 }
                 if (command != null) {
-                    if (command.newBlockLocation.x < minx) minx = command.newBlockLocation.x;
-                    if (command.newBlockLocation.y < miny) miny = command.newBlockLocation.y;
-                    if (command.newBlockLocation.z < minz) minz = command.newBlockLocation.z;
-                    if (command.newBlockLocation.x > maxx) maxx = command.newBlockLocation.x;
-                    if (command.newBlockLocation.y > maxy) maxy = command.newBlockLocation.y;
-                    if (command.newBlockLocation.z > maxz) maxz = command.newBlockLocation.z;
-                    sortRef.put(command.newBlockLocation, command);
+                    if (command.newBlockLocation.x() < minx) minx = command.newBlockLocation.x();
+                    if (command.newBlockLocation.y() < miny) miny = command.newBlockLocation.y();
+                    if (command.newBlockLocation.z() < minz) minz = command.newBlockLocation.z();
+                    if (command.newBlockLocation.x() > maxx) maxx = command.newBlockLocation.x();
+                    if (command.newBlockLocation.y() > maxy) maxy = command.newBlockLocation.y();
+                    if (command.newBlockLocation.z() > maxz) maxz = command.newBlockLocation.z();
+                    //sortRef.put(command.newBlockLocation, command);
                 }
             }
         }
@@ -814,7 +810,7 @@ Changed for 1.8, and quite possibly wrong:
             // Sort the blocks from the bottom up to minimize lower altitude block updates
             for (int posy = maxy; posy >= miny; posy--) {
                 for (final MapUpdateCommand test : mapUpdates) {
-                    if (test.newBlockLocation.y == posy) {
+                    if (test.newBlockLocation.y() == posy) {
                         tempSet.add(test);
                     }
                 }
@@ -869,14 +865,14 @@ Changed for 1.8, and quite possibly wrong:
         return false;
     }
 
-    private TransferData getBlockDataPacket(final BlockState s, final Rotation r) {
+    private TransferData getBlockDataPacket(final BlockState s, final RotationXZ r) {
         if (BlockUtils.blockHasNoData(s.getTypeId())) {
             return null;
         }
 
         byte data = s.getRawData();
 
-        if (BlockUtils.blockRequiresRotation(s.getTypeId()) && r != Rotation.NONE) {
+        if (BlockUtils.blockRequiresRotation(s.getTypeId()) && !r.equals(RotationXZ.none())) {
             data = BlockUtils.rotate(data, s.getTypeId(), r);
         }
 

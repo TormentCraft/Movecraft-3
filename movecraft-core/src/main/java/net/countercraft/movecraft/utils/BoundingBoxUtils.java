@@ -17,7 +17,7 @@
 
 package net.countercraft.movecraft.utils;
 
-import net.countercraft.movecraft.api.BlockVec;
+import com.alexknvl.shipcraft.math.BlockVec;
 
 public final class BoundingBoxUtils {
 
@@ -31,24 +31,24 @@ public final class BoundingBoxUtils {
         final int[][][] polygonalBox = new int[sizeX][][];
 
         for (final BlockVec l : blockList) {
-            if (polygonalBox[l.x - minX] == null) {
-                polygonalBox[l.x - minX] = new int[sizeZ][];
+            if (polygonalBox[l.x() - minX] == null) {
+                polygonalBox[l.x() - minX] = new int[sizeZ][];
             }
 
-            if (polygonalBox[l.x - minX][l.z - minZ] == null) {
+            if (polygonalBox[l.x() - minX][l.z() - minZ] == null) {
 
-                polygonalBox[l.x - minX][l.z - minZ] = new int[2];
-                polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
-                polygonalBox[l.x - minX][l.z - minZ][1] = l.y;
+                polygonalBox[l.x() - minX][l.z() - minZ] = new int[2];
+                polygonalBox[l.x() - minX][l.z() - minZ][0] = l.y();
+                polygonalBox[l.x() - minX][l.z() - minZ][1] = l.y();
             } else {
-                final int minY = polygonalBox[l.x - minX][l.z - minZ][0];
-                final int maxY = polygonalBox[l.x - minX][l.z - minZ][1];
+                final int minY = polygonalBox[l.x() - minX][l.z() - minZ][0];
+                final int maxY = polygonalBox[l.x() - minX][l.z() - minZ][1];
 
-                if (l.y < minY) {
-                    polygonalBox[l.x - minX][l.z - minZ][0] = l.y;
+                if (l.y() < minY) {
+                    polygonalBox[l.x() - minX][l.z() - minZ][0] = l.y();
                 }
-                if (l.y > maxY) {
-                    polygonalBox[l.x - minX][l.z - minZ][1] = l.y;
+                if (l.y() > maxY) {
+                    polygonalBox[l.x() - minX][l.z() - minZ][1] = l.y();
                 }
             }
         }

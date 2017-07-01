@@ -17,12 +17,12 @@
 
 package net.countercraft.movecraft.async.detection;
 
+import com.alexknvl.shipcraft.math.BlockVec;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sk89q.worldguard.LocalPlayer;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.BlockVec;
-import net.countercraft.movecraft.api.IntRange;
+import com.alexknvl.shipcraft.math.IntRange;
 import net.countercraft.movecraft.api.MaterialDataPredicate;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
@@ -106,19 +106,18 @@ public class DetectionTask extends AsyncTask {
         }
     }
 
-    private void detectBlock(final int x, final int y, final int z) {
-        final BlockVec workingLocation = new BlockVec(x, y, z);
+    private void detectBlock(final BlockVec vec) {
 
-        if (this.notVisited(workingLocation, this.visited)) {
+        if (this.notVisited(vec, this.visited)) {
             final Block testBlock;
             final Material testMaterial;
             final MaterialData materialData;
             try {
-                testBlock = this.data.getWorld().getBlockAt(x, y, z);
+                testBlock = this.data.getWorld().getBlockAt(vec.x(), vec.y(), vec.z());
                 materialData = testBlock.getState().getData();
                 testMaterial = materialData.getItemType();
             } catch (final Exception e) {
-                this.fail(String.format(this.i18n.get("Detection - Craft too large"), this.sizeRange.max));
+                this.fail(String.format(this.i18n.get("Detection - Craft too large"), this.sizeRange.max()));
                 return;
             }
 
@@ -126,7 +125,7 @@ public class DetectionTask extends AsyncTask {
                 this.data.setWaterContact(true);
             }
             if (testMaterial == Material.WALL_SIGN || testMaterial == Material.SIGN_POST) {
-                final BlockState state = this.data.getWorld().getBlockAt(x, y, z).getState();
+                final BlockState state = testBlock.getState();
                 if (state instanceof Sign) {
                     final Sign s = (Sign) state;
                     if (s.getLine(0).equalsIgnoreCase("Pilot:") && this.data.getPlayer() != null) {
@@ -146,23 +145,23 @@ public class DetectionTask extends AsyncTask {
             if (this.isForbiddenBlock(materialData)) {
                 this.fail(this.i18n.get("Detection - Forbidden block found") +
                           String.format("\nInvalid Block: %s at (%d, %d, %d)", BlockNames.itemName(materialData),
-                                   x, y, z));
+                                        vec.x(), vec.y(), vec.z()));
             } else if (this.isAllowedBlock(materialData)) {
                 // Check for double chests.
                 final Set<Material> chestTypes = Sets.immutableEnumSet(Material.CHEST, Material.TRAPPED_CHEST);
                 if (chestTypes.contains(testMaterial)) {
                     final World w = this.data.getWorld();
                     final boolean foundDoubleChest =
-                            (w.getBlockAt(x - 1, y, z).getType() == testMaterial) ||
-                            (w.getBlockAt(x + 1, y, z).getType() == testMaterial) ||
-                            (w.getBlockAt(x, y, z - 1).getType() == testMaterial) ||
-                            (w.getBlockAt(x, y, z + 1).getType() == testMaterial);
+                            (w.getBlockAt(vec.x() - 1, vec.y(), vec.z()).getType() == testMaterial) ||
+                            (w.getBlockAt(vec.x() + 1, vec.y(), vec.z()).getType() == testMaterial) ||
+                            (w.getBlockAt(vec.x(), vec.y(), vec.z() - 1).getType() == testMaterial) ||
+                            (w.getBlockAt(vec.x(), vec.y(), vec.z() + 1).getType() == testMaterial);
                     if (foundDoubleChest) {
                         this.fail(this.i18n.get("Detection - ERROR: Double chest found"));
                     }
                 }
 
-                final Location loc = new Location(this.data.getWorld(), x, y, z);
+                final Location loc = vec.toBukkitLocation(this.data.getWorld());
                 final Player p;
                 if (this.data.getPlayer() == null) {
                     p = this.data.getNotificationPlayer();
@@ -174,12 +173,12 @@ public class DetectionTask extends AsyncTask {
                         final LocalPlayer lp = this.plugin.getWorldGuardPlugin().wrapPlayer(p);
                         if (!WGCustomFlagsUtils
                                 .validateFlag(this.plugin.getWorldGuardPlugin(), loc, this.plugin.FLAG_PILOT, lp)) {
-                            this.fail(String.format(this.i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d", x, y, z));
+                            this.fail(String.format(this.i18n.get("WGCustomFlags - Detection Failed") + " @ %d,%d,%d", vec.x(), vec.y(), vec.z()));
                         }
                     }
                 }
 
-                this.addToBlockList(workingLocation);
+                this.addToBlockList(vec);
                 for (final MaterialDataPredicate flyBlockDef : this.dFlyBlocks.keySet()) {
                     if (flyBlockDef.checkBlock(testBlock)) {
                         this.addToBlockCount(flyBlockDef);
@@ -188,11 +187,9 @@ public class DetectionTask extends AsyncTask {
                     }
                 }
 
-                if (this.isWithinLimit(this.blockList.size(), new IntRange(0, this.sizeRange.max), true)) {
-
-                    this.addToDetectionStack(workingLocation);
-
-                    this.calculateBounds(workingLocation);
+                if (this.isWithinLimit(this.blockList.size(), new IntRange(0, this.sizeRange.max()), true)) {
+                    this.addToDetectionStack(vec);
+                    this.calculateBounds(vec);
                 }
             }
         }
@@ -233,55 +230,51 @@ public class DetectionTask extends AsyncTask {
     }
 
     private void detectSurrounding(final BlockVec l) {
-        final int x = l.x;
-        final int y = l.y;
-        final int z = l.z;
-
         for (int xMod = -1; xMod < 2; xMod += 2) {
             for (int yMod = -1; yMod < 2; yMod++) {
-                this.detectBlock(x + xMod, y + yMod, z);
+                this.detectBlock(l.translate(xMod, yMod, 0));
             }
         }
 
         for (int zMod = -1; zMod < 2; zMod += 2) {
             for (int yMod = -1; yMod < 2; yMod++) {
-                this.detectBlock(x, y + yMod, z + zMod);
+                this.detectBlock(l.translate(0, yMod, zMod));
             }
         }
 
         for (int yMod = -1; yMod < 2; yMod += 2) {
-            this.detectBlock(x, y + yMod, z);
+            this.detectBlock(l.translate(0, yMod, 0));
         }
     }
 
     private void calculateBounds(final BlockVec l) {
-        if (this.maxX == null || l.x > this.maxX) {
-            this.maxX = l.x;
+        if (this.maxX == null || l.x() > this.maxX) {
+            this.maxX = l.x();
         }
-        if (this.maxY == null || l.y > this.maxY) {
-            this.maxY = l.y;
+        if (this.maxY == null || l.y() > this.maxY) {
+            this.maxY = l.y();
         }
-        if (this.maxZ == null || l.z > this.maxZ) {
-            this.maxZ = l.z;
+        if (this.maxZ == null || l.z() > this.maxZ) {
+            this.maxZ = l.z();
         }
-        if (this.data.getMinX() == null || l.x < this.data.getMinX()) {
-            this.data.setMinX(l.x);
+        if (this.data.getMinX() == null || l.x() < this.data.getMinX()) {
+            this.data.setMinX(l.x());
         }
-        if (this.minY == null || l.y < this.minY) {
-            this.minY = l.y;
+        if (this.minY == null || l.y() < this.minY) {
+            this.minY = l.y();
         }
-        if (this.data.getMinZ() == null || l.z < this.data.getMinZ()) {
-            this.data.setMinZ(l.z);
+        if (this.data.getMinZ() == null || l.z() < this.data.getMinZ()) {
+            this.data.setMinZ(l.z());
         }
     }
 
     private boolean isWithinLimit(final int size, final IntRange sizeRange, final boolean continueOver) {
-        if (size < sizeRange.min) {
-            this.fail(String.format(this.i18n.get("Detection - Craft too small"), sizeRange.min) +
+        if (size < sizeRange.min()) {
+            this.fail(String.format(this.i18n.get("Detection - Craft too small"), sizeRange.min()) +
                       String.format("\nBlocks found: %d", size));
             return false;
-        } else if ((!continueOver && size > sizeRange.max) || (continueOver && size > (sizeRange.max + 1000))) {
-            this.fail(String.format(this.i18n.get("Detection - Craft too large"), sizeRange.max) +
+        } else if ((!continueOver && size > sizeRange.max()) || (continueOver && size > (sizeRange.max() + 1000))) {
+            this.fail(String.format(this.i18n.get("Detection - Craft too large"), sizeRange.max()) +
                       String.format("\nBlocks found: %d", size));
             return false;
         } else {

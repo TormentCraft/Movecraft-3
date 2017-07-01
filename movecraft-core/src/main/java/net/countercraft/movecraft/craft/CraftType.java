@@ -20,7 +20,7 @@ package net.countercraft.movecraft.craft;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.countercraft.movecraft.api.IntRange;
+import com.alexknvl.shipcraft.math.IntRange;
 import net.countercraft.movecraft.api.MaterialDataPredicate;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;

@@ -17,8 +17,8 @@
 
 package net.countercraft.movecraft.utils;
 
+import com.alexknvl.shipcraft.math.RotationXZ;
 import com.google.common.collect.Sets;
-import net.countercraft.movecraft.api.Rotation;
 import org.bukkit.Material;
 
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public final class BlockUtils {
         return false;
     }
 
-    public static byte rotate(byte data, int typeID, Rotation rotation) {
+    public static byte rotate(byte data, int typeID, RotationXZ rotation) {
         switch (typeID) {
             case 17:
             case 170:
@@ -92,7 +92,7 @@ public final class BlockUtils {
                 if (!nonDirectional) {
                     switch (data) {
                         case 0x1:
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 data = 0x3;
                             } else {
                                 data = 0x4;
@@ -100,7 +100,7 @@ public final class BlockUtils {
                             break;
 
                         case 0x2:
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 data = 0x4;
                             } else {
                                 data = 0x3;
@@ -108,7 +108,7 @@ public final class BlockUtils {
                             break;
 
                         case 0x3:
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 data = 0x02;
                             } else {
                                 data = 0x1;
@@ -116,7 +116,7 @@ public final class BlockUtils {
                             break;
 
                         case 0x4:
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 data = 0x1;
                             } else {
                                 data = 0x2;
@@ -135,7 +135,7 @@ public final class BlockUtils {
 
                 byte constant = 1;
 
-                if (rotation == Rotation.ANTICLOCKWISE) {
+                if (rotation == RotationXZ.CCW$.MODULE$) {
                     constant = -1;
                 }
 
@@ -155,7 +155,7 @@ public final class BlockUtils {
                     switch (direction) {
                         case 0x2:
                             // North
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x5;
                             } else {
                                 direction = 0x4;
@@ -164,7 +164,7 @@ public final class BlockUtils {
 
                         case 0x3:
                             // South
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x4;
                             } else {
                                 direction = 0x5;
@@ -173,7 +173,7 @@ public final class BlockUtils {
 
                         case 0x4:
                             // West
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x2;
                             } else {
                                 direction = 0x3;
@@ -182,7 +182,7 @@ public final class BlockUtils {
 
                         case 0x5:
                             //East
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x3;
                             } else {
                                 direction = 0x2;
@@ -214,7 +214,7 @@ public final class BlockUtils {
                 switch (direction) {
                     case 0x0:
                         // East
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x2;
                         } else {
                             direction = 0x3;
@@ -223,7 +223,7 @@ public final class BlockUtils {
 
                     case 0x1:
                         // West
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x3;
                         } else {
                             direction = 0x2;
@@ -232,7 +232,7 @@ public final class BlockUtils {
 
                     case 0x2:
                         // South
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x1;
                         } else {
                             direction = 0x0;
@@ -241,7 +241,7 @@ public final class BlockUtils {
 
                     case 0x3:
                         // North
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x0;
                         } else {
                             direction = 0x1;
@@ -255,7 +255,7 @@ public final class BlockUtils {
 
                 constant = 4;
 
-                if (rotation == Rotation.ANTICLOCKWISE) {
+                if (rotation == RotationXZ.CCW$.MODULE$) {
                     constant = -4;
                 }
 
@@ -275,7 +275,7 @@ public final class BlockUtils {
                 if (isRealDoor) {
                     direction = (byte) (data & 0x3);
                     int newDirection;
-                    if (rotation == Rotation.CLOCKWISE) newDirection = direction + 1;
+                    if (rotation == RotationXZ.CW$.MODULE$) newDirection = direction + 1;
                     else newDirection = direction - 1;
                     if (newDirection == 4) newDirection = 0;
                     if (newDirection == -1) newDirection = 3;
@@ -293,7 +293,7 @@ public final class BlockUtils {
 
                     constant = 1;
 
-                    if (rotation == Rotation.ANTICLOCKWISE) {
+                    if (rotation == RotationXZ.CCW$.MODULE$) {
                         constant = -1;
                     }
 
@@ -306,7 +306,7 @@ public final class BlockUtils {
                         // Is a corner piece
                         constant = 1;
 
-                        if (rotation == Rotation.ANTICLOCKWISE) {
+                        if (rotation == RotationXZ.CCW$.MODULE$) {
                             constant = -1;
                         }
 
@@ -318,7 +318,7 @@ public final class BlockUtils {
                         switch (direction) {
                             case 0x2:
                                 // East
-                                if (rotation == Rotation.CLOCKWISE) {
+                                if (rotation == RotationXZ.CW$.MODULE$) {
                                     direction = 0x4;
                                 } else {
                                     direction = 0x5;
@@ -327,7 +327,7 @@ public final class BlockUtils {
 
                             case 0x3:
                                 // West
-                                if (rotation == Rotation.CLOCKWISE) {
+                                if (rotation == RotationXZ.CW$.MODULE$) {
                                     direction = 0x5;
                                 } else {
                                     direction = 0x4;
@@ -336,7 +336,7 @@ public final class BlockUtils {
 
                             case 0x4:
                                 // South
-                                if (rotation == Rotation.CLOCKWISE) {
+                                if (rotation == RotationXZ.CW$.MODULE$) {
                                     direction = 0x3;
                                 } else {
                                     direction = 0x2;
@@ -345,7 +345,7 @@ public final class BlockUtils {
 
                             case 0x5:
                                 // North
-                                if (rotation == Rotation.CLOCKWISE) {
+                                if (rotation == RotationXZ.CW$.MODULE$) {
                                     direction = 0x2;
                                 } else {
                                     direction = 0x3;
@@ -369,7 +369,7 @@ public final class BlockUtils {
 
                     constant = 1;
 
-                    if (rotation == Rotation.ANTICLOCKWISE) {
+                    if (rotation == RotationXZ.CCW$.MODULE$) {
                         constant = -1;
                     }
 
@@ -382,7 +382,7 @@ public final class BlockUtils {
                     switch (direction) {
                         case 0x2:
                             // East
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x4;
                             } else {
                                 direction = 0x5;
@@ -391,7 +391,7 @@ public final class BlockUtils {
 
                         case 0x3:
                             // West
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x5;
                             } else {
                                 direction = 0x4;
@@ -400,7 +400,7 @@ public final class BlockUtils {
 
                         case 0x4:
                             // South
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x3;
                             } else {
                                 direction = 0x2;
@@ -409,7 +409,7 @@ public final class BlockUtils {
 
                         case 0x5:
                             // North
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x2;
                             } else {
                                 direction = 0x3;
@@ -438,7 +438,7 @@ public final class BlockUtils {
                 switch (direction) {
                     case 0x5:
                         // East
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x3;
                         } else {
                             direction = 0x2;
@@ -447,7 +447,7 @@ public final class BlockUtils {
 
                     case 0x4:
                         // West
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x2;
                         } else {
                             direction = 0x3;
@@ -456,7 +456,7 @@ public final class BlockUtils {
 
                     case 0x3:
                         // South
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x4;
                         } else {
                             direction = 0x5;
@@ -465,7 +465,7 @@ public final class BlockUtils {
 
                     case 0x2:
                         // North
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x5;
                         } else {
                             direction = 0x4;
@@ -483,7 +483,7 @@ public final class BlockUtils {
                     switch (direction) {
                         case 0x1:
                             // East
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x3;
                             } else {
                                 direction = 0x4;
@@ -492,7 +492,7 @@ public final class BlockUtils {
 
                         case 0x2:
                             // West
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x4;
                             } else {
                                 direction = 0x3;
@@ -501,7 +501,7 @@ public final class BlockUtils {
 
                         case 0x3:
                             // South
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x2;
                             } else {
                                 direction = 0x1;
@@ -510,7 +510,7 @@ public final class BlockUtils {
 
                         case 0x4:
                             // North
-                            if (rotation == Rotation.CLOCKWISE) {
+                            if (rotation == RotationXZ.CW$.MODULE$) {
                                 direction = 0x1;
                             } else {
                                 direction = 0x2;
@@ -539,7 +539,7 @@ public final class BlockUtils {
                 switch (direction) {
                     case 0x1:
                         // East
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x3;
                         } else {
                             direction = 0x4;
@@ -548,7 +548,7 @@ public final class BlockUtils {
 
                     case 0x2:
                         // West
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x4;
                         } else {
                             direction = 0x3;
@@ -557,7 +557,7 @@ public final class BlockUtils {
 
                     case 0x3:
                         // South
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x2;
                         } else {
                             direction = 0x1;
@@ -566,7 +566,7 @@ public final class BlockUtils {
 
                     case 0x4:
                         // North
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x1;
                         } else {
                             direction = 0x2;
@@ -587,7 +587,7 @@ public final class BlockUtils {
                 } else {
                     constant = 1;
 
-                    if (rotation == Rotation.ANTICLOCKWISE) {
+                    if (rotation == RotationXZ.CCW$.MODULE$) {
                         constant = -1;
                     }
 
@@ -604,7 +604,7 @@ public final class BlockUtils {
 
                 constant = 1;
 
-                if (rotation == Rotation.ANTICLOCKWISE) {
+                if (rotation == RotationXZ.CCW$.MODULE$) {
                     constant = -1;
                 }
 
@@ -620,7 +620,7 @@ public final class BlockUtils {
                 switch (direction) {
                     case 0x2:
                         // East
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x0;
                         } else {
                             direction = 0x1;
@@ -629,7 +629,7 @@ public final class BlockUtils {
 
                     case 0x3:
                         // West
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x1;
                         } else {
                             direction = 0x0;
@@ -638,7 +638,7 @@ public final class BlockUtils {
 
                     case 0x0:
                         // South
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x3;
                         } else {
                             direction = 0x2;
@@ -647,7 +647,7 @@ public final class BlockUtils {
 
                     case 0x1:
                         // North
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x2;
                         } else {
                             direction = 0x3;
@@ -662,7 +662,7 @@ public final class BlockUtils {
                 if (data == 0x0) {
                     return data;
                 } else {
-                    if (rotation == Rotation.CLOCKWISE) {
+                    if (rotation == RotationXZ.CW$.MODULE$) {
                         data = (byte) (data << 1);
                     } else {
                         data = (byte) (data >> 1);
@@ -688,7 +688,7 @@ public final class BlockUtils {
 
                 constant = 1;
 
-                if (rotation == Rotation.ANTICLOCKWISE) {
+                if (rotation == RotationXZ.CCW$.MODULE$) {
                     constant = -1;
                 }
 
@@ -703,7 +703,7 @@ public final class BlockUtils {
 
                 constant = 1;
 
-                if (rotation == Rotation.ANTICLOCKWISE) {
+                if (rotation == RotationXZ.CCW$.MODULE$) {
                     constant = -1;
                 }
 
@@ -720,7 +720,7 @@ public final class BlockUtils {
                         return data;
                     case 0x4:
                         // East
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x3;
                         } else {
                             direction = 0x2;
@@ -729,7 +729,7 @@ public final class BlockUtils {
 
                     case 0x5:
                         // West
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x2;
                         } else {
                             direction = 0x3;
@@ -738,7 +738,7 @@ public final class BlockUtils {
 
                     case 0x3:
                         // South
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x5;
                         } else {
                             direction = 0x4;
@@ -747,7 +747,7 @@ public final class BlockUtils {
 
                     case 0x2:
                         // North
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x4;
                         } else {
                             direction = 0x5;
@@ -761,7 +761,7 @@ public final class BlockUtils {
                 direction = (byte) (data & 0x1);
                 constant = 1;
 
-                if (rotation == Rotation.ANTICLOCKWISE) {
+                if (rotation == RotationXZ.CCW$.MODULE$) {
                     constant = -1;
                 }
 
@@ -783,7 +783,7 @@ public final class BlockUtils {
                         return data;
                     case 0x2:
                         //North
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x6;
                         } else {
                             direction = 0x4;
@@ -791,7 +791,7 @@ public final class BlockUtils {
                         break;
                     case 0x4:
                         //East
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x2;
                         } else {
                             direction = 0x8;
@@ -799,7 +799,7 @@ public final class BlockUtils {
                         break;
                     case 0x6:
                         //West
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x8;
                         } else {
                             direction = 0x2;
@@ -807,7 +807,7 @@ public final class BlockUtils {
                         break;
                     case 0x8:
                         //South
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x4;
                         } else {
                             direction = 0x6;
@@ -815,7 +815,7 @@ public final class BlockUtils {
                         break;
                     case 0x1:
                         //North and West
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x3;
                         } else {
                             direction = 0x7;
@@ -823,7 +823,7 @@ public final class BlockUtils {
                         break;
                     case 0x3:
                         //North and East
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x9;
                         } else {
                             direction = 0x1;
@@ -831,7 +831,7 @@ public final class BlockUtils {
                         break;
                     case 0x7:
                         //South and West
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x1;
                         } else {
                             direction = 0x9;
@@ -839,7 +839,7 @@ public final class BlockUtils {
                         break;
                     case 0x9:
                         //South and East
-                        if (rotation == Rotation.CLOCKWISE) {
+                        if (rotation == RotationXZ.CW$.MODULE$) {
                             direction = 0x7;
                         } else {
                             direction = 0x3;

@@ -17,7 +17,8 @@
 
 package net.countercraft.movecraft.listener;
 
-import net.countercraft.movecraft.api.BlockVec;
+import com.alexknvl.shipcraft.math.BlockVec;
+import com.alexknvl.shipcraft.math.BlockVec$;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
@@ -64,15 +65,15 @@ public class PlayerListener implements Listener {
                         if (x == 0 && y == 0 && z == 0) continue;
                         if (z != 0 && x != 0) continue;
 
-                        final BlockVec test = new BlockVec(block.x + x, block.y + y, block.z + z);
+                        final BlockVec test = block.translate(x, y, z);
                         if (!craftBlocks.contains(test)) {
-                            final Block testBlock = craft.getWorld().getBlockAt(block.x + x, block.y + y, block.z + z);
+                            final Block testBlock = craft.getWorld().getBlockAt(test.x(), test.y(), test.z());
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||
                                 craft.getType().isForbiddenBlock(testBlock.getTypeId(), testBlock.getData())) {
 
                                 return String
                                         .format("%s at (%d,%d,%d)", BlockNames.itemName(testBlock.getState().getData()),
-                                                test.x, test.y, test.z);
+                                                test.x(), test.y(), test.z());
                             }
                         }
                     }
@@ -115,7 +116,7 @@ public class PlayerListener implements Listener {
         if (craft != null) {
             if (craft.isNotProcessing() && (!MathUtils
                     .playerIsWithinBoundingPolygon(craft.getHitBox(), craft.getMinX(), craft.getMinZ(),
-                                                   MathUtils.bukkit2MovecraftLoc(player.getLocation())))) {
+                                                   BlockVec$.MODULE$.from(player.getLocation())))) {
 
                 if (!this.craftManager.getReleaseEvents().containsKey(player) && craft.getType().getMoveEntities()) {
                     if (this.settings.ManOverBoardTimeout == 0)

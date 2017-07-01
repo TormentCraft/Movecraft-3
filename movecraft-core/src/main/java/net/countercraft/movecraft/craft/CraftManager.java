@@ -17,8 +17,8 @@
 
 package net.countercraft.movecraft.craft;
 
+import com.alexknvl.shipcraft.math.BlockVec;
 import com.google.common.collect.Sets;
-import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import org.bukkit.ChatColor;
@@ -183,9 +183,9 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
 
         final Set<BlockVec> craftBlocks = Sets.newHashSet(craft.getBlockList());
         for (final BlockVec block : craftBlocks) {
-            final BlockVec test = new BlockVec(block.x, block.y + 1, block.z);
+            final BlockVec test = block.translate(0, 1, 0);
             if (!craftBlocks.contains(test)) {
-                final Block testBlock = craft.getWorld().getBlockAt(test.x, test.y, test.z);
+                final Block testBlock = craft.getWorld().getBlockAt(test.x(), test.y(), test.z());
 
                 if (testBlock.getType() == Material.SNOW && testBlock.getData() == 0) {
                     final Collection<ItemStack> drops = testBlock.getDrops(new ItemStack(Material.WOOD_SPADE, 1, (short) 5));
@@ -213,13 +213,13 @@ public final class CraftManager implements net.countercraft.movecraft.api.CraftM
                         if (z != 0 && x != 0) continue;
                         if (x == 0 && y == 0 && z == 0) continue;
 
-                        final BlockVec test = new BlockVec(block.x + x, block.y + y, block.z + z);
+                        final BlockVec test = block.translate(x, y, z);
                         if (!craftBlocks.contains(test)) {
-                            Block testBlock = craft.getWorld().getBlockAt(test.x, test.y, test.z);
+                            Block testBlock = craft.getWorld().getBlockAt(test.x(), test.y(), test.z());
                             if (craft.getType().isAllowedBlock(testBlock.getTypeId(), testBlock.getData()) ||
                                 craft.getType().isForbiddenBlock(testBlock.getTypeId(), testBlock.getData())) {
 
-                                testBlock = craft.getWorld().getBlockAt(block.x, block.y, block.z);
+                                testBlock = craft.getWorld().getBlockAt(block.x(), block.y(), block.z());
                                 if (!this.canPilotBreakBlock(pilot, testBlock)) {
                                     blockedBroken++;
                                     final Collection<ItemStack> drops = testBlock.getDrops();

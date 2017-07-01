@@ -18,11 +18,11 @@
 package net.countercraft.movecraft;
 
 import at.pavlov.cannons.Cannons;
+import com.alexknvl.shipcraft.math.BlockVec;
 import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.StateFlag;
-import net.countercraft.movecraft.api.BlockVec;
 import net.countercraft.movecraft.api.MovecraftPlugin;
 import net.countercraft.movecraft.async.AsyncManager;
 import net.countercraft.movecraft.config.Settings;

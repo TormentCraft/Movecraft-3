@@ -17,8 +17,8 @@
 
 package net.countercraft.movecraft.craft;
 
-import net.countercraft.movecraft.api.BlockVec;
-import net.countercraft.movecraft.api.Direction;
+import com.alexknvl.shipcraft.math.BlockVec;
+import com.alexknvl.shipcraft.math.Direction;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
@@ -103,9 +103,9 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
 
     public void resetSigns(final boolean resetCruise, final boolean resetAscend, final boolean resetDescend) {
         for (final BlockVec location : this.blockList) {
-            final int blockID = this.world.getBlockAt(location.x, location.y, location.z).getTypeId();
+            final int blockID = this.world.getBlockAt(location.x(), location.y(), location.z()).getTypeId();
             if (blockID == 63 || blockID == 68) {
-                final Sign s = (Sign) this.world.getBlockAt(location.x, location.y, location.z).getState();
+                final Sign s = (Sign) this.world.getBlockAt(location.x(), location.y(), location.z()).getState();
                 if (resetCruise) if (ChatColor.stripColor(s.getLine(0)).equals("Cruise: ON")) {
                     s.setLine(0, "Cruise: OFF");
                     s.update(true);
@@ -184,12 +184,12 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
 
     public boolean isCraftBlock(final BlockVec mloc) {
 
-        if (mloc.x < getMinX() || mloc.x > getMaxX()) return false;
-        if (mloc.z < getMinZ() || mloc.z > getMaxZ()) return false;
-        if (mloc.y < getMinY() || mloc.y > getMaxY()) return false;
+        if (mloc.x() < getMinX() || mloc.x() > getMaxX()) return false;
+        if (mloc.z() < getMinZ() || mloc.z() > getMaxZ()) return false;
+        if (mloc.y() < getMinY() || mloc.y() > getMaxY()) return false;
 
         for (final BlockVec loc : getBlockList()) {
-            if (loc.x == mloc.x && loc.y == mloc.y && loc.z == mloc.z) return true;
+            if (loc.equals(mloc)) return true;
         }
         return false;
     }
