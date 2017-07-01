@@ -988,92 +988,6 @@ public final class AsyncManager extends BukkitRunnable {
         }
     }
 
-    public void processDetection() {
-        final long ticksElapsed = (System.currentTimeMillis() - this.lastContactCheck) / 50;
-        if (ticksElapsed > 21) {
-            for (final World w : Bukkit.getWorlds()) {
-                for (final Craft ccraft : this.craftManager.getCraftsInWorld(w)) {
-                    if (this.craftManager.getPlayerFromCraft(ccraft) != null) {
-                        if (!this.recentContactTracking.containsKey(ccraft)) {
-                            this.recentContactTracking.put(ccraft, new HashMap<Craft, Long>());
-                        }
-                        for (final Craft tcraft : this.craftManager.getCraftsInWorld(w)) {
-                            long cposx = ccraft.getMaxX() + ccraft.getMinX();
-                            long cposy = ccraft.getMaxY() + ccraft.getMinY();
-                            long cposz = ccraft.getMaxZ() + ccraft.getMinZ();
-                            cposx = cposx >> 1;
-                            cposy = cposy >> 1;
-                            cposz = cposz >> 1;
-                            long tposx = tcraft.getMaxX() + tcraft.getMinX();
-                            long tposy = tcraft.getMaxY() + tcraft.getMinY();
-                            long tposz = tcraft.getMaxZ() + tcraft.getMinZ();
-                            tposx = tposx >> 1;
-                            tposy = tposy >> 1;
-                            tposz = tposz >> 1;
-                            final long diffx = cposx - tposx;
-                            final long diffy = cposy - tposy;
-                            final long diffz = cposz - tposz;
-                            long distsquared = Math.abs(diffx) * Math.abs(diffx);
-                            distsquared += Math.abs(diffy) * Math.abs(diffy);
-                            distsquared += Math.abs(diffz) * Math.abs(diffz);
-                            long detectionRange = 0;
-                            if (tposy > 65) {
-                                detectionRange = (long) (Math.sqrt(tcraft.getOrigBlockCount()) *
-                                                         tcraft.getType().getDetectionMultiplier());
-                            } else {
-                                detectionRange = (long) (Math.sqrt(tcraft.getOrigBlockCount()) *
-                                                         tcraft.getType().getUnderwaterDetectionMultiplier());
-                            }
-                            if (distsquared < detectionRange * detectionRange &&
-                                tcraft.getNotificationPlayer() != ccraft.getNotificationPlayer()) {
-                                // craft has been detected
-
-                                // has the craft not been seen in the last minute, or is completely new?
-                                if (this.recentContactTracking.get(ccraft).get(tcraft) == null ||
-                                    System.currentTimeMillis() - this.recentContactTracking.get(ccraft).get(tcraft) >
-                                    60000) {
-                                    String notification = "New contact: ";
-                                    notification += tcraft.getType().getCraftName();
-                                    notification += " commanded by ";
-                                    if (tcraft.getNotificationPlayer() != null) {
-                                        notification += tcraft.getNotificationPlayer().getDisplayName();
-                                    } else {
-                                        notification += "NULL";
-                                    }
-                                    notification += ", size: ";
-                                    notification += tcraft.getOrigBlockCount();
-                                    notification += ", range: ";
-                                    notification += (int) Math.sqrt(distsquared);
-                                    notification += " to the";
-                                    if (Math.abs(diffx) > Math.abs(diffz)) if (diffx < 0) notification += " east.";
-                                    else notification += " west.";
-                                    else if (diffz < 0) notification += " south.";
-                                    else notification += " north.";
-
-                                    ccraft.getNotificationPlayer().sendMessage(notification);
-                                    w.playSound(ccraft.getNotificationPlayer().getLocation(),
-                                                Sound.BLOCK_ANVIL_LAND, 1.0f, 2.0f);
-                                    final World sw = w;
-                                    final Player sp = ccraft.getNotificationPlayer();
-                                    final BukkitTask replaysound = new BukkitRunnable() {
-                                        @Override public void run() {
-                                            sw.playSound(sp.getLocation(), Sound.BLOCK_ANVIL_LAND, 10.0f, 2.0f);
-                                        }
-                                    }.runTaskLater(this.plugin, (5));
-                                }
-
-                                final long timestamp = System.currentTimeMillis();
-                                this.recentContactTracking.get(ccraft).put(tcraft, timestamp);
-                            }
-                        }
-                    }
-                }
-            }
-
-            this.lastContactCheck = System.currentTimeMillis();
-        }
-    }
-
     @Override public void run() {
         this.clearAll();
         this.processCruise();
@@ -1082,7 +996,6 @@ public final class AsyncManager extends BukkitRunnable {
         this.processFireballs();
         this.processTNTContactExplosives();
         this.processFadingBlocks();
-        this.processDetection();
         this.processAlgorithmQueue();
     }
 

@@ -295,56 +295,6 @@ public class CommandListener implements CommandExecutor {
             }
         }
 
-        if (name.equalsIgnoreCase("contacts")) {
-            if (playerCraft == null)
-                throw new CommandRequiresPilotedCraftException();
-
-            boolean foundContact = false;
-            for (final Craft tcraft : this.craftManager.getCraftsInWorld(playerCraft.getWorld())) {
-                final long cposx = (playerCraft.getMaxX() + playerCraft.getMinX()) / 2;
-                final long cposy = (playerCraft.getMaxY() + playerCraft.getMinY()) / 2;
-                final long cposz = (playerCraft.getMaxZ() + playerCraft.getMinZ()) / 2;
-
-                final long tposx = (tcraft.getMaxX() + tcraft.getMinX()) / 2;
-                final long tposy = (tcraft.getMaxY() + tcraft.getMinY()) / 2;
-                final long tposz = (tcraft.getMaxZ() + tcraft.getMinZ()) / 2;
-
-                final long detectionRange;
-                if (tposy > 65) {
-                    detectionRange = (long) (Math.sqrt(tcraft.getOrigBlockCount()) *
-                                             tcraft.getType().getDetectionMultiplier());
-                } else {
-                    detectionRange = (long) (Math.sqrt(tcraft.getOrigBlockCount()) *
-                                             tcraft.getType().getUnderwaterDetectionMultiplier());
-                }
-
-                final long dx = cposx - tposx;
-                final long dy = cposy - tposy;
-                final long dz = cposz - tposz;
-                final long dr = dx * dx + dy * dy + dz * dz;
-                if (dr < detectionRange * detectionRange &&
-                    tcraft.getNotificationPlayer() != playerCraft.getNotificationPlayer()) {
-                    // craft has been detected
-                    foundContact = true;
-
-                    final String direction;
-                    if (Math.abs(dx) > Math.abs(dz)) {
-                        if (dx < 0) direction = "east";
-                        else direction = "west";
-                    } else if (dz < 0) {
-                        direction = "south";
-                    } else direction = "north";
-
-                    final String notification = MessageFormat
-                            .format("Contact: {0} commanded by {1}, size: {2}, range: {3} to the {4}.",
-                                    tcraft.getType().getCraftName(), tcraft.getNotificationPlayer().getDisplayName(),
-                                    tcraft.getOrigBlockCount(), Math.sqrt(dr), direction);
-                    playerCraft.getNotificationPlayer().sendMessage(notification);
-                }
-            }
-            if (!foundContact) player.sendMessage(this.i18n.get("No contacts within range"));
-        }
-
         if (name.equalsIgnoreCase("manOverBoard")) {
             if (playerCraft != null) {
                 final Location telPoint = CommandListener.getCraftTeleportPoint(playerCraft, playerCraft.getWorld());
