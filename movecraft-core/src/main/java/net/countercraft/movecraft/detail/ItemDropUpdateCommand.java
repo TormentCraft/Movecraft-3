@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.countercraft.movecraft.utils;
+package net.countercraft.movecraft.detail;
 
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;

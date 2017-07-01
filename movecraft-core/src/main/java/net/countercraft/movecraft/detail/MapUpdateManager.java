@@ -15,7 +15,7 @@
  *     along with Movecraft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.countercraft.movecraft.utils;
+package net.countercraft.movecraft.detail;
 
 import com.alexknvl.shipcraft.math.BlockVec;
 import com.alexknvl.shipcraft.math.RotationXZ;
@@ -27,10 +27,11 @@ import net.countercraft.movecraft.Movecraft;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.localisation.I18nSupport;
-import net.countercraft.movecraft.utils.datastructures.CommandBlockTransferHolder;
-import net.countercraft.movecraft.utils.datastructures.InventoryTransferHolder;
-import net.countercraft.movecraft.utils.datastructures.SignTransferHolder;
-import net.countercraft.movecraft.utils.datastructures.TransferData;
+import net.countercraft.movecraft.utils.BlockUtils;
+import net.countercraft.movecraft.detail.datastructures.CommandBlockTransferHolder;
+import net.countercraft.movecraft.detail.datastructures.InventoryTransferHolder;
+import net.countercraft.movecraft.detail.datastructures.SignTransferHolder;
+import net.countercraft.movecraft.detail.datastructures.TransferData;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;

@@ -15,7 +15,7 @@
  *     along with Movecraft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.countercraft.movecraft.utils.datastructures;
+package net.countercraft.movecraft.detail.datastructures;
 
 public class CommandBlockTransferHolder extends TransferData {
     public final String commandText;

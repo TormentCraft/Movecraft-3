@@ -15,15 +15,12 @@
  *     along with Movecraft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.countercraft.movecraft.utils.datastructures;
+package net.countercraft.movecraft.detail.datastructures;
 
-import org.bukkit.inventory.ItemStack;
+public class TransferData {
+    public final byte data;
 
-public class InventoryTransferHolder extends TransferData {
-    public final ItemStack[] inventory;
-
-    public InventoryTransferHolder(final byte data, final ItemStack[] inventory) {
-        super(data);
-        this.inventory = inventory;
+    public TransferData(final byte data) {
+        this.data = data;
     }
 }

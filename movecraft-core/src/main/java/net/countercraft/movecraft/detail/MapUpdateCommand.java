@@ -15,7 +15,7 @@
  *     along with Movecraft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.countercraft.movecraft.utils;
+package net.countercraft.movecraft.detail;
 
 import com.alexknvl.shipcraft.math.BlockVec;
 import com.alexknvl.shipcraft.math.RotationXZ;

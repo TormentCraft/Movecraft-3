@@ -19,9 +19,9 @@ package net.countercraft.movecraft.async.translation;
 
 import com.alexknvl.shipcraft.math.BlockVec;
 import com.alexknvl.shipcraft.math.IntRange;
-import net.countercraft.movecraft.utils.EntityUpdateCommand;
-import net.countercraft.movecraft.utils.ItemDropUpdateCommand;
-import net.countercraft.movecraft.utils.MapUpdateCommand;
+import net.countercraft.movecraft.detail.EntityUpdateCommand;
+import net.countercraft.movecraft.detail.ItemDropUpdateCommand;
+import net.countercraft.movecraft.detail.MapUpdateCommand;
 
 public class TranslationTaskData {
     private final int dx;

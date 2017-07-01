@@ -15,27 +15,13 @@
  *     along with Movecraft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.countercraft.movecraft.utils;
+package net.countercraft.movecraft.detail.datastructures;
 
-import org.bukkit.Location;
-import org.bukkit.entity.Entity;
+public class SignTransferHolder extends TransferData {
+    public final String[] lines;
 
-import javax.annotation.Nullable;
-
-/**
- * Class that stores the data about a single blocks changes to the map in an unspecified world. The world is
- * retrieved contextually from the submitting craft.
- */
-public class EntityUpdateCommand {
-    @Nullable
-    public final Location location;
-    public final Location newLocation;
-    public final Entity entity;
-
-    public EntityUpdateCommand(final Location blockLocation, final Location newLocation, final Entity entity) {
-        this.location = blockLocation;
-        this.newLocation = newLocation;
-        this.entity = entity;
+    public SignTransferHolder(final byte data, final String[] lines) {
+        super(data);
+        this.lines = lines;
     }
 }
-
