@@ -15,13 +15,15 @@
  *     along with Movecraft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.countercraft.movecraft.detail.datastructures;
+package net.countercraft.movecraft.detail;
 
-public class SignTransferHolder extends TransferData {
-    public final String[] lines;
+public class CommandBlockTransferHolder extends TransferData {
+    public final String commandText;
+    public final String commandName;
 
-    public SignTransferHolder(final byte data, final String[] lines) {
+    public CommandBlockTransferHolder(final byte data, final String commandText, final String commandName) {
         super(data);
-        this.lines = lines;
+        this.commandText = commandText;
+        this.commandName = commandName;
     }
 }

@@ -15,7 +15,7 @@
  *     along with Movecraft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.countercraft.movecraft.detail.datastructures;
+package net.countercraft.movecraft.detail;
 
 public class TransferData {
     public final byte data;

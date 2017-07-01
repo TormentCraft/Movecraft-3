@@ -23,15 +23,12 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.SignBlock;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
-import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.config.Settings;
+//import net.countercraft.movecraft.Movecraft;
+//import net.countercraft.movecraft.config.Settings;
+//import net.countercraft.movecraft.craft.Craft;
+//import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.craft.Craft;
-import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockUtils;
-import net.countercraft.movecraft.detail.datastructures.CommandBlockTransferHolder;
-import net.countercraft.movecraft.detail.datastructures.InventoryTransferHolder;
-import net.countercraft.movecraft.detail.datastructures.SignTransferHolder;
-import net.countercraft.movecraft.detail.datastructures.TransferData;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
@@ -47,6 +44,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -60,19 +58,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class MapUpdateManager extends BukkitRunnable {
-    private final Settings settings;
-    private final I18nSupport i18n;
-    private final Movecraft plugin;
+    private static final boolean DEBUG = false;
+    private static final Logger LOGGER = Logger.getLogger(MapUpdateManager.class.getSimpleName());
+
     private final Map<World, ArrayList<MapUpdateCommand>> updates = new HashMap<>();
     private final Map<World, ArrayList<EntityUpdateCommand>> entityUpdates = new HashMap<>();
     private final Map<World, ArrayList<ItemDropUpdateCommand>> itemDropUpdates = new HashMap<>();
 
-    public MapUpdateManager(final Settings settings, final I18nSupport i18n, final Movecraft plugin) {
-        this.settings = settings;
-        this.i18n = i18n;
+    private final Plugin plugin;
+    private final boolean compatibilityMode;
+    private final int queueChunkSize;
+
+    public MapUpdateManager(final Plugin plugin, final boolean compatibilityMode, final int queueChunkSize) {
         this.plugin = plugin;
+        this.compatibilityMode = compatibilityMode;
+        this.queueChunkSize = queueChunkSize;
     }
 
     private void updateBlock(final MapUpdateCommand m, final World w, final Map<BlockVec, TransferData> dataMap,
@@ -96,7 +99,7 @@ public final class MapUpdateManager extends BukkitRunnable {
 
         net.minecraft.server.v1_12_R1.Chunk c = null;
         Chunk cmC = null;
-        if (this.settings.CompatibilityMode) {
+        if (this.compatibilityMode) {
             cmC = chunk;
         } else {
             c = ((CraftChunk) chunk).getHandle();
@@ -112,7 +115,7 @@ public final class MapUpdateManager extends BukkitRunnable {
         final int origType = w.getBlockAt(x, y, z).getTypeId();
         final byte origData = w.getBlockAt(x, y, z).getData();
 
-        if (this.settings.CompatibilityMode) {
+        if (this.compatibilityMode) {
 
             if (origType != newTypeID || origData != data) {
                 final boolean doBlankOut = (Arrays.binarySearch(blocksToBlankOut, newTypeID) >= 0);
@@ -273,17 +276,7 @@ Changed for 1.8, and quite possibly wrong:
                         for (int i = 0; i < signData.lines.length; i++) {
                             sign.setLine(i, signData.lines[i]);
                         }
-                        if (this.settings.AllowCrewSigns && signData.lines[0].equalsIgnoreCase("Crew:")) {
-                            final String crewName = signData.lines[1];
-                            final Player crewPlayer = this.plugin.getServer().getPlayer(crewName);
-                            if (crewPlayer != null) {
-                                Location loc = sign.getLocation();
-                                loc = loc.subtract(0, 1, 0);
-                                if (w.getBlockAt(loc).getType() == Material.BED_BLOCK) {
-                                    crewPlayer.setBedSpawnLocation(loc);
-                                }
-                            }
-                        }
+
                         for (final Player p : w
                                 .getPlayers()) { // this is necessary because signs do not get updated client side
                             // correctly without refreshing the chunks, which causes a memory leak in the clients
@@ -313,7 +306,7 @@ Changed for 1.8, and quite possibly wrong:
                 }
                 w.getBlockAt(entry.getKey().x(), entry.getKey().y(), entry.getKey().z()).setData(transferData.data);
             } catch (final IndexOutOfBoundsException | IllegalArgumentException e) {
-                this.plugin.getLogger().log(Level.SEVERE, "Severe error in map updater");
+                LOGGER.log(Level.SEVERE, "Severe error in map updater");
             }
         }
     }
@@ -326,7 +319,8 @@ Changed for 1.8, and quite possibly wrong:
                           final Map<BlockVec, List<EntityUpdateCommand>> entityMap)
     {
         int numToRun = queuedMapUpdateCommands.size();
-        if (numToRun > this.settings.BlockQueueChunkSize) numToRun = this.settings.BlockQueueChunkSize;
+        if (numToRun > this.queueChunkSize) numToRun = this.queueChunkSize;
+
         final long start = System.currentTimeMillis();
         for (int i = 0; i < numToRun; i++) {
             final MapUpdateCommand command = queuedMapUpdateCommands.get(0);
@@ -335,6 +329,7 @@ Changed for 1.8, and quite possibly wrong:
             queuedPlaceDispensers.remove(0);
         }
         final long end = System.currentTimeMillis();
+
         if (!queuedMapUpdateCommands.isEmpty()) {
             final BukkitTask nextQueueRun = new BukkitRunnable() {
                 @Override public void run() {
@@ -346,7 +341,7 @@ Changed for 1.8, and quite possibly wrong:
                         final StringWriter sw = new StringWriter();
                         final PrintWriter pw = new PrintWriter(sw);
                         e.printStackTrace(pw);
-                        MapUpdateManager.this.plugin.getLogger().log(Level.SEVERE, sw.toString());
+                        LOGGER.log(Level.SEVERE, sw.toString());
                     }
                 }
             }.runTaskLater(this.plugin, ((end - start) / 50));
@@ -361,7 +356,7 @@ Changed for 1.8, and quite possibly wrong:
                     if (craft != null) {
                         if (!craft.isNotProcessing()) {
                             craft.setProcessing(false);
-                            if (this.settings.Debug) {
+                            if (DEBUG) {
                                 final long finish = System.currentTimeMillis();
                                 this.plugin.getServer().broadcastMessage("Time from last cruise to update (ms): " +
                                                                          (finish - craft.getLastCruiseUpdate()));
@@ -371,7 +366,7 @@ Changed for 1.8, and quite possibly wrong:
                 }
             }
 
-            if (!this.settings.CompatibilityMode) {
+            if (!this.compatibilityMode) {
                 // send updates to client
                 for (final MapUpdateCommand command : updatesInWorld) {
                     final Location loc = command.newBlockLocation.toBukkitLocation(w);
@@ -423,10 +418,11 @@ Changed for 1.8, and quite possibly wrong:
                 final List<EntityUpdateCommand> entityUpdatesInWorld = this.entityUpdates.get(entry.getKey());
                 final List<ItemDropUpdateCommand> itemDropUpdatesInWorld = this.itemDropUpdates.get(entry.getKey());
                 final Map<BlockVec, List<ItemDropUpdateCommand>> itemMap = new HashMap<>();
+
                 Set<net.minecraft.server.v1_12_R1.Chunk> chunks = null;
                 Set<Chunk> cmChunks = null;
 
-                if (this.settings.CompatibilityMode) {
+                if (this.compatibilityMode) {
                     cmChunks = new HashSet<>();
                 } else {
                     chunks = new HashSet<>();
@@ -458,7 +454,7 @@ Changed for 1.8, and quite possibly wrong:
                         if (entry.getKey().getBlockAt(l.x(), l.y(), l.z()).getTypeId() == 23) {
                             final MapUpdateCommand blankCommand = new MapUpdateCommand(c.blockLocation, 23, c
                                     .dataID, c.craft);
-//							if(Settings.CompatibilityMode) {
+//							if(compatibilityMode) {
                             queuedMapUpdateCommands.add(blankCommand);
                             queuedPlaceDispensers.add(false);
 //							} else 
@@ -468,7 +464,7 @@ Changed for 1.8, and quite possibly wrong:
                         // reconstruction
                         if (entry.getKey().getBlockAt(l.x(), l.y(), l.z()).getTypeId() == 152) {
                             final MapUpdateCommand blankCommand = new MapUpdateCommand(c.blockLocation, 1, (byte) 0, c.craft);
-//							if(Settings.CompatibilityMode) {
+//							if(compatibilityMode) {
                             queuedMapUpdateCommands.add(blankCommand);
                             queuedPlaceDispensers.add(false);
 //							} else 
@@ -532,7 +528,7 @@ Changed for 1.8, and quite possibly wrong:
                             final boolean prevIsFragile = (Arrays.binarySearch(fragileBlocks, prevType) >= 0);
                             final boolean isFragile = (Arrays.binarySearch(fragileBlocks, i.typeID) >= 0);
                             if (prevIsFragile && (!isFragile)) {
-//								if(Settings.CompatibilityMode) {
+//								if(compatibilityMode) {
                                 queuedMapUpdateCommands.add(i);
                                 queuedPlaceDispensers.add(false);
 //								} else 
@@ -541,7 +537,7 @@ Changed for 1.8, and quite possibly wrong:
                             if (prevIsFragile && isFragile) {
                                 final MapUpdateCommand blankCommand = new MapUpdateCommand(i.newBlockLocation, 0,
                                                                                            (byte) 0, i.craft);
-//								if(Settings.CompatibilityMode) {
+//								if(compatibilityMode) {
                                 queuedMapUpdateCommands.add(blankCommand);
                                 queuedPlaceDispensers.add(false);
 //								} else 
@@ -570,7 +566,7 @@ Changed for 1.8, and quite possibly wrong:
                                     // .getY()+0.5, command.getNewBlockLocation().getZ()+0.5, explosionPower);
                                 }
                             } else {
-                                //							if(Settings.CompatibilityMode) {
+                                //							if(compatibilityMode) {
                                 queuedMapUpdateCommands.add(command);
                                 queuedPlaceDispensers.add(false);
                                 //							} else
@@ -581,7 +577,7 @@ Changed for 1.8, and quite possibly wrong:
 
                         // if the block you just updated had any entities on it, move them. If they are moving, add
                         // in their motion to the craft motion
-                        if (entityMap.containsKey(command.newBlockLocation) && !this.settings.CompatibilityMode) {
+                        if (entityMap.containsKey(command.newBlockLocation) && !this.compatibilityMode) {
                             final List<EntityUpdateCommand> mapUpdateList = entityMap.get(command.newBlockLocation);
                             for (final EntityUpdateCommand entityUpdate : mapUpdateList) {
                                 final Entity entity = entityUpdate.entity;
@@ -598,7 +594,7 @@ Changed for 1.8, and quite possibly wrong:
                     if (command != null) {
                         final boolean isFragile = (Arrays.binarySearch(fragileBlocks, command.typeID) >= 0);
                         if (isFragile) {
-                            //					if(Settings.CompatibilityMode) {
+                            //					if(compatibilityMode) {
                             queuedMapUpdateCommands.add(command);
                             queuedPlaceDispensers.add(false);
                             //					} else
@@ -611,7 +607,7 @@ Changed for 1.8, and quite possibly wrong:
                     if (command != null) {
                         // Put Dispensers back in now that the ship is reconstructed
                         if (command.typeID == 23 || command.typeID == 152) {
-                            //					if(Settings.CompatibilityMode) {
+                            //					if(compatibilityMode) {
                             queuedMapUpdateCommands.add(command);
                             queuedPlaceDispensers.add(true);
                             //					} else
@@ -624,7 +620,7 @@ Changed for 1.8, and quite possibly wrong:
                     if(i!=null) {
 						// Place air
 						if(i.getTypeID()==0) {
-							if(Settings.CompatibilityMode) {
+							if(compatibilityMode) {
 								queuedMapUpdateCommands.add(i);
 								queuedPlaceDispensers.add(true);
 							} else 
@@ -638,7 +634,7 @@ Changed for 1.8, and quite possibly wrong:
                     if (command != null) {
                         // Place beds
                         if (command.typeID == 26) {
-                            //					if(Settings.CompatibilityMode) {
+                            //					if(compatibilityMode) {
                             queuedMapUpdateCommands.add(command);
                             queuedPlaceDispensers.add(true);
                             //					} else
@@ -652,7 +648,7 @@ Changed for 1.8, and quite possibly wrong:
                         // Place fragiles again, in case they got screwed up the first time
                         final boolean isFragile = (Arrays.binarySearch(fragileBlocks, command.typeID) >= 0);
                         if (isFragile) {
-                            //					if(Settings.CompatibilityMode) {
+                            //					if(compatibilityMode) {
                             queuedMapUpdateCommands.add(command);
                             queuedPlaceDispensers.add(true);
                             //					} else
@@ -662,7 +658,7 @@ Changed for 1.8, and quite possibly wrong:
                 }
 
 /*				// move entities again
-                if(!Settings.CompatibilityMode)
+                if(!compatibilityMode)
 					for(BlockVec i : entityMap.keySet()) {
 						List<EntityUpdateCommand> mapUpdateList=entityMap.get(i);
 							for(EntityUpdateCommand entityUpdate : mapUpdateList) {
@@ -681,10 +677,11 @@ Changed for 1.8, and quite possibly wrong:
                     }
                 }
 
-//				if(Settings.CompatibilityMode) {
+//				if(compatibilityMode) {
                 final long endTime = System.currentTimeMillis();
-                if (this.settings.Debug) {
-                    this.plugin.getServer().broadcastMessage("Map update setup took (ms): " + (endTime - startTime));
+                if (DEBUG) {
+                    this.plugin.getServer().broadcastMessage(
+                            String.format("Map update setup took (ms): %d", endTime - startTime));
                 }
                 try {
                     this.runQueue(queuedMapUpdateCommands, queuedPlaceDispensers, entry.getKey(), chunks, cmChunks,
@@ -739,7 +736,7 @@ Changed for 1.8, and quite possibly wrong:
 						}
 					}
 					long endTime=System.currentTimeMillis();
-					if(Settings.Debug) {
+					if (DEBUG) {
 						Movecraft.getInstance().getServer().broadcastMessage("Map update took (ms): "+
 						(endTime-startTime));
 					}
@@ -913,40 +910,6 @@ Changed for 1.8, and quite possibly wrong:
     }
 
     private void createExplosion(final Location loc, final float explosionPower) {
-//        if (Settings.CompatibilityMode){
-        //using other-explosion flag ... isn't secure
-        boolean explosionblocked = false;
-        if (this.plugin.getWorldGuardPlugin() != null) {
-            final ApplicableRegionSet set = this.plugin.getWorldGuardPlugin().getRegionManager(loc.getWorld())
-                                                       .getApplicableRegions(loc);
-            if (!set.allows(DefaultFlag.OTHER_EXPLOSION)) {
-                explosionblocked = true;
-            }
-        }
-        if (!explosionblocked)
-            loc.getWorld().createExplosion(loc.getX() + 0.5, loc.getY() + 0.5, loc.getZ() + 0.5, explosionPower);
-        return;
-//        }
-
-//        loc.getWorld().createExplosion(loc.getX()+0.5,loc.getY()+0.5, loc.getZ()+0.5, explosionPower);
-        //correct explosion ... tnt event ... may be changed to any else entity type
-/*        EntityTNTPrimed e = new EntityTNTPrimed(((CraftWorld)loc.getWorld()).getHandle()); // this is the code that
- causes pre 1.8.3 builds of Spigot to fail
-        e.setLocation(loc.getX(),loc.getBlockY(), loc.getBlockZ(), 0f, 0f);
-        e.setSize(0.89F, 0.89F);
-        e.setInvisible(true);
-        org.bukkit.craftbukkit.v1_8_R3.CraftWorld craftWorld = (CraftWorld) loc.getWorld();
-        org.bukkit.craftbukkit.v1_8_R3.CraftServer server = craftWorld.getHandle().getServer();
-        
-        ExplosionPrimeEvent event = new ExplosionPrimeEvent((org.bukkit.entity.Explosive) org.bukkit.craftbukkit
-        .v1_8_R3.entity.CraftEntity.getEntity(server, e));
-        event.setRadius(explosionPower);
-        server.getPluginManager().callEvent(event);
-
-        if (!event.isCancelled()) {
-            craftWorld.getHandle().createExplosion(e, loc.getX() + 0.5D , loc.getY() + 0.5D , loc.getZ() + 0.5D ,
-            event.getRadius(), event.getFire(), true);
-        }
-  */
+        loc.getWorld().createExplosion(loc.getX() + 0.5, loc.getY() + 0.5, loc.getZ() + 0.5, explosionPower);
     }
 }

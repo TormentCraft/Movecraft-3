@@ -220,7 +220,7 @@ public class Movecraft extends JavaPlugin implements MovecraftPlugin {
         } else {
             this.craftManager = new CraftManager(this.settings, this.i18nSupport, this);
             this.craftManager.initCraftTypes();
-            this.mapUpdateManager = new MapUpdateManager(this.settings, this.i18nSupport, this);
+            this.mapUpdateManager = new MapUpdateManager(this, this.settings.CompatibilityMode, this.settings.BlockQueueChunkSize);
             this.asyncManager = new AsyncManager(this.settings, this.i18nSupport, this.craftManager, this, this.mapUpdateManager);
 
             // Startup procedure
