@@ -19,6 +19,7 @@ package net.countercraft.movecraft.craft;
 
 import com.alexknvl.shipcraft.math.BlockVec;
 import com.alexknvl.shipcraft.math.Direction;
+import com.google.common.base.Preconditions;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
@@ -63,6 +64,7 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
         this.pilotLockedY = 0.0;
         this.pilotLockedZ = 0.0;
         this.keepMoving = false;
+        this.cruiseDirection = Direction.Off();
     }
 
     public boolean isNotProcessing() {
@@ -203,6 +205,7 @@ public class Craft implements net.countercraft.movecraft.api.Craft {
     }
 
     public void setCruiseDirection(final Direction cruiseDirection) {
+        Preconditions.checkNotNull(cruiseDirection);
         this.cruiseDirection = cruiseDirection;
     }
 

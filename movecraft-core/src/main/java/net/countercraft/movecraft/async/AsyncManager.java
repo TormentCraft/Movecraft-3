@@ -38,8 +38,6 @@ import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.craft.CraftType;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockUtils;
-import net.countercraft.movecraft.detail.EntityUpdateCommand;
-import net.countercraft.movecraft.detail.ItemDropUpdateCommand;
 import net.countercraft.movecraft.detail.MapUpdateCommand;
 import net.countercraft.movecraft.detail.MapUpdateManager;
 import net.countercraft.movecraft.utils.MathUtils;
@@ -379,7 +377,7 @@ public final class AsyncManager extends BukkitRunnable {
                     if (notifyP != null && !c.getSinking()) notifyP.sendMessage(task.getData().getFailMessage());
 
                     if (task.getData().collisionExplosion()) {
-                        final MapUpdateCommand[] updates = task.getData().getUpdates();
+                        final MapUpdateCommand.MoveBlock[] updates = task.getData().getUpdates();
                         c.setBlockList(task.getData().getBlockList());
                         final boolean failed = this.mapUpdateManager.addWorldUpdate(c.getWorld(), updates, null, null);
 
@@ -392,9 +390,9 @@ public final class AsyncManager extends BukkitRunnable {
                 } else {
                     //The craft is clear to move, perform the block updates
 
-                    final MapUpdateCommand[] updates = task.getData().getUpdates();
-                    final EntityUpdateCommand[] eUpdates = task.getData().getEntityUpdates();
-                    final ItemDropUpdateCommand[] iUpdates = task.getData().getItemDropUpdateCommands();
+                    final MapUpdateCommand.MoveBlock[] updates = task.getData().getUpdates();
+                    final MapUpdateCommand.MoveEntity[] eUpdates = task.getData().getEntityUpdates();
+                    final MapUpdateCommand.DropItem[] iUpdates = task.getData().getItemDropUpdateCommands();
                     //get list of cannons before sending map updates, to avoid conflicts
                     Iterable<Cannon> shipCannons = null;
                     if (this.plugin.getCannonsPlugin() != null && c.getNotificationPlayer() != null) {
@@ -442,8 +440,8 @@ public final class AsyncManager extends BukkitRunnable {
                         if (notifyP != null) notifyP.sendMessage(task.getFailMessage());
                         else this.plugin.getLogger().log(Level.INFO, "NULL Player Rotation Failed: " + task.getFailMessage());
                     } else {
-                        final MapUpdateCommand[] updates = task.getUpdates();
-                        final EntityUpdateCommand[] eUpdates = task.getEntityUpdates();
+                        final MapUpdateCommand.MoveBlock[] updates = task.getUpdates();
+                        final MapUpdateCommand.MoveEntity[] eUpdates = task.getEntityUpdates();
 
                         //get list of cannons before sending map updates, to avoid conflicts
                         Iterable<Cannon> shipCannons = null;
@@ -961,10 +959,10 @@ public final class AsyncManager extends BukkitRunnable {
                                     if (w.getBlockAt(loc.x(), loc.y(), loc.z()).getType() == this.plugin.blockFadeTypeMap.get(loc)) {
                                         // should it become water? if not, then air
                                         if (this.plugin.blockFadeWaterMap.get(loc)) {
-                                            final MapUpdateCommand updateCom = new MapUpdateCommand(loc, 9, (byte) 0, null);
+                                            final MapUpdateCommand updateCom = new MapUpdateCommand.MoveBlock(loc, Material.STATIONARY_WATER, null);
                                             updateCommands.add(updateCom);
                                         } else {
-                                            final MapUpdateCommand updateCom = new MapUpdateCommand(loc, 0, (byte) 0, null);
+                                            final MapUpdateCommand updateCom = new MapUpdateCommand.MoveBlock(loc, Material.AIR, null);
                                             updateCommands.add(updateCom);
                                         }
                                     }
@@ -977,8 +975,8 @@ public final class AsyncManager extends BukkitRunnable {
                         }
                     }
                     if (!updateCommands.isEmpty()) {
-                        this.mapUpdateManager
-                                .addWorldUpdate(w, updateCommands.toArray(new MapUpdateCommand[1]), null, null);
+                        this.mapUpdateManager.addWorldUpdate(w, updateCommands.toArray(
+                                new MapUpdateCommand.MoveBlock[updateCommands.size()]), null, null);
                     }
                 }
             }

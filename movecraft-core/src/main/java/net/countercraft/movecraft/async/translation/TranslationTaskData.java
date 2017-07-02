@@ -19,8 +19,6 @@ package net.countercraft.movecraft.async.translation;
 
 import com.alexknvl.shipcraft.math.BlockVec;
 import com.alexknvl.shipcraft.math.IntRange;
-import net.countercraft.movecraft.detail.EntityUpdateCommand;
-import net.countercraft.movecraft.detail.ItemDropUpdateCommand;
 import net.countercraft.movecraft.detail.MapUpdateCommand;
 
 public class TranslationTaskData {
@@ -30,9 +28,9 @@ public class TranslationTaskData {
     private boolean failed = false;
     private String failMessage;
     private BlockVec[] blockList;
-    private MapUpdateCommand[] updates;
-    private EntityUpdateCommand[] entityUpdates;
-    private ItemDropUpdateCommand[] itemDropUpdates;
+    private MapUpdateCommand.MoveBlock[] updates;
+    private MapUpdateCommand.MoveEntity[] entityUpdates;
+    private MapUpdateCommand.DropItem[] itemDropUpdates;
     private int[][][] hitbox;
     private int minX, minZ;
     public final IntRange heightRange;
@@ -100,19 +98,19 @@ public class TranslationTaskData {
         this.blockList = blockList;
     }
 
-    public MapUpdateCommand[] getUpdates() {
+    public MapUpdateCommand.MoveBlock[] getUpdates() {
         return this.updates;
     }
 
-    public void setUpdates(final MapUpdateCommand[] updates) {
+    public void setUpdates(final MapUpdateCommand.MoveBlock[] updates) {
         this.updates = updates;
     }
 
-    public EntityUpdateCommand[] getEntityUpdates() {
+    public MapUpdateCommand.MoveEntity[] getEntityUpdates() {
         return this.entityUpdates;
     }
 
-    public void setEntityUpdates(final EntityUpdateCommand[] entityUpdates) {
+    public void setEntityUpdates(final MapUpdateCommand.MoveEntity[] entityUpdates) {
         this.entityUpdates = entityUpdates;
     }
 
@@ -140,11 +138,11 @@ public class TranslationTaskData {
         this.minZ = minZ;
     }
 
-    public ItemDropUpdateCommand[] getItemDropUpdateCommands() {
+    public MapUpdateCommand.DropItem[] getItemDropUpdateCommands() {
         return this.itemDropUpdates;
     }
 
-    public void setItemDropUpdates(final ItemDropUpdateCommand[] itemDropUpdate) {
+    public void setItemDropUpdates(final MapUpdateCommand.DropItem[] itemDropUpdate) {
         this.itemDropUpdates = itemDropUpdate;
     }
 }

@@ -51,8 +51,8 @@ public final class BlockUtils {
         Arrays.sort(ROTATION_BLOCKS);
     }
 
-    public static boolean blockHasNoData(int id) {
-        return Arrays.binarySearch(DATA_BLOCKS, id) == -1;
+    public static boolean blockHasNoData(Material id) {
+        return Arrays.binarySearch(DATA_BLOCKS, id.getId()) == -1;
     }
 
     public static boolean blockRequiresRotation(int id) {

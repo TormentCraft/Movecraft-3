@@ -29,8 +29,6 @@ import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BoundingBoxUtils;
-import net.countercraft.movecraft.detail.EntityUpdateCommand;
-import net.countercraft.movecraft.detail.ItemDropUpdateCommand;
 import net.countercraft.movecraft.detail.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MathUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
@@ -284,11 +282,11 @@ public class TranslationTask extends AsyncTask {
 
         final List<BlockVec> tempBlockList = new ArrayList<>();
         final HashSet<BlockVec> existingBlockSet = new HashSet<>(Arrays.asList(blocksList));
-        final HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<>();
-        final Set<MapUpdateCommand> updateSet = new HashSet<>();
+        final HashSet<MapUpdateCommand.MoveEntity> entityUpdateSet = new HashSet<>();
+        final Set<MapUpdateCommand.MoveBlock> updateSet = new HashSet<>();
 
         this.data.setCollisionExplosion(false);
-        final Set<MapUpdateCommand> explosionSet = new HashSet<>();
+        final Set<MapUpdateCommand.SpawnExplosion> explosionSet = new HashSet<>();
 
         final MaterialDataPredicate harvestBlocks = this.getCraft().getType().getHarvestBlocks();
         final List<BlockVec> harvestedBlocks = new ArrayList<>();
@@ -475,15 +473,16 @@ public class TranslationTask extends AsyncTask {
                     if (this.getCraft().getSinking()) {
                         if (this.getCraft().getType().getExplodeOnCrash() != 0.0F) {
                             final int explosionKey = (int) (0 - (this.getCraft().getType().getExplodeOnCrash() * 100));
+
                             if (this.getCraft().getWorld().getBlockAt(oldLoc.x(), oldLoc.y(), oldLoc.z()).getType() != Material.AIR) {
-                                explosionSet.add(new MapUpdateCommand(oldLoc, explosionKey, (byte) 0, this.getCraft()));
+                                explosionSet.add(new MapUpdateCommand.SpawnExplosion(explosionKey, oldLoc));
                                 this.data.setCollisionExplosion(true);
                             }
                         } else {
                             // use the explosion code to clean up the craft, but not with enough force to do anything
                             if (this.getCraft().getWorld().getBlockAt(oldLoc.x(), oldLoc.y(), oldLoc.z()).getType() != Material.AIR) {
                                 final int explosionKey = 0 - 1;
-                                explosionSet.add(new MapUpdateCommand(oldLoc, explosionKey, (byte) 0, this.getCraft()));
+                                explosionSet.add(new MapUpdateCommand.SpawnExplosion(explosionKey, oldLoc));
                                 this.data.setCollisionExplosion(true);
                             }
                         }
@@ -501,7 +500,7 @@ public class TranslationTask extends AsyncTask {
                         } else {
                             final int explosionKey = (int) (0 - (this.getCraft().getType().getCollisionExplosion() * 100));
                             if (this.getCraft().getWorld().getBlockAt(oldLoc.x(), oldLoc.y(), oldLoc.z()).getType() != Material.AIR) {
-                                explosionSet.add(new MapUpdateCommand(oldLoc, explosionKey, (byte) 0, this.getCraft()));
+                                explosionSet.add(new MapUpdateCommand.SpawnExplosion(explosionKey, oldLoc));
                                 this.data.setCollisionExplosion(true);
                             }
                         }
@@ -518,8 +517,9 @@ public class TranslationTask extends AsyncTask {
                         oldID = Material.AIR;
                 }
 
+
                 if (!ignoreBlock) {
-                    updateSet.add(new MapUpdateCommand(oldLoc, newLoc, oldID.getId(), oldData.getData(), this.getCraft()));
+                    updateSet.add(new MapUpdateCommand.MoveBlock(oldLoc, newLoc, oldData, this.getCraft()));
                     tempBlockList.add(newLoc);
                 }
 
@@ -642,7 +642,7 @@ public class TranslationTask extends AsyncTask {
         if (this.data.collisionExplosion()) {
             // mark the craft to check for sinking, remove the exploding blocks from the blocklist, and submit the
             // explosions for map update
-            for (final MapUpdateCommand m : explosionSet) {
+            for (final MapUpdateCommand.SpawnExplosion m : explosionSet) {
 
                 if (existingBlockSet.contains(m.newBlockLocation)) {
                     existingBlockSet.remove(m.newBlockLocation);
@@ -699,7 +699,8 @@ public class TranslationTask extends AsyncTask {
 
             final BlockVec[] newBlockList = existingBlockSet.toArray(new BlockVec[existingBlockSet.size()]);
             this.data.setBlockList(newBlockList);
-            this.data.setUpdates(explosionSet.toArray(new MapUpdateCommand[1]));
+            // FIXME
+            // this.data.setUpdates(explosionSet.toArray(new MapUpdateCommand.SpawnExplosion[explosionSet.size()]));
 
             this.fail(this.i18n.get("Translation - Failed Craft is obstructed"));
             if (this.getCraft().getSinking()) {
@@ -749,8 +750,7 @@ public class TranslationTask extends AsyncTask {
                             newPLoc.setPitch(pTest.getLocation().getPitch());
                             newPLoc.setYaw(pTest.getLocation().getYaw());
 
-                            final EntityUpdateCommand eUp = new EntityUpdateCommand(pTest.getLocation().clone(), newPLoc,
-                                                                                    pTest);
+                            final MapUpdateCommand.MoveEntity eUp = new MapUpdateCommand.MoveEntity(pTest.getLocation().clone(), newPLoc, pTest);
                             entityUpdateSet.add(eUp);
                             if (this.getCraft().getPilotLocked() && pTest == this.craftManager.getPlayerFromCraft(this.getCraft())) {
                                 this.getCraft().setPilotLockedX(tempLoc.getX());
@@ -775,10 +775,10 @@ public class TranslationTask extends AsyncTask {
                 if (posY > waterLine) {
                     for (posX = minX - 1; posX <= maxX + 1; posX++) {
                         for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
-                            if (this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
-                                this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
+                            final Material type = this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType();
+                            if (type == Material.STATIONARY_WATER || type == Material.WATER) {
                                 final BlockVec loc = new BlockVec(posX, posY, posZ);
-                                updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, this.getCraft()));
+                                updateSet.add(new MapUpdateCommand.MoveBlock(loc, Material.AIR, this.getCraft()));
                             }
                         }
                     }
@@ -786,34 +786,34 @@ public class TranslationTask extends AsyncTask {
                 for (posY = maxY + 1; (posY >= minY - 1) && (posY > waterLine); posY--) {
                     posZ = minZ - 1;
                     for (posX = minX - 1; posX <= maxX + 1; posX++) {
-                        if (this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
-                            this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
+                        final Material type = this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType();
+                        if (type == Material.STATIONARY_WATER || type == Material.WATER) {
                             final BlockVec loc = new BlockVec(posX, posY, posZ);
-                            updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, this.getCraft()));
+                            updateSet.add(new MapUpdateCommand.MoveBlock(loc, Material.AIR, this.getCraft()));
                         }
                     }
                     posZ = maxZ + 1;
                     for (posX = minX - 1; posX <= maxX + 1; posX++) {
-                        if (this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
-                            this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
+                        final Material type = this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType();
+                        if (type == Material.STATIONARY_WATER || type == Material.WATER) {
                             final BlockVec loc = new BlockVec(posX, posY, posZ);
-                            updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, this.getCraft()));
+                            updateSet.add(new MapUpdateCommand.MoveBlock(loc, Material.AIR, this.getCraft()));
                         }
                     }
                     posX = minX - 1;
                     for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
-                        if (this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
-                            this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
+                        final Material type = this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType();
+                        if (type == Material.STATIONARY_WATER || type == Material.WATER) {
                             final BlockVec loc = new BlockVec(posX, posY, posZ);
-                            updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, this.getCraft()));
+                            updateSet.add(new MapUpdateCommand.MoveBlock(loc, Material.AIR, this.getCraft()));
                         }
                     }
                     posX = maxX + 1;
                     for (posZ = minZ - 1; posZ <= maxZ + 1; posZ++) {
-                        if (this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.STATIONARY_WATER ||
-                            this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType() == Material.WATER) {
+                        final Material type = this.getCraft().getWorld().getBlockAt(posX, posY, posZ).getType();
+                        if (type == Material.STATIONARY_WATER || type == Material.WATER) {
                             final BlockVec loc = new BlockVec(posX, posY, posZ);
-                            updateSet.add(new MapUpdateCommand(loc, 0, (byte) 0, this.getCraft()));
+                            updateSet.add(new MapUpdateCommand.MoveBlock(loc, Material.AIR, this.getCraft()));
                         }
                     }
                 }
@@ -833,38 +833,38 @@ public class TranslationTask extends AsyncTask {
                         }
                         if (this.getCraft().getWorld().getBlockAt(testAir.x(), testAir.y(), testAir.z()).getType() == Material.AIR) {
                             if (this.getCraft().getSinking()) {
-                                updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null,
-                                                                   this.getCraft().getType().getSmokeOnSink()));
+                                // updateSet.add(new MapUpdateCommand.SpawnSmoke(this.getCraft().getType().getSmokeOnSink(), l1));
+                                updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null));
                             } else {
-                                updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null));
+                                updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null));
                             }
                         } else {
-                            updateSet.add(new MapUpdateCommand(l1, 9, (byte) 0, null));
+                            updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.STATIONARY_WATER, null));
                         }
                     } else {
                         if (this.getCraft().getSinking()) {
-                            updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null,
-                                                               this.getCraft().getType().getSmokeOnSink()));
+                            // updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null, this.getCraft().getType().getSmokeOnSink(), explosion));
+                            updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null));
                         } else {
-                            updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null));
+                            updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null));
                         }
                     }
                 } else {
                     if (this.getCraft().getSinking()) {
-                        updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null,
-                                                           this.getCraft().getType().getSmokeOnSink()));
+//                        updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null, this.getCraft().getType().getSmokeOnSink()));
+                        updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null));
                     } else {
-                        updateSet.add(new MapUpdateCommand(l1, 0, (byte) 0, null));
+                        updateSet.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null));
                     }
                 }
             }
 
             //add destroyed parts of growed
             for (final BlockVec destroyedLocation : destroyedBlocks) {
-                updateSet.add(new MapUpdateCommand(destroyedLocation, 0, (byte) 0, null));
+                updateSet.add(new MapUpdateCommand.MoveBlock(destroyedLocation, Material.AIR, null));
             }
-            this.data.setUpdates(updateSet.toArray(new MapUpdateCommand[1]));
-            this.data.setEntityUpdates(entityUpdateSet.toArray(new EntityUpdateCommand[1]));
+            this.data.setUpdates(updateSet.toArray(new MapUpdateCommand.MoveBlock[updateSet.size()]));
+            this.data.setEntityUpdates(entityUpdateSet.toArray(new MapUpdateCommand.MoveEntity[1]));
 
             if (this.data.getDy() != 0) {
                 this.data.setHitbox(BoundingBoxUtils.translateBoundingBoxVertically(this.data.getHitbox(), this.data.getDy()));
@@ -983,7 +983,7 @@ public class TranslationTask extends AsyncTask {
         }
 
         final Map<Material, ArrayList<Block>> crates = new HashMap<>();
-        final HashSet<ItemDropUpdateCommand> itemDropUpdateSet = new HashSet<>();
+        final HashSet<MapUpdateCommand.DropItem> itemDropUpdateSet = new HashSet<>();
         final Set<Material> droppedSet = new HashSet<>();
         final HashMap<BlockVec, ItemStack[]> droppedMap = new HashMap<>();
         harvestedBlocks.addAll(droppedBlocks);
@@ -1070,13 +1070,13 @@ public class TranslationTask extends AsyncTask {
                         //drop items on position 
                         final Location loc = new Location(this.getCraft().getWorld(), harvestedBlock.x(), harvestedBlock.y(),
                                                           harvestedBlock.z());
-                        final ItemDropUpdateCommand iUp = new ItemDropUpdateCommand(loc, drop);
+                        final MapUpdateCommand.DropItem iUp = new MapUpdateCommand.DropItem(loc, drop);
                         itemDropUpdateSet.add(iUp);
                     }
                 }
             }
         }
-        this.data.setItemDropUpdates(itemDropUpdateSet.toArray(new ItemDropUpdateCommand[1]));
+        this.data.setItemDropUpdates(itemDropUpdateSet.toArray(new MapUpdateCommand.DropItem[itemDropUpdateSet.size()]));
     }
 
     private ItemStack putInToChests(ItemStack stack, final Map<Material, ArrayList<Block>> chests) {

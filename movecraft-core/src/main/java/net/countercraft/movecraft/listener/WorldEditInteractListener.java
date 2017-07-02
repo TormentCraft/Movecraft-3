@@ -41,6 +41,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -372,7 +373,7 @@ public class WorldEditInteractListener implements Listener {
                             }
                         }
                     }
-                    final ArrayList<MapUpdateCommand> updateCommands = new ArrayList<>();
+                    final ArrayList<MapUpdateCommand.MoveBlock> updateCommands = new ArrayList<>();
                     for (final Vector ccloc : locMissingBlocks) {
                         com.sk89q.worldedit.blocks.BaseBlock bb = cc.getBlock(ccloc);
                         if (bb.getId() == 68 ||
@@ -386,12 +387,13 @@ public class WorldEditInteractListener implements Listener {
                                 sign.getX() + cc.getOffset().getBlockX() + ccloc.getBlockX(),
                                 sign.getY() + cc.getOffset().getBlockY() + ccloc.getBlockY(),
                                 sign.getZ() + cc.getOffset().getBlockZ() + ccloc.getBlockZ());
-                        final MapUpdateCommand updateCom = new MapUpdateCommand(moveloc, bb.getType(), (byte) bb.getData(),
-                                                                                bb, craft);
+                        final MapUpdateCommand.MoveBlock updateCom =
+                                new MapUpdateCommand.MoveBlock(moveloc, new MaterialData(bb.getType(), (byte) bb.getData()), bb, craft);
                         updateCommands.add(updateCom);
                     }
                     if (!updateCommands.isEmpty()) {
-                        final MapUpdateCommand[] fUpdateCommands = updateCommands.toArray(new MapUpdateCommand[1]);
+                        final MapUpdateCommand.MoveBlock[] fUpdateCommands = updateCommands
+                                .toArray(new MapUpdateCommand.MoveBlock[updateCommands.size()]);
                         final int durationInTicks = numdiffblocks * this.settings.RepairTicksPerBlock;
 
                         // send out status updates every minute

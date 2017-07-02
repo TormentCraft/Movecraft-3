@@ -28,7 +28,6 @@ import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.craft.CraftManager;
 import net.countercraft.movecraft.localisation.I18nSupport;
 import net.countercraft.movecraft.utils.BlockUtils;
-import net.countercraft.movecraft.detail.EntityUpdateCommand;
 import net.countercraft.movecraft.detail.MapUpdateCommand;
 import net.countercraft.movecraft.utils.MathUtils;
 import net.countercraft.movecraft.utils.WGCustomFlagsUtils;
@@ -58,8 +57,8 @@ public class RotationTask extends AsyncTask {
     private boolean failed = false;
     private String failMessage;
     private BlockVec[] blockList;    // used to be final, not sure why. Changed by Mark / Loraxe42
-    private MapUpdateCommand[] updates;
-    private EntityUpdateCommand[] entityUpdates;
+    private MapUpdateCommand.MoveBlock[] updates;
+    private MapUpdateCommand.MoveEntity[] entityUpdates;
     private int[][][] hitbox;
     private Integer minX, minZ;
     private final RotationXZ rotation;
@@ -228,8 +227,8 @@ public class RotationTask extends AsyncTask {
         final BlockVec[] centeredBlockList = new BlockVec[this.blockList.length];
         final BlockVec[] originalBlockList = this.blockList.clone();
         final Set<BlockVec> existingBlockSet = Sets.newHashSet(originalBlockList);
-        final Set<MapUpdateCommand> mapUpdates = new HashSet<>();
-        final HashSet<EntityUpdateCommand> entityUpdateSet = new HashSet<>();
+        final Set<MapUpdateCommand.MoveBlock> mapUpdates = new HashSet<>();
+        final HashSet<MapUpdateCommand.MoveEntity> entityUpdateSet = new HashSet<>();
 
         // Make the centered block list, and check for a cruise control sign to reset to off.
         for (int i = 0; i < this.blockList.length; i++) {
@@ -298,8 +297,11 @@ public class RotationTask extends AsyncTask {
                 if (BlockUtils.blockRequiresRotation(id)) {
                     data = BlockUtils.rotate(data, id, this.rotation);
                 }
-                mapUpdates.add(new MapUpdateCommand(originalBlockList[i], this.blockList[i], id, data, this.rotation,
-                                                    this.getCraft()));
+
+                final MaterialData newData = new MaterialData(id, data);
+
+                mapUpdates.add(new MapUpdateCommand.MoveBlock(
+                        originalBlockList[i], this.blockList[i], newData, this.rotation, this.getCraft()));
             } else {
                 this.failed = true;
                 this.failMessage = String
@@ -369,7 +371,7 @@ public class RotationTask extends AsyncTask {
                             this.getCraft().setPilotLockedY(newPLoc.getY());
                             this.getCraft().setPilotLockedZ(newPLoc.getZ());
                         }
-                        final EntityUpdateCommand eUp = new EntityUpdateCommand(pTest.getLocation().clone(), newPLoc, pTest);
+                        final MapUpdateCommand.MoveEntity eUp = new MapUpdateCommand.MoveEntity(pTest.getLocation().clone(), newPLoc, pTest);
                         entityUpdateSet.add(eUp);
                         if (this.getCraft().getPilotLocked() && pTest == this.craftManager.getPlayerFromCraft(this.getCraft())) {
                             this.getCraft().setPilotLockedX(newPLoc.getX());
@@ -408,17 +410,17 @@ public class RotationTask extends AsyncTask {
                 if (waterCraft) {
                     // if its below the waterline, fill in with water. Otherwise fill in with air.
                     if (l1.y() <= waterLine) {
-                        mapUpdates.add(new MapUpdateCommand(l1, 9, (byte) 0, null));
+                        mapUpdates.add(new MapUpdateCommand.MoveBlock(l1, Material.STATIONARY_WATER, null));
                     } else {
-                        mapUpdates.add(new MapUpdateCommand(l1, 0, (byte) 0, null));
+                        mapUpdates.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null));
                     }
                 } else {
-                    mapUpdates.add(new MapUpdateCommand(l1, 0, (byte) 0, null));
+                    mapUpdates.add(new MapUpdateCommand.MoveBlock(l1, Material.AIR, null));
                 }
             }
 
-            this.updates = mapUpdates.toArray(new MapUpdateCommand[1]);
-            this.entityUpdates = entityUpdateSet.toArray(new EntityUpdateCommand[1]);
+            this.updates = mapUpdates.toArray(new MapUpdateCommand.MoveBlock[mapUpdates.size()]);
+            this.entityUpdates = entityUpdateSet.toArray(new MapUpdateCommand.MoveEntity[entityUpdateSet.size()]);
 
             maxX = null;
             maxZ = null;
@@ -582,11 +584,11 @@ public class RotationTask extends AsyncTask {
         return this.blockList;
     }
 
-    public MapUpdateCommand[] getUpdates() {
+    public MapUpdateCommand.MoveBlock[] getUpdates() {
         return this.updates;
     }
 
-    public EntityUpdateCommand[] getEntityUpdates() {
+    public MapUpdateCommand.MoveEntity[] getEntityUpdates() {
         return this.entityUpdates;
     }
 

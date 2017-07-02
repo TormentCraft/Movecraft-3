@@ -19,7 +19,13 @@ package net.countercraft.movecraft.detail;
 
 import com.alexknvl.shipcraft.math.BlockVec;
 import com.alexknvl.shipcraft.math.RotationXZ;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import net.countercraft.movecraft.craft.Craft;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -30,76 +36,118 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public class MapUpdateCommand {
-    @Nullable public final BlockVec blockLocation;
-    public final BlockVec newBlockLocation;
-    public final int typeID;
-    public final byte dataID;
-    @Nullable public final Object worldEditBaseBlock;
-    public final RotationXZ rotation;
-    public final Craft craft;
-    public final int smoke;
+    private MapUpdateCommand() { }
 
-    public MapUpdateCommand(final BlockVec blockLocation, final BlockVec newBlockLocation,
-                            final int typeID, final byte dataID,
-                            final RotationXZ rotation, final Craft craft)
-    {
-        this.blockLocation = blockLocation;
-        this.newBlockLocation = newBlockLocation;
-        this.typeID = typeID;
-        this.dataID = dataID;
-        this.worldEditBaseBlock = null;
-        this.rotation = rotation;
-        this.craft = craft;
-        this.smoke = 0;
+    @Immutable
+    public static final class MoveBlock extends MapUpdateCommand {
+        @Nullable public final BlockVec blockLocation;
+        public final BlockVec newBlockLocation;
+        public final MaterialData data;
+        @Nullable public final Object worldEditBaseBlock;
+        public final RotationXZ rotation;
+        public final Craft craft;
+
+        public MoveBlock(final BlockVec blockLocation, final BlockVec newBlockLocation,
+                         final MaterialData data, final Craft craft) {
+            this.blockLocation = blockLocation;
+            this.newBlockLocation = newBlockLocation;
+            this.data = data;
+            this.craft = craft;
+            this.rotation = RotationXZ.none();
+            this.worldEditBaseBlock = null;
+        }
+
+        public MoveBlock(final BlockVec newBlockLocation, final Material material, final Craft craft) {
+            this.newBlockLocation = newBlockLocation;
+            this.data = new MaterialData(material);
+            this.craft = craft;
+            this.blockLocation = null;
+            this.rotation = RotationXZ.none();
+            this.worldEditBaseBlock = null;
+        }
+
+        public MoveBlock(final BlockVec newBlockLocation, final Material material, final byte data, final Craft craft) {
+            this.newBlockLocation = newBlockLocation;
+            this.data = new MaterialData(material, data);
+            this.craft = craft;
+            this.blockLocation = null;
+            this.rotation = RotationXZ.none();
+            this.worldEditBaseBlock = null;
+        }
+
+        public MoveBlock(final BlockVec blockLocation, final BlockVec newBlockLocation, final MaterialData data,
+                         final RotationXZ rotation, final Craft craft) {
+            this.blockLocation = blockLocation;
+            this.newBlockLocation = newBlockLocation;
+            this.data = data;
+            this.worldEditBaseBlock = null;
+            this.rotation = rotation;
+            this.craft = craft;
+        }
+
+        public MoveBlock(BlockVec blockLocation, MaterialData data, BaseBlock bb, Craft craft) {
+            this.blockLocation = null;
+            this.newBlockLocation = blockLocation;
+            this.data = data;
+            this.craft = craft;
+            this.rotation = RotationXZ.none();
+            this.worldEditBaseBlock = bb;
+        }
     }
 
-    public MapUpdateCommand(final BlockVec blockLocation, final BlockVec newBlockLocation,
-                            final int typeID, final byte dataID, final Craft craft)
-    {
-        this.blockLocation = blockLocation;
-        this.newBlockLocation = newBlockLocation;
-        this.typeID = typeID;
-        this.dataID = dataID;
-        this.worldEditBaseBlock = null;
-        this.rotation = RotationXZ.None$.MODULE$;
-        this.craft = craft;
-        this.smoke = 0;
+    @Immutable
+    public static final class SpawnExplosion extends MapUpdateCommand {
+        public final int explosion;
+        public final BlockVec newBlockLocation;
+
+        public SpawnExplosion(final int explosion, final BlockVec newBlockLocation) {
+            this.explosion = explosion;
+            this.newBlockLocation = newBlockLocation;
+        }
     }
 
-    public MapUpdateCommand(final BlockVec newBlockLocation, final int typeID, final byte dataID, final Craft craft) {
-        this.blockLocation = null;
-        this.newBlockLocation = newBlockLocation;
-        this.typeID = typeID;
-        this.dataID = dataID;
-        this.worldEditBaseBlock = null;
-        this.rotation = RotationXZ.None$.MODULE$;
-        this.craft = craft;
-        this.smoke = 0;
+    @Immutable
+    public static final class SpawnSmoke extends MapUpdateCommand {
+        public final int smoke;
+        public final BlockVec newBlockLocation;
+
+        public SpawnSmoke(final int smoke, final BlockVec newBlockLocation) {
+            this.smoke = smoke;
+            this.newBlockLocation = newBlockLocation;
+        }
     }
 
-    public MapUpdateCommand(final BlockVec newBlockLocation, final int typeID, final byte dataID,
-                            final Object worldEditBaseBlock, final Craft craft)
-    {
-        this.blockLocation = null;
-        this.newBlockLocation = newBlockLocation;
-        this.typeID = typeID;
-        this.dataID = dataID;
-        this.worldEditBaseBlock = worldEditBaseBlock;
-        this.rotation = RotationXZ.None$.MODULE$;
-        this.craft = craft;
-        this.smoke = 0;
+    /**
+     * Class that stores the data about a item drops to the map in an unspecified world. The world is retrieved
+     * contextually from the submitting craft.
+     */
+    @Immutable
+    public static final class DropItem extends MapUpdateCommand {
+        public final Location location;
+        public final ItemStack itemStack;
+
+        public DropItem(final Location location, final ItemStack itemStack) {
+            this.location = location;
+            this.itemStack = itemStack;
+        }
     }
 
-    public MapUpdateCommand(final BlockVec newBlockLocation, final int typeID, final byte dataID,
-                            final Craft craft, final int smoke) {
-        this.blockLocation = null;
-        this.newBlockLocation = newBlockLocation;
-        this.typeID = typeID;
-        this.dataID = dataID;
-        this.worldEditBaseBlock = null;
-        this.rotation = RotationXZ.None$.MODULE$;
-        this.craft = craft;
-        this.smoke = smoke;
+    /**
+     * Class that stores the data about a single blocks changes to the map in an unspecified world. The world is
+     * retrieved contextually from the submitting craft.
+     */
+    @Immutable
+    public static final class MoveEntity extends MapUpdateCommand {
+        @Nullable
+        public final Location location;
+        public final Location newLocation;
+        public final Entity entity;
+
+        public MoveEntity(final Location blockLocation, final Location newLocation, final Entity entity) {
+            this.location = blockLocation;
+            this.newLocation = newLocation;
+            this.entity = entity;
+        }
     }
 }
 

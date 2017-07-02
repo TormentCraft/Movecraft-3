@@ -311,33 +311,38 @@ public class DetectionTask extends AsyncTask {
         for (final Map.Entry<MaterialDataPredicate, List<CraftType.Constraint>> entry : flyBlocks.entrySet()) {
             final MaterialDataPredicate predicate = entry.getKey();
             final List<CraftType.Constraint> constraints = entry.getValue();
+
             final int count = Optional.ofNullable(countData.get(predicate)).orElse(0);
-            final double percentage = ((double) count / total) * 100;
-            final String name = Joiner.on(' ').join(BlockNames.materialDataPredicateNames(entry.getKey()));
+            final String name = Joiner.on(", ").join(BlockNames.materialDataPredicateNames(entry.getKey()));
 
             for (final CraftType.Constraint constraint : constraints) {
-                final int exactBound = constraint.bound.asExact(total);
-                final double ratioBound = constraint.bound.asRatio(total);
+                if (constraint.bound.isExact()) {
+                    final int exactBound = constraint.bound.asExact(total);
 
-                if (!constraint.isSatisfiedBy(count, total)) {
-                    if (constraint.isUpper) {
-                        if (constraint.bound.isExact()) {
-                            this.fail(String.format(this.i18n.get("Not enough flyblock") + " (%d < %d) : %s", count, exactBound,
-                                                    name));
+                    if (!constraint.isSatisfiedBy(count, total)) {
+                        if (constraint.isUpper) {
+                            this.fail(String.format(this.i18n.get("Too much flyblock") + " (%d > %d) : %s", count,
+                                                    exactBound, name));
                         } else {
-                            this.fail(String.format(this.i18n.get("Not enough flyblock") + " (%.2f%% < %.2f%%) : %s", percentage,
-                                               ratioBound * 100.0));
+                            this.fail(String.format(this.i18n.get("Not enough flyblock") + " (%d < %d) : %s", count,
+                                                    exactBound, name));
                         }
-                    } else {
-                        if (constraint.bound.isExact()) {
-                            this.fail(String.format(this.i18n.get("Too much flyblock") + " (%d > %d) : %s", count, exactBound,
-                                                    name));
-                        } else {
-                            this.fail(String.format(this.i18n.get("Too much flyblock") + " (%.2f%% > %.2f%%) : %s", percentage,
-                                               ratioBound * 100.0));
-                        }
+                        return false;
                     }
-                    return false;
+                } else {
+                    final double ratioBound = constraint.bound.asRatio(total);
+                    final double percentage = ((double) count / total) * 100;
+
+                    if (!constraint.isSatisfiedBy(count, total)) {
+                        if (constraint.isUpper) {
+                            this.fail(String.format(this.i18n.get("Too much flyblock") + " (%.1f%% > %.1f%%) : %s",
+                                                    percentage, ratioBound * 100.0, name));
+                        } else {
+                            this.fail(String.format(this.i18n.get("Not enough flyblock") + " (%.1f%% < %.1f%%) : %s",
+                                                    percentage, ratioBound * 100.0, name));
+                        }
+                        return false;
+                    }
                 }
             }
         }

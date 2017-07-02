@@ -179,7 +179,7 @@ public class CraftType {
             }
 
             @Override public String toString() {
-                return String.valueOf(this.value);
+                return String.format("Exact{value=%d}", this.value);
             }
         }
 
@@ -224,7 +224,7 @@ public class CraftType {
             }
 
             @Override public String toString() {
-                return String.format("%.2f%%", this.value);
+                return String.format("Ratio{value=%f}", this.value);
             }
         }
     }
@@ -269,8 +269,9 @@ public class CraftType {
         }
 
         @Override public String toString() {
-            if (this.isUpper) return String.format("<= %s", this.bound);
-            return String.format(">= %s", this.bound);
+            // if (this.isUpper) return String.format("<= %s", this.bound);
+            // return String.format(">= %s", this.bound);
+            return String.format("Constraint{bound=%s,isUpper=%b}", this.bound.toString(), this.isUpper);
         }
     }
 
