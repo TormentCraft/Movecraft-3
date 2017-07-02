@@ -59,7 +59,7 @@ import java.util.logging.Logger;
 import static org.bukkit.Material.*;
 
 public final class MapUpdateManager extends BukkitRunnable {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final Logger LOGGER = Logger.getLogger(MapUpdateManager.class.getSimpleName());
 
     private final Map<World, ArrayList<MapUpdateCommand.MoveBlock>> updates = new HashMap<>();
@@ -373,15 +373,17 @@ Changed for 1.8, and quite possibly wrong:
             }
 
             if (!this.compatibilityMode) {
-                // send updates to client
+                // Send updates to client.
                 for (final MapUpdateCommand.MoveBlock command : updatesInWorld) {
                     final Location loc = command.newBlockLocation.toBukkitLocation(world);
                     world.getBlockAt(loc).getState().update();
                 }
-//				for ( net.minecraft.server.v1_8_R3.Chunk c : chunks ) {
-//					c.initLighting();
-//				}
-/*				for(BlockVec mloc : origLightMap.keySet()) {
+
+                // for (net.minecraft.server.v1_8_R3.Chunk c : chunks) {
+                //    c.initLighting();
+                // }
+
+                /*for(BlockVec mloc : origLightMap.keySet()) {
                     Location loc=new Location(world, mloc.getX(), mloc.getY(), mloc.getZ());
 					for ( Player p : world.getPlayers() ) {
 						Chunk c=p.getLocation().getChunk();
@@ -397,8 +399,8 @@ Changed for 1.8, and quite possibly wrong:
             }
 
 			
-/*			// move all players one final time
-            for(List<EntityUpdateCommand> listE : entityMap.values()) {
+			// move all players one final time
+            /*for(List<EntityUpdateCommand> listE : entityMap.values()) {
 				for(EntityUpdateCommand e : listE) {
 					if(e.getEntity() instanceof Player) {
 						e.getEntity().teleport(e.getNewLocation());

@@ -36,7 +36,8 @@ public class TranslationTaskData {
     public final IntRange heightRange;
     private boolean collisionExplosion;
 
-    public TranslationTaskData(final int dx, final int dz, final int dy, final BlockVec[] blockList, final int[][][] hitbox, final int minZ, final int minX,
+    public TranslationTaskData(final int dx, final int dz, final int dy, final BlockVec[] blockList,
+                               final int[][][] hitbox, final int minZ, final int minX,
                                final IntRange heightRange)
     {
         this.dx = dx;

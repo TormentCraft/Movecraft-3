@@ -61,10 +61,10 @@ public class TranslationTask extends AsyncTask {
     private final CraftManager craftManager;
     private final TranslationTaskData data;
 
-    public TranslationTask(final Craft c, final Movecraft plugin, final Settings settings, final I18nSupport i18n, final CraftManager craftManager,
-                           final TranslationTaskData data)
+    public TranslationTask(final Craft craft, final Movecraft plugin, final Settings settings, final I18nSupport i18n,
+                           final CraftManager craftManager, final TranslationTaskData data)
     {
-        super(c);
+        super(craft);
         this.plugin = plugin;
         this.settings = settings;
         this.i18n = i18n;
@@ -72,7 +72,7 @@ public class TranslationTask extends AsyncTask {
         this.data = data;
     }
 
-    private final Set<Material> fallThroughBlocks = Sets.newEnumSet(Lists.newArrayList(
+    private static final Set<Material> FALL_THROUGH_BLOCKS = Sets.newEnumSet(Lists.newArrayList(
             Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.LAVA, Material.STATIONARY_LAVA,
             Material.LONG_GRASS, Material.YELLOW_FLOWER, Material.RED_ROSE, Material.BROWN_MUSHROOM,
             Material.RED_MUSHROOM, Material.TORCH, Material.FIRE, Material.REDSTONE_WIRE, Material.CROPS,
@@ -138,11 +138,10 @@ public class TranslationTask extends AsyncTask {
 
         // check the maxheightaboveground limitation, move 1 down if that limit is exceeded
         if (this.getCraft().getType().getMaxHeightAboveGround() > 0 && this.data.getDy() >= 0) {
-            int x = this.getCraft().getMaxX() + this.getCraft().getMinX();
-            x = x >> 1;
+            final int x = (this.getCraft().getMaxX() + this.getCraft().getMinX()) / 2;
             final int y = this.getCraft().getMaxY();
-            int z = this.getCraft().getMaxZ() + this.getCraft().getMinZ();
-            z = z >> 1;
+            final int z = (this.getCraft().getMaxZ() + this.getCraft().getMinZ()) / 2;
+
             int cy = this.getCraft().getMinY();
             boolean done = false;
             while (!done) {
@@ -240,12 +239,12 @@ public class TranslationTask extends AsyncTask {
             if (this.getCraft().getBurningFuel() < fuelBurnRate) {
                 Block fuelHolder = null;
                 for (final BlockVec bTest : blocksList) {
-                    final Block b = this.getCraft().getWorld().getBlockAt(bTest.x(), bTest.y(), bTest.z());
-                    if (b.getType() == Material.FURNACE) {
-                        final InventoryHolder inventoryHolder = (InventoryHolder) b.getState();
+                    final Block block = this.getCraft().getWorld().getBlockAt(bTest.x(), bTest.y(), bTest.z());
+                    if (block.getType() == Material.FURNACE) {
+                        final InventoryHolder inventoryHolder = (InventoryHolder) block.getState();
                         if (inventoryHolder.getInventory().contains(Material.COAL) ||
                             inventoryHolder.getInventory().contains(Material.COAL_BLOCK)) {
-                            fuelHolder = b;
+                            fuelHolder = block;
                         }
                     }
                 }
@@ -359,7 +358,7 @@ public class TranslationTask extends AsyncTask {
             boolean blockObstructed;
             if (this.getCraft().getSinking()) {
                 final Material testID = this.getCraft().getWorld().getBlockAt(newLoc.x(), newLoc.y(), newLoc.z()).getType();
-                blockObstructed = !this.fallThroughBlocks.contains(testID) && !existingBlockSet.contains(newLoc);
+                blockObstructed = !FALL_THROUGH_BLOCKS.contains(testID) && !existingBlockSet.contains(newLoc);
             } else if (!waterCraft) {
                 // New block is not air or a piston head and is not part of the existing ship
                 testMaterial = this.getCraft().getWorld().getBlockAt(newLoc.x(), newLoc.y(), newLoc.z()).getType();
@@ -671,7 +670,7 @@ public class TranslationTask extends AsyncTask {
                                           .getBlockAt(m.newBlockLocation.x(), posy, m.newBlockLocation.z())
                                           .getType();
 
-                    while (posy <= maxY && !this.fallThroughBlocks.contains(testID)) {
+                    while (posy <= maxY && !FALL_THROUGH_BLOCKS.contains(testID)) {
                         final BlockVec testLoc = new BlockVec(m.newBlockLocation.x(), posy, m.newBlockLocation.z());
                         if (existingBlockSet.contains(testLoc)) {
                             existingBlockSet.remove(testLoc);
