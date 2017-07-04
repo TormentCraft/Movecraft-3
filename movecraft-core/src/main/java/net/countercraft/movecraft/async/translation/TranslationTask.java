@@ -22,7 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sk89q.worldguard.LocalPlayer;
 import net.countercraft.movecraft.Movecraft;
-import net.countercraft.movecraft.api.MaterialDataPredicate;
+import com.alexknvl.shipcraft.MaterialDataPredicate;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;

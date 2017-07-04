@@ -23,7 +23,7 @@ import com.google.common.collect.Sets;
 import com.sk89q.worldguard.LocalPlayer;
 import net.countercraft.movecraft.Movecraft;
 import com.alexknvl.shipcraft.math.IntRange;
-import net.countercraft.movecraft.api.MaterialDataPredicate;
+import com.alexknvl.shipcraft.MaterialDataPredicate;
 import net.countercraft.movecraft.async.AsyncTask;
 import net.countercraft.movecraft.config.Settings;
 import net.countercraft.movecraft.craft.Craft;
@@ -313,7 +313,7 @@ public class DetectionTask extends AsyncTask {
             final List<CraftType.Constraint> constraints = entry.getValue();
 
             final int count = Optional.ofNullable(countData.get(predicate)).orElse(0);
-            final String name = Joiner.on(", ").join(BlockNames.materialDataPredicateNames(entry.getKey()));
+            final String name = BlockNames.materialDataPredicateNames(entry.getKey()).mkString(", ");
 
             for (final CraftType.Constraint constraint : constraints) {
                 if (constraint.bound.isExact()) {

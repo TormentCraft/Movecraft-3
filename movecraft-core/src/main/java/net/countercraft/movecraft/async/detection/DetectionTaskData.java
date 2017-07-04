@@ -18,7 +18,7 @@
 package net.countercraft.movecraft.async.detection;
 
 import com.alexknvl.shipcraft.math.BlockVec;
-import net.countercraft.movecraft.api.MaterialDataPredicate;
+import com.alexknvl.shipcraft.MaterialDataPredicate;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 

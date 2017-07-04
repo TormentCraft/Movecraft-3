@@ -21,7 +21,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.alexknvl.shipcraft.math.IntRange;
-import net.countercraft.movecraft.api.MaterialDataPredicate;
+import com.alexknvl.shipcraft.MaterialDataPredicate;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
 import org.yaml.snakeyaml.Yaml;
